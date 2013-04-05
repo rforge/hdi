@@ -1,0 +1,11 @@
+Package: hdi
+Type: Package
+Title: High-Dimensional Inference
+Version: 0.0-1
+Date: 2013-04-02
+Author: Lukas Meier
+Maintainer: Lukas Meier <meier@stat.math.ethz.ch>
+Description: Implementation of multiple approaches to perform inference in
+	     high-dimensional models
+Depends: glmnet
+License: GPL

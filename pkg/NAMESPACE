@@ -1,0 +1,6 @@
+export(hdi, hdi)
+export(hdi, lasso.cv)
+export(hdi, lm.pval)
+export(hdi, lasso.firstq)
+
+S3method(print, hdi)
