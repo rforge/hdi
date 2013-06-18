@@ -51,6 +51,7 @@ lm.pval <- function(x, y, exact = TRUE)
   }else{ ## p-values based on *normal* distribution
     pval.sel <- 2 * pnorm(abs(tstat), lower.tail = FALSE)
   }
+  
   names(pval.sel) <- colnames(x)
   pval.sel
 }

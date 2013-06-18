@@ -26,7 +26,6 @@ stability <- function(x, y, B, fraction, model.selector, EV, q,
   for(b in 1:B){
     if(trace)
       cat("...Subsample", b, "\n")
-
     sel <- sample(1:n, floor(fraction * n), replace = FALSE)
 
     ## Current sub-sampled data
