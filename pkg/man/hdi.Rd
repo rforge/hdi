@@ -1,8 +1,5 @@
 \name{hdi}
 \alias{hdi}
-\alias{lasso.cv}
-\alias{lm.pval}
-\alias{lasso.firstq}
 \alias{multi.split}
 \alias{stability}
 \title{Function to perform inference in high-dimensional (generalized) linear models}
@@ -27,15 +24,26 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
     ("stability").}  
   \item{fraction}{Fraction of data used at each of the B iterations.}
   \item{model.selector}{Function to perform model selection. Default is
-    lasso.cv ("multi-split") and lasso.firstq ("stability").}
+    \code{\link{lasso.cv}} ("multi-split") and
+    \code{\link{lasso.firstq}} ("stability"). Function must have at
+    least two arguments: x (the design matrix) and y (the response
+    vector). Return value is the index vector of selected columns. See
+    \code{\link{lasso.cv}} and \code{\link{lasso.firstq}} for
+    examples. Additional arguments can be passed through
+    \code{args.model.selector}.}
   \item{EV}{Bound for expected number of false positives (only for "stability").}
   \item{q}{Bound for model size (only for "stability").}
   \item{gamma}{Sequence of gamma-values (only for "multi-split")}
-  \item{classical.fit}{Function to calculate (classical) p-values
-    (only for "multi-split"). Default is lm.pval (p-values based on
-    normal distribution, instead t-distribution).}
-  \item{args.model.selector}{Further arguments for function "model.selector".}
-  \item{args.classical.fit}{Further arguments for function "classical.fit".}
+  \item{classical.fit}{Function to calculate (classical) p-values (only
+    for "multi-split"). Default is \code{\link{lm.pval}}. Function must
+    have at least two arguments: x (the design matrix) and y (the
+    response vector). Return value is the vector of p-values. See
+    \code{\link{lm.pval}} for an example. Additional arguments can be
+    passed through \code{args.classical.fit}.}
+  \item{args.model.selector}{Named list of further arguments for
+    function \code{model.selector}.} 
+  \item{args.classical.fit}{Named list of further arguments for function
+    \code{classical.fit}.}
   \item{trace}{Should information be printed out while computing (logical).}
 }
 \details{
