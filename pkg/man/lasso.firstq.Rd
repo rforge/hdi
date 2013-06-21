@@ -1,9 +1,8 @@
 \name{lasso.firstq}
 \alias{lasso.firstq}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Function to select the first q predictors in the lasso path.}
-\description{Determines those q predictors that enter the lasso path first.
-}
+\title{Function to determine the first q predictors in the lasso path.}
+\description{Determines the q predictors that enter the lasso path first.}
 \usage{lasso.firstq(x, y, q)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -30,7 +29,7 @@
 \examples{
 x <- matrix(rnorm(100*1000), nrow = 100, ncol = 1000)
 y <- x[,1] * 2 + x[,2] * 2.5 + rnorm(100)
-sel <- lasso.firstq(x, y, q = 10)
+sel <- lasso.firstq(x, y, q = 5)
 sel
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

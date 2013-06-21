@@ -1,4 +1,4 @@
-lasso.cv <- function(x, y)
+lasso.cv <- function(x, y, ...)
 {
   ## Purpose:
   ## ----------------------------------------------------------------------
@@ -6,7 +6,7 @@ lasso.cv <- function(x, y)
   ## ----------------------------------------------------------------------
   ## Author: Lukas Meier, Date: 25 Mar 2013, 17:08
   
-  fit.cv <- cv.glmnet(x, y)
+  fit.cv <- cv.glmnet(x, y, ...)
   ## Use default value of "lambda1.se" in cv.glmnet optimal lambda sel.
   sel <- predict(fit.cv, type = "nonzero") ## Intercept??? Exceptions???
   sel[[1]] ## ugly...

@@ -3,15 +3,16 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Function to select predictors based on 10-fold cross-validation
   of the lasso estimator.}
-\description{Function to select predictors based on 10-fold cross-validation
-  of the lasso estimator.}
+\description{Performs (10-fold) cross-validation and determines the prediction
+  optimal set of parameters}
 \usage{
-lasso.cv(x, y)
+lasso.cv(x, y, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{Design matrix (without intercept).}
   \item{y}{Number of predictors that should be selected.}
+  \item{...}{Further arguments to be passed to cv.glmnet}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~

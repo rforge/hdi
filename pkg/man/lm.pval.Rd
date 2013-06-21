@@ -2,8 +2,8 @@
 \alias{lm.pval}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Function to calculate p-values for ordinary multiple linear regression.}
-\description{Function to calculate p-values for ordinary multiple linear
-  regression.}
+\description{Calculates (classical) p-values for an ordinary multiple linear
+  regression in the n > p situation.}
 \usage{
 lm.pval(x, y, exact = TRUE)
 }
@@ -12,12 +12,12 @@ lm.pval(x, y, exact = TRUE)
   \item{x}{Design matrix (without intercept).}
   \item{y}{Response vector.}
   \item{exact}{Logical. TRUE if p-values based on t-distribution should
-    be calculated. FALSE if normal distribution should be used.}
+    be calculated. FALSE if normal distribution should be used as
+    approximation.}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
-\value{Vector of p-values.}
+\details{A model with intercept is fit but the p-value of the intercept
+  is not reported in the output.}
+\value{Vector of p-values (not including the intercept).}
 \references{
 %% ~put references to the literature/web site here ~
 }

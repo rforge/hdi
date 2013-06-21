@@ -17,11 +17,11 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
 \arguments{
   \item{x}{Design matrix (without intercept).}
   \item{y}{Response vector.}
-  \item{method}{Multi-splitting ("multi-split") or Stability-Selection
+  \item{method}{Multi-splitting ("multi-split") or stability-selection
     ("stability").} 
-  \item{B}{Number of sample-splits ("multi-split") or sub-sample
-    iterations ("stability"). Default is 50 ("multi-split")or 500
-    ("stability").}  
+  \item{B}{Number of sample-splits (for "multi-split") or sub-sample
+    iterations (for "stability"). Default is 50 ("multi-split")or 500
+    ("stability"). Ignored otherwise.}
   \item{fraction}{Fraction of data used at each of the B iterations.}
   \item{model.selector}{Function to perform model selection. Default is
     \code{\link{lasso.cv}} ("multi-split") and
@@ -31,7 +31,8 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
     \code{\link{lasso.cv}} and \code{\link{lasso.firstq}} for
     examples. Additional arguments can be passed through
     \code{args.model.selector}.}
-  \item{EV}{Bound for expected number of false positives (only for "stability").}
+  \item{EV}{Bound(s) for expected number of false positives (only for
+    "stability").} 
   \item{q}{Bound for model size (only for "stability").}
   \item{gamma}{Sequence of gamma-values (only for "multi-split")}
   \item{classical.fit}{Function to calculate (classical) p-values (only
@@ -71,8 +72,18 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
 \examples{
 x <- matrix(rnorm(100*1000), nrow = 100, ncol = 1000)
 y <- x[,1] * 2 + x[,2] * 2.5 + rnorm(100)
-fit <- hdi(x, y, method = "stability", EV = 1, q = 10)
-fit
+
+## Multi-splitting with lasso.firstq as model selector function
+fit.multi <- hdi(x, y, method = "multi-split",
+                 model.selector =lasso.firstq,
+                 args.model.selector = list(q = 10))
+fit.multi
+fit.multi$pval[1:10] ## the first 10 p-values
+
+## Stability selection
+fit.stab <- hdi(x, y, method = "stability", EV = c(1, 2), q = 10)
+fit.stab
+fit.stab$freq[1:10] ## frequency of the first 10 predictors
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
