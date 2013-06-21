@@ -15,16 +15,10 @@ lm.pval(x, y, exact = TRUE)
     be calculated. FALSE if normal distribution should be used as
     approximation.}
 }
-\details{A model with intercept is fit but the p-value of the intercept
+\details{A model with intercept is fitted but the p-value of the intercept
   is not reported in the output.}
 \value{Vector of p-values (not including the intercept).}
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Lukas Meier}
-\note{
-%%  ~~further notes~~
-}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 

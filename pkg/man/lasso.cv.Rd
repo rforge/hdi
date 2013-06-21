@@ -14,17 +14,9 @@ lasso.cv(x, y, ...)
   \item{y}{Number of predictors that should be selected.}
   \item{...}{Further arguments to be passed to cv.glmnet}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+\details{Function basically only calls cv.glmnet, see source code.}
 \value{Vector of selected predictors.}
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Lukas Meier}
-\note{
-%%  ~~further notes~~
-}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 

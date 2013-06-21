@@ -29,7 +29,4 @@ Maintainer: Lukas Meier <meier@stat.math.ethz.ch>
   (with discussion)}, Journal of the Royal Statistical Society: Series B,
   72, 417-473.}
 \keyword{ package }
-\seealso{
-}
-\examples{
-}
+

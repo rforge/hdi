@@ -47,9 +47,7 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
     \code{classical.fit}.}
   \item{trace}{Should information be printed out while computing (logical).}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+\details{...}
 \value{A list containing the p-values or the selected predictors.}
 \references{
   Meinshausen, N., Meier, L. and B\"uhlmann, P. (2009),
@@ -60,15 +58,9 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
   (with discussion)}, Journal of the Royal Statistical Society: Series B,
   72, 417-473.}
 \author{Lukas Meier}
-\note{
-%%  ~~further notes~~
-}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
 x <- matrix(rnorm(100*1000), nrow = 100, ncol = 1000)
 y <- x[,1] * 2 + x[,2] * 2.5 + rnorm(100)

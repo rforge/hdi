@@ -11,17 +11,9 @@
   \item{y}{Response vector.}
   \item{q}{Number of predictors that should be selected.}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+\details{Function only calls glmnet in a special way, see source code.}
 \value{Vector of selected predictors.}
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{Lukas Meier}
-\note{
-%%  ~~further notes~~
-}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
