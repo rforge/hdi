@@ -15,14 +15,17 @@ multi.split <- function(x, y, B, fraction,
   n <- nrow(x)
   p <- ncol(x)
   
-  ## matrix of bootstrap p-values
-  pvals <- matrix(1, nrow = B, ncol = ncol(x))
+  ## Matrix of bootstrap p-values:
+  ## rows = sample-splits
+  ## cols = predictors
+  pvals <- matrix(1, nrow = B, ncol = p)
 
   n.left <- floor(n * fraction)
   n.right <- n - n.left
       
   for(b in 1:B){
     try.again <- TRUE
+    repeat.count <- 0
     while(try.again){
       if(trace)
         cat("...Split", b, "\n")
@@ -44,33 +47,41 @@ multi.split <- function(x, y, B, fraction,
 
       p.sel <- length(sel.model)
 
-      ## Classical situation
-      if(p.sel > 0 & p.sel < nrow(x.right) - 1){ ## intercept!
+      ## Classical situation:
+      ## A model with intercept is used, hence p.sel + 1 < nrow(x.right),
+      ## otherwise, p-values can not be calculated
+      if(p.sel > 0 & p.sel < nrow(x.right) - 1){ 
         sel.pval <- do.call(classical.fit,
                             args = c(list(x = x.right[,sel.model],
                                 y = y.right), args.classical.fit))
-        pvals[b, sel.model] <- pmin(sel.pval * p.sel, 1)
-        try.again <- FALSE
+        pvals[b, sel.model] <- pmin(sel.pval * p.sel, 1) ## Bonferroni on small model
+        try.again <- FALSE ## break the loop, continue with next sample-split
       }
-      ## Empty model selected
+      ## Empty model selected:
+      ## Do nothing in that case. Matrix already filled with 1's.
+      ## Print out information for the sake of completeness
       if(p.sel == 0){
-        ## Do nothing in that case. Matrix already filled with 1's
         if(trace)
           cat("......Empty model selected. That's ok...\n")
 
-        try.again <- FALSE
+        try.again <- FALSE ## break the loop, continue with next sample-split
       }
       ## Too large model selected for classical fitter
       if(p.sel >= n.right - 1){ ## p.sel + 1 < n.right for p-val calculation
         try.again <- TRUE ## re-do sample splitting
-        warning("Too large model selected in a sample split")
+        repeat.count <- repeat.count + 1
+        warning("Too large model selected in a sample-split")
+      }
+      if(repeat.count > 20){ ## too prevent never-ending loops
+        stop("More than 20 sample splits resulted in too large models...giving up")
+        try.again <- FALSE
       }
     } ## end while(try.again)
   }
   
   ## For loop is not very innovative, but it does it's job...
   pvals.current <- which.gamma <- numeric(p)
-  for(j in 1:p){
+  for(j in 1:p){ ## loop through all predictors
     quant.gamma <- quantile(pvals[,j], gamma) / gamma
     
     pvals.pre        <- min(quant.gamma) * (1 + log(1/min(gamma)))

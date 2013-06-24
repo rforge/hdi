@@ -7,26 +7,31 @@ stability <- function(x, y, B, fraction, model.selector, EV, q,
   ## ----------------------------------------------------------------------
   ## Author: Lukas Meier, Date: 28 Mar 2013, 12:49
 
+  if(length(q) > 1) ## q has to be a scalar (EV can be a vector)
+      stop("q must be a scalar")
+  
   n <- nrow(x)
   p <- ncol(x)
   
   col.nam <- colnames(x)
 
-  thresholds <- 0.5 * (1 + q^2 / (p * EV)) ## check!!!
+  thresholds <- 0.5 * (1 + q^2 / (p * EV)) ## vector of thresholds
 
   if(any(thresholds > 1))
     warning("Some thresholds larger than 1. Decrease q or increase EV.")
 
-  ## Matrix of selected models
-  ## rows = predictors
-  ## cols = subsamples
+  ## Matrix of selected models:
+  ## rows = subsamples
+  ## cols = predictors
   sel.mat <- matrix(FALSE, nrow = B, ncol = p) 
 
+  sel.n <- floor(fraction * n)
+  
   ## Subsampling
   for(b in 1:B){
     if(trace)
       cat("...Subsample", b, "\n")
-    sel <- sample(1:n, floor(fraction * n), replace = FALSE)
+    sel <- sample(1:n, sel.n, replace = FALSE)
 
     ## Current sub-sampled data
     x.sel <- x[sel,]
