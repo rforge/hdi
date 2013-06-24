@@ -31,12 +31,12 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
     \code{\link{lasso.cv}} and \code{\link{lasso.firstq}} for
     examples. Additional arguments can be passed through
     \code{args.model.selector}.}
-  \item{EV}{(Only for
+  \item{EV}{(only for
     "stability"). Bound(s) for expected number of false positives . Can
     be a vector.}
-  \item{q}{(Only for "stability"). Bound for model size. Must be a scalar.}
-  \item{gamma}{Sequence of gamma-values (only for "multi-split")}
-  \item{classical.fit}{(Only
+  \item{q}{(only for "stability"). Bound for model size. Must be a scalar.}
+  \item{gamma}{(only for "multi-split"). Vector of gamma-values.}
+  \item{classical.fit}{(only
     for "multi-split"). Function to calculate (classical)
     p-values. Default is \code{\link{lm.pval}}. Function must 
     have at least two arguments: x (the design matrix) and y (the
