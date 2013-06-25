@@ -20,7 +20,7 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
   \item{method}{Multi-splitting ("multi-split") or stability-selection
     ("stability").} 
   \item{B}{Number of sample-splits (for "multi-split") or sub-sample
-    iterations (for "stability"). Default is 50 ("multi-split")or 500
+    iterations (for "stability"). Default is 50 ("multi-split")or 100
     ("stability"). Ignored otherwise.}
   \item{fraction}{Fraction of data used at each of the B iterations.}
   \item{model.selector}{Function to perform model selection. Default is
