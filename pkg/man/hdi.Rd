@@ -1,7 +1,5 @@
 \name{hdi}
 \alias{hdi}
-\alias{multi.split}
-\alias{stability}
 \title{Function to perform inference in high-dimensional (generalized) linear models}
 \description{Perform inference in high-dimensional (generalized) linear
   models using various approaches.}

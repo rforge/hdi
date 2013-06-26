@@ -1,10 +1,10 @@
-multi.split <- function(x, y, B, fraction,
-                        model.selector,
-                        classical.fit,
-                        gamma,
-                        args.model.selector,
-                        args.classical.fit,
-                        trace = TRUE)
+multi.split <- function(x, y, B = 50, fraction = 0.5,
+                        model.selector = lasso.cv,
+                        classical.fit = lm.pval,
+                        gamma = seq(0.05, 0.99, by = 0.01),
+                        args.model.selector = NULL,
+                        args.classical.fit = NULL,
+                        trace = FALSE)
 {
   ## Purpose:
   ## ----------------------------------------------------------------------
@@ -91,9 +91,14 @@ multi.split <- function(x, y, B, fraction,
   }
 
   names(pvals.current) <- names(which.gamma) <- colnames(x)
+
+  out <- list(pval = pvals.current,
+              gamma.min = gamma[which.gamma],
+              method = "multi.split",
+              call = match.call())
+  class(out) <- "hdi"
   
-  return(list(pval = pvals.current,
-              gamma.min = gamma[which.gamma]))
+  return(out)
 }
 
 

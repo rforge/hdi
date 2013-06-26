@@ -1,5 +1,5 @@
-stability <- function(x, y, B, fraction, model.selector, EV, q,
-                      args.model.selector, trace = TRUE)
+stability <- function(x, y, EV, q, B = 100, fraction = 0.5, model.selector = lasso.firstq, 
+                      args.model.selector = NULL, trace = FALSE)
 {
   ## Purpose:
   ## ----------------------------------------------------------------------
@@ -54,9 +54,13 @@ stability <- function(x, y, B, fraction, model.selector, EV, q,
     names(sel.current) <- col.nam[sel.current]
     out[[i]] <- sel.current
   }
-  
-  return(list(select = out,
+
+  out <- list(select = out,
               EV = EV,
               thresholds = thresholds,
-              freq = freq))
+              freq = freq,
+              method = "stability")
+  
+  class(out) <- "hdi"
+  return(out)
 }

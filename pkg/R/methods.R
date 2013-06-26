@@ -8,7 +8,7 @@ print.hdi <- function(x, ...)
 
   method <- x$method
 
-  if(method == "multi-split"){
+  if(method == "multi.split"){
     cat("alpha = 0.01:")
     cat(" Selected predictors:", which(x$pval <= 0.01), "\n")
     cat("alpha = 0.05:")
