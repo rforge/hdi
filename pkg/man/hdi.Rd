@@ -49,8 +49,18 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
     \code{classical.fit}.}
   \item{trace}{Should information be printed out while computing (logical).}
 }
-\details{...}
-\value{A list containing the p-values or the selected predictors.}
+%\details{}
+\value{
+  \item{pval}{(only for "multi-split"). Vector of p-values.}
+  \item{gamma.min}{(only for "multi-split"). Value of gamma where
+    minimal p-values was attained.}
+  \item{select}{(only for "stability"). List with selected predictors
+    for the supplied values of EV.}
+  \item{EV}{(only for "stability"). Vector of corresponding values of EV.}
+  \item{thresholds}{(only for "stability"). Used thresholds.}
+  \item{freq}{(only for "stability"). Vector of selection frequencies.}
+}
+
 \references{
   Meinshausen, N., Meier, L. and B\"uhlmann, P. (2009),
   \emph{P-values for high-dimensional regression}, Journal of the

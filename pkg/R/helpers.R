@@ -55,5 +55,3 @@ lm.pval <- function(x, y, exact = TRUE)
   names(pval.sel) <- colnames(x)
   pval.sel
 }
-
-
