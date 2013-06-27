@@ -5,7 +5,7 @@
   models using various approaches.}
 \usage{
 hdi(x, y, method = "multi.split", B = NULL, fraction = 0.5,
-    model.selector = NULL, EV = 1, q = NULL,
+    model.selector = NULL, EV = NULL, q = NULL,
     gamma = seq(0.05, 0.99, by = 0.01),
     classical.fit = NULL,
     args.model.selector = NULL, args.classical.fit = NULL,

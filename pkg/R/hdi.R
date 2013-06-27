@@ -1,7 +1,7 @@
 hdi <- function(x, y, method = "multi.split", B = NULL,
                 fraction = 0.5,
                 model.selector = NULL,
-                EV = 1, q = NULL,                    ## stability args
+                EV = NULL, q = NULL,                 ## stability args
                 gamma = seq(0.05, 0.99, by = 0.01),  ## multi-split args
                 classical.fit = NULL,                ## multi-split args
                 args.model.selector = NULL,          ## list
@@ -56,6 +56,9 @@ hdi <- function(x, y, method = "multi.split", B = NULL,
     if(is.null(B))
       B <- 100
 
+    if(is.null(EV))
+        stop("EV not defined")
+    
     if(is.null(q))
       stop("q not defined")
     
