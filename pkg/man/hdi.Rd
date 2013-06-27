@@ -4,7 +4,7 @@
 \description{Perform inference in high-dimensional (generalized) linear
   models using various approaches.}
 \usage{
-hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
+hdi(x, y, method = "multi.split", B = NULL, fraction = 0.5,
     model.selector = NULL, EV = 1, q = NULL,
     gamma = seq(0.05, 0.99, by = 0.01),
     classical.fit = NULL,
@@ -15,14 +15,14 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
 \arguments{
   \item{x}{Design matrix (without intercept).}
   \item{y}{Response vector.}
-  \item{method}{Multi-splitting ("multi-split") or stability-selection
+  \item{method}{Multi-splitting ("multi.split") or stability-selection
     ("stability").} 
-  \item{B}{Number of sample-splits (for "multi-split") or sub-sample
-    iterations (for "stability"). Default is 50 ("multi-split")or 100
+  \item{B}{Number of sample-splits (for "multi.split") or sub-sample
+    iterations (for "stability"). Default is 50 ("multi.split")or 100
     ("stability"). Ignored otherwise.}
   \item{fraction}{Fraction of data used at each of the B iterations.}
   \item{model.selector}{Function to perform model selection. Default is
-    \code{\link{lasso.cv}} ("multi-split") and
+    \code{\link{lasso.cv}} ("multi.split") and
     \code{\link{lasso.firstq}} ("stability"). Function must have at
     least two arguments: x (the design matrix) and y (the response
     vector). Return value is the index vector of selected columns. See
@@ -33,9 +33,9 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
     "stability"). Bound(s) for expected number of false positives . Can
     be a vector.}
   \item{q}{(only for "stability"). Bound for model size. Must be a scalar.}
-  \item{gamma}{(only for "multi-split"). Vector of gamma-values.}
+  \item{gamma}{(only for "multi.split"). Vector of gamma-values.}
   \item{classical.fit}{(only
-    for "multi-split"). Function to calculate (classical)
+    for "multi.split"). Function to calculate (classical)
     p-values. Default is \code{\link{lm.pval}}. Function must 
     have at least two arguments: x (the design matrix) and y (the
     response vector). Return value is the vector of p-values. See
@@ -49,8 +49,8 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
 }
 %\details{}
 \value{
-  \item{pval}{(only for "multi-split"). Vector of p-values.}
-  \item{gamma.min}{(only for "multi-split"). Value of gamma where
+  \item{pval}{(only for "multi.split"). Vector of p-values.}
+  \item{gamma.min}{(only for "multi.split"). Value of gamma where
     minimal p-values was attained.}
   \item{select}{(only for "stability"). List with selected predictors
     for the supplied values of EV.}
@@ -70,13 +70,14 @@ hdi(x, y, method = "multi-split", B = NULL, fraction = 0.5,
 \author{Lukas Meier}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
+\seealso{\code{\link{stability}}, \code{\link{multi.split}}}
 
 \examples{
 x <- matrix(rnorm(100*1000), nrow = 100, ncol = 1000)
 y <- x[,1] * 2 + x[,2] * 2.5 + rnorm(100)
 
 ## Multi-splitting with lasso.firstq as model selector function
-fit.multi <- hdi(x, y, method = "multi-split",
+fit.multi <- hdi(x, y, method = "multi.split",
                  model.selector =lasso.firstq,
                  args.model.selector = list(q = 10))
 fit.multi

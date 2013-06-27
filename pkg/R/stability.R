@@ -55,11 +55,12 @@ stability <- function(x, y, EV, q, B = 100, fraction = 0.5, model.selector = las
     out[[i]] <- sel.current
   }
 
-  out <- list(select = out,
-              EV = EV,
+  out <- list(select     = out,
+              EV         = EV,
               thresholds = thresholds,
-              freq = freq,
-              method = "stability")
+              freq       = freq,
+              method     = "stability",
+              call       = match.call())
   
   class(out) <- "hdi"
   return(out)

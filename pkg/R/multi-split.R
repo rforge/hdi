@@ -92,10 +92,10 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
 
   names(pvals.current) <- names(which.gamma) <- colnames(x)
 
-  out <- list(pval = pvals.current,
+  out <- list(pval      = pvals.current,
               gamma.min = gamma[which.gamma],
-              method = "multi.split",
-              call = match.call())
+              method    = "multi.split",
+              call      = match.call())
   class(out) <- "hdi"
   
   return(out)

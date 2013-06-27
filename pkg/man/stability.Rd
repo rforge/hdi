@@ -34,7 +34,7 @@ stability(x, y, EV, q, B = 100, fraction = 0.5,
   \item{select}{List with selected predictors
     for the supplied values of EV.}
   \item{EV}{Vector of corresponding values of EV.}
-  \item{thresholds}{Used thresholds.}
+  \item{thresholds}{Thresholds corresponding to different values of EV.}
   \item{freq}{Vector of selection frequencies.}
 }
 

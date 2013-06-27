@@ -1,4 +1,4 @@
-hdi <- function(x, y, method = "multi-split", B = NULL,
+hdi <- function(x, y, method = "multi.split", B = NULL,
                 fraction = 0.5,
                 model.selector = NULL,
                 EV = 1, q = NULL,                    ## stability args
@@ -24,7 +24,7 @@ hdi <- function(x, y, method = "multi-split", B = NULL,
   ##                 ##
   #####################
   
-  if(method == "multi-split"){
+  if(method %in% c("multi.split", "multi-split")){ ## for compatibility reasons
     ## argument checking
     if(is.null(B))
       B <- 50
@@ -73,13 +73,13 @@ hdi <- function(x, y, method = "multi-split", B = NULL,
     stop("Method not (yet) defined")
   }
   ## Output parsing
-
   ## ...
-
-  out <- c(out,
-           method = method,
-           call = match.call())
+  
+  ## The following overwrites 
+  out$call = match.call()
+  
   class(out) <- "hdi"
+  
   return(out)
 }
 

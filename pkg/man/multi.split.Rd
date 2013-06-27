@@ -14,7 +14,9 @@ multi.split(x, y, B = 50, fraction = 0.5, model.selector = lasso.cv,
   \item{x}{Design matrix (without intercept).}
   \item{y}{Response vector.}
   \item{B}{Number of sample-splits.}
-  \item{fraction}{Fraction of data used at each of the B iterations.}
+  \item{fraction}{Fraction of data used at each sample split for
+    the model selection process. The remaining data is used for
+    calculating the p-values.}
   \item{model.selector}{Function to perform model selection. Default is
     \code{\link{lasso.cv}}. Function must have at
     least two arguments: x (the design matrix) and y (the response
@@ -37,9 +39,8 @@ multi.split(x, y, B = 50, fraction = 0.5, model.selector = lasso.cv,
 }
 \details{...}
 \value{
-  \item{pval}{(only for "multi-split"). Vector of p-values.}
-  \item{gamma.min}{(only for "multi-split"). Value of gamma where
-    minimal p-values was attained.}
+  \item{pval}{Vector of p-values.}
+  \item{gamma.min}{Value of gamma where minimal p-values was attained.}
 }
 \references{
   Meinshausen, N., Meier, L. and B\"uhlmann, P. (2009),
