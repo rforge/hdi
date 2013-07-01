@@ -3,13 +3,14 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Function to determine the first q predictors in the lasso path.}
 \description{Determines the q predictors that enter the lasso path first.}
-\usage{lasso.firstq(x, y, q)
+\usage{lasso.firstq(x, y, q, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{Design matrix (without intercept).}
   \item{y}{Response vector.}
   \item{q}{Number of predictors that should be selected.}
+  \item{...}{Additional arguments to be passed to \code{\link{glmnet}}.}
 }
 \details{Function only calls glmnet in a special way, see source code.}
 \value{Vector of selected predictors.}

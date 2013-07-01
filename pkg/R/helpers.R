@@ -12,7 +12,7 @@ lasso.cv <- function(x, y, ...)
   sel[[1]] ## ugly...
 }
 
-lasso.firstq <- function(x, y, q)
+lasso.firstq <- function(x, y, q, ...)
 {
   ## Purpose:
   ## ----------------------------------------------------------------------
@@ -21,7 +21,7 @@ lasso.firstq <- function(x, y, q)
   ## Author: Lukas Meier, Date:  2 Apr 2013, 13:42
 
   ## Use glmnet (dfmax = q+1 because of Intercept)
-  fit <- glmnet(x, y, dfmax = q)        ## only need partial path
+  fit <- glmnet(x, y, dfmax = q, ...)   ## only need partial path
   m   <- predict(fit, type = "nonzero") ## determine non-zero coefs
 
   ## determine largest model that is <= q

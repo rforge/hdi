@@ -12,7 +12,7 @@ lasso.cv(x, y, ...)
 \arguments{
   \item{x}{Design matrix (without intercept).}
   \item{y}{Number of predictors that should be selected.}
-  \item{...}{Further arguments to be passed to cv.glmnet}
+  \item{...}{Further arguments to be passed to \code{\link{cv.glmnet}.}}
 }
 \details{Function basically only calls cv.glmnet, see source code.}
 \value{Vector of selected predictors.}
