@@ -1,4 +1,5 @@
-stability <- function(x, y, EV, q, B = 100, fraction = 0.5, model.selector = lasso.firstq, 
+stability <- function(x, y, EV, q, B = 100, fraction = 0.5,
+                      model.selector = lasso.firstq,
                       args.model.selector = NULL, trace = FALSE)
 {
   ## Purpose:
@@ -52,6 +53,10 @@ stability <- function(x, y, EV, q, B = 100, fraction = 0.5, model.selector = las
   for(i in 1:length(EV)){
     sel.current        <- which(freq >= thresholds[i])
     names(sel.current) <- col.nam[sel.current]
+    
+    if(length(sel.current) == 0)
+      sel.current <- NULL ## for safety reasons...
+    
     out[[i]] <- sel.current
   }
 
