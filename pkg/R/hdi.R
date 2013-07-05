@@ -6,7 +6,7 @@ hdi <- function(x, y, method = "multi.split", B = NULL,
                 classical.fit = NULL,                ## multi-split args
                 args.model.selector = NULL,          ## list
                 args.classical.fit = NULL,           ## list
-                trace = FALSE)
+                trace = FALSE, ...)
 {
   ## Purpose:
   ## ----------------------------------------------------------------------

@@ -4,6 +4,8 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
                         gamma = seq(0.05, 0.99, by = 0.01),
                         args.model.selector = NULL,
                         args.classical.fit = NULL,
+                        return.nonaggr = FALSE,
+                        return.selmodels = FALSE,
                         trace = FALSE)
 {
   ## Purpose:
@@ -19,7 +21,15 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
   ## rows = sample-splits
   ## cols = predictors
   pvals <- matrix(1, nrow = B, ncol = p)
+  colnames(pvals) <- colnames(x)
 
+  if(return.selmodels){
+    sel.model.all <- matrix(FALSE, nrow = B, ncol = p)
+    colnames(sel.model.all) <- colnames(x)
+  }else{ ## safe memory space in case no output is wanted regarding sel. models
+    sel.model.all <- NULL
+  }
+  
   n.left <- floor(n * fraction)
   n.right <- n - n.left
       
@@ -55,6 +65,10 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
                             args = c(list(x = x.right[,sel.model],
                                 y = y.right), args.classical.fit))
         pvals[b, sel.model] <- pmin(sel.pval * p.sel, 1) ## Bonferroni on small model
+
+        if(return.selmodels)
+          sel.model.all[b, sel.model] <- TRUE
+        
         try.again <- FALSE ## break the loop, continue with next sample-split
       }
       ## Empty model selected:
@@ -89,13 +103,19 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
     
     which.gamma[j] <- which.min(quant.gamma)
   }
-
+  
   names(pvals.current) <- names(which.gamma) <- colnames(x)
 
-  out <- list(pval      = pvals.current,
-              gamma.min = gamma[which.gamma],
-              method    = "multi.split",
-              call      = match.call())
+  if(!return.nonaggr) ## Overwrite pvals with NULL if no output is wanted
+    pvals <- NULL
+      
+  out <- list(pval          = pvals.current,
+              gamma.min     = gamma[which.gamma],
+              pvals.nonaggr = pvals,
+              sel.models    = sel.model.all,
+              method        = "multi.split",
+              call          = match.call())
+  
   class(out) <- "hdi"
   
   return(out)

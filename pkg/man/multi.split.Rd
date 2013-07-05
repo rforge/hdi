@@ -7,7 +7,8 @@
 \usage{
 multi.split(x, y, B = 50, fraction = 0.5, model.selector = lasso.cv,
             classical.fit = lm.pval, gamma = seq(0.05, 0.99, by = 0.01),
-            args.model.selector = NULL, args.classical.fit = NULL, trace = FALSE)
+            args.model.selector = NULL, args.classical.fit = NULL,
+            return.nonaggr = FALSE, return.selmodels = FALSE, trace = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -35,6 +36,9 @@ multi.split(x, y, B = 50, fraction = 0.5, model.selector = lasso.cv,
     function \code{model.selector}.}
   \item{args.classical.fit}{Named list of further arguments for function
     \code{classical.fit}.}
+  \item{return.nonaggr}{Should the unadjusted p-values be reported (logical).}
+  \item{return.selmodels}{Should the selected models (at each split) be
+    reported (logical).}
   \item{trace}{Should information be printed out while computing (logical).}
 }
 \details{...}
