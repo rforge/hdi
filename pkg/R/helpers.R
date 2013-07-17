@@ -55,3 +55,26 @@ lm.pval <- function(x, y, exact = TRUE)
   names(pval.sel) <- colnames(x)
   pval.sel
 }
+
+fdr.adjust <- function(p)
+{
+  ## Purpose:
+  ## ----------------------------------------------------------------------
+  ## Arguments:
+  ## ----------------------------------------------------------------------
+  ## Author: Lukas Meier, Date: 17 Jul 2013, 16:42
+
+  p.fin <- p
+  use <- (p < 1)
+  if(any(use)){
+    p.use <- p[use]
+
+    lp <- length(p.use) ## as in p.adjust
+    i <- lp:1L 
+    o <- order(p.use, decreasing = TRUE)
+    ro <- order(o)
+    p.fin[use] <- pmin(1, cummin(p.use[o] / i))[ro]
+  }
+  p.fin
+}
+
