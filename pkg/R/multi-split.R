@@ -97,8 +97,14 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
   pvals.current <- which.gamma <- numeric(p)
   for(j in 1:p){ ## loop through all predictors
     quant.gamma <- quantile(pvals[,j], gamma) / gamma
-    
-    pvals.pre        <- min(quant.gamma) * (1 + log(1/min(gamma)))
+
+    if(length(gamma) > 1)
+      penalty <- (1 - log(min(gamma)))
+    else
+      penalty <- 1
+
+    pvals.pre <- min(quant.gamma) * penalty
+             
     pvals.current[j] <- pmin(pvals.pre, 1)
     
     which.gamma[j] <- which.min(quant.gamma)

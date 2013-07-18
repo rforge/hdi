@@ -31,7 +31,8 @@ multi.split(x, y, B = 50, fraction = 0.5, model.selector = lasso.cv,
     response vector). Return value is the vector of p-values. See
     \code{\link{lm.pval}} for an example. Additional arguments can be
     passed through \code{args.classical.fit}.}
-  \item{gamma}{Vector of gamma-values.}
+  \item{gamma}{Vector of gamma-values. In case gamma is a scalar, the
+    value Q_j instead of P_j is being calculated (see reference below).}
   \item{args.model.selector}{Named list of further arguments for
     function \code{model.selector}.}
   \item{args.classical.fit}{Named list of further arguments for function

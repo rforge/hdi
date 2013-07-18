@@ -1,8 +1,9 @@
 export(hdi, hdi)
+export(hdi, stability)
+export(hdi, multi.split)
 export(hdi, lasso.cv)
 export(hdi, lm.pval)
 export(hdi, lasso.firstq)
-export(hdi, stability)
-export(hdi, multi.split)
+export(hdi, fdr.adjust)
 
 S3method(print, hdi)
