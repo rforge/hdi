@@ -42,7 +42,7 @@ hdi <- function(x, y, method = "multi.split", B = NULL,
                        gamma = gamma,
                        args.model.selector = args.model.selector,
                        args.classical.fit = args.classical.fit,
-                       trace = trace)
+                       trace = trace,...)
   }
   
   #########################
@@ -70,7 +70,7 @@ hdi <- function(x, y, method = "multi.split", B = NULL,
                      model.selector = model.selector,
                      EV = EV, q = q,
                      args.model.selector = args.model.selector,
-                     trace = trace)
+                     trace = trace,...)
   }
   else{
     stop("Method not (yet) defined")
