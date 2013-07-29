@@ -8,9 +8,16 @@ stability <- function(x, y, EV, q, B = 100, fraction = 0.5,
   ## ----------------------------------------------------------------------
   ## Author: Lukas Meier, Date: 28 Mar 2013, 12:49
 
+  ## error checking
+
+  if(any(EV >= q))
+    stop("q should be larger than EV")
+
   if(length(q) > 1) ## q has to be a scalar (EV can be a vector)
-      stop("q must be a scalar")
-  
+    stop("q must be a scalar")
+
+  ##
+
   n <- nrow(x)
   p <- ncol(x)
   
