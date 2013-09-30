@@ -64,7 +64,8 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
         sel.pval <- do.call(classical.fit,
                             args = c(list(x = x.right[,sel.model],
                                 y = y.right), args.classical.fit))
-        pvals[b, sel.model] <- pmin(sel.pval * p.sel, 1) ## Bonferroni on small model
+        ## Bonferroni on small model
+        pvals[b, sel.model] <- pmin(sel.pval * p.sel, 1)
 
         if(return.selmodels)
           sel.model.all[b, sel.model] <- TRUE
