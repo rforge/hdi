@@ -41,7 +41,7 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
 }
 
   
-lower.bound.pred <- function(x, y, group, mfact, pred,
+lowerGroupBoundWithPrediction <- function(x, y, group, mfact, pred,
                              intercept = TRUE, useseed = NULL,
                              lpSolve = TRUE){
   ## not to be called by user (?)
@@ -118,7 +118,7 @@ lower.bound.pred <- function(x, y, group, mfact, pred,
   return(TG)
 }
 
-lower.bound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
+lowerGroupBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
                         setseed = TRUE, silent = FALSE, lpSolve = TRUE){
   if(!silent){
     if(alpha > 0.5 | alpha < 0.0005)
@@ -183,17 +183,22 @@ lower.bound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
       A <- t(A)
       mfact <- getmfact(s, 1 - alpha / 2)
       
-      TGsplit <- lower.bound.pred(A %*% x[outsam,], as.numeric(A %*% y[outsam]),
-                                  group, mfact, as.numeric(A %*% pred),
-                                  intercept = TRUE,
-                                  useseed = if(setseed) useseed else NULL,
-                                  lpSolve = lpSolve)
+      TGsplit <- lowerGroupBoundWithPrediction(A %*% x[outsam,],
+                                               as.numeric(A %*% y[outsam]),
+                                               group, mfact,
+                                               as.numeric(A %*% pred),
+                                               intercept = TRUE,
+                                               useseed = if(setseed) useseed
+                                               else NULL,
+                                               lpSolve = lpSolve)
    }else{
      mfact   <- getmfact(nrow(x), 1 - alpha / 2)
-     TGsplit <- lower.bound.pred(x[outsam,], y[outsam], group, mfact, pred,
-                                 intercept = TRUE,
-                                 useseed = if(setseed) useseed else NULL,
-                                 lpSolve = lpSolve)
+     TGsplit <- lowerGroupBoundWithPrediction(x[outsam,], y[outsam], group,
+                                              mfact, pred,
+                                              intercept = TRUE,
+                                              useseed = if(setseed) useseed
+                                              else NULL,
+                                              lpSolve = lpSolve)
    }
    if(!silent)
      cat("\n   // lower l1-norm bound", signif(TGsplit, 2))
@@ -214,10 +219,10 @@ lower.bound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
   return(TG)
 }
 
-cluster.lower.bound <- function(x, y, method = "average", dist = NULL,
-                                   alpha = 0.05, nsplit = 11, s = 10,
-                                   silent = FALSE, setseed = TRUE,
-                                   lpSolve = TRUE){
+clusterLowerBound <- function(x, y, method = "average", dist = NULL,
+                              alpha = 0.05, nsplit = 11, s = 10,
+                              silent = FALSE, setseed = TRUE,
+                              lpSolve = TRUE){
   if(alpha > 0.5 | alpha < 0.0005)
     warning("level alpha outside supported range [0.0005, 0.5]")
   n <- nrow(x)
@@ -274,14 +279,17 @@ cluster.lower.bound <- function(x, y, method = "average", dist = NULL,
     x$rightChild[k] <- if(length(tmp)>0) tmp else -1
     x$position[k]   <- mean(((1:length(ord)))[ord %in% x$members[[k]]]/ncol(x))
   }
-  x$isLeaf <- (x$leftChild < 0 & x$rightChild < 0)
 
+  ##x$isLeaf <- (x$leftChild < 0 & x$rightChild < 0)
 
-  zeroChilds <- (x$lowerBound[ pmax(1,x$leftChild)]==0) &
-      (x$lowerBound[pmax(1,x$rightChild)]==0)
+  ##zeroChilds <- (x$lowerBound[ pmax(1,x$leftChild)] == 0) &
+  ##    (x$lowerBound[pmax(1,x$rightChild)] == 0)
   
-  x$isLeaf <- x$isLeaf | zeroChilds
-  
+  ##x$isLeaf <- x$isLeaf | zeroChilds
+
+  leafLeft  <- (x$leftChild < 0 | x$lowerBound[pmax(1, x$leftChild)] == 0)
+  leafRight <- (x$rightChild < 0 | x$lowerBound[pmax(1, x$rightChild)] == 0)
+  x$isLeaf  <- leafLeft & leafRight
   return(x)
 }
 

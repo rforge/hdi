@@ -6,4 +6,8 @@ export(hdi, lm.pval)
 export(hdi, lasso.firstq)
 export(hdi, fdr.adjust)
 
+export(hdi, clusterLowerBound)
+export(hdi, plotClusterBound)
+export(hdi, lowerGroupBound)
+
 S3method(print, hdi)
