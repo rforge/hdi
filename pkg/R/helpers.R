@@ -56,31 +56,38 @@ lm.pval <- function(x, y, exact = TRUE)
   pval.sel
 }
 
-glm.pval <- function(x,y,family="binomial",trace=TRUE,...)
-    {
-        ## Purpose:
-        ## ----------------------------------------------------------------------
-        ## Arguments:
-        ## ----------------------------------------------------------------------
-        ## Author: Ruben Dezeure based on lm.pval, Date:  30 Sept 2013, 18:04
-        
-        fit.glm <- glm(y ~ x,family=family,...) ## Intercept??? Exceptions???
-        fit.summary <- summary(fit.glm)
-
-        if(!fit.glm$converged && trace)
-            {
-                print(fit.summary)
-            }
-           
-        zstat <- fit.summary$coefficients[-1, "z value"] ## Intercept??? Exceptions???
-        
-        ## p-values based on *normal* distribution
-        pval.sel <- 2 * pnorm(abs(zstat), lower.tail = FALSE)
-        
-        
-        names(pval.sel) <- colnames(x)
-        pval.sel
-    }
+glm.pval <- function(x,y,family="binomial",trace=FALSE,...)
+{
+    ## Purpose:
+    ## ----------------------------------------------------------------------
+    ## Arguments:
+    ## ----------------------------------------------------------------------
+    ## Author: Ruben Dezeure based on lm.pval, Date:  30 Sept 2013, 18:04
+    
+    fit.glm <- glm(y ~ x,family=family,...) ## Intercept??? Exceptions???
+    fit.summary <- summary(fit.glm)
+    
+    if(!fit.glm$converged && trace)
+        {
+            print(fit.summary)
+        }
+    
+    if(family %in% c("poisson","binomial"))
+        {
+            zstat <- fit.summary$coefficients[-1, "z value"] ## Intercept??? Exceptions???
+            
+            ## p-values based on *normal* distribution
+            pval.sel <- 2 * pnorm(abs(zstat), lower.tail = FALSE)
+        }else{
+            tstat <- fit.summary$coefficients[-1, "t value"] ## Intercept??? Exceptions???
+            
+            pval.sel <- 2 * pt(abs(tstat), df = fit.lm$df.residual,
+                               lower.tail = FALSE)
+        }
+    
+    names(pval.sel) <- colnames(x)
+    pval.sel
+}
 
 fdr.adjust <- function(p)
 {
