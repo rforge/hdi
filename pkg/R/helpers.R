@@ -32,7 +32,7 @@ lasso.firstq <- function(x, y, q, ...)
   m[[take]]
 }
 
-lm.pval <- function(x, y, exact = TRUE)
+lm.pval <- function(x, y, exact = TRUE, ...)
 {
   ## Purpose:
   ## ----------------------------------------------------------------------
@@ -40,10 +40,10 @@ lm.pval <- function(x, y, exact = TRUE)
   ## ----------------------------------------------------------------------
   ## Author: Lukas Meier, Date:  2 Apr 2013, 11:34
 
-  fit.lm <- lm(y ~ x) ## Intercept??? Exceptions???
+  fit.lm <- lm(y ~ x, ...) ## Intercept??? Exceptions???
   fit.summary <- summary(fit.lm)
 
-  tstat <- fit.summary$coefficients[-1, "t value"] ## Intercept??? Exceptions???
+  tstat <- coef(fit.summary)[-1, "t value"] ## Intercept??? Exceptions???
 
   if(exact){ ## Use appropriate t-dist
     pval.sel <- 2 * pt(abs(tstat), df = fit.lm$df.residual,
@@ -56,7 +56,7 @@ lm.pval <- function(x, y, exact = TRUE)
   pval.sel
 }
 
-glm.pval <- function(x,y,family="binomial",trace=FALSE,...)
+glm.pval <- function(x, y, family = "binomial", trace = FALSE, ...)
 {
     ## Purpose:
     ## ----------------------------------------------------------------------
@@ -64,27 +64,27 @@ glm.pval <- function(x,y,family="binomial",trace=FALSE,...)
     ## ----------------------------------------------------------------------
     ## Author: Ruben Dezeure based on lm.pval, Date:  30 Sept 2013, 18:04
     
-    fit.glm <- glm(y ~ x,family=family,...) ## Intercept??? Exceptions???
+    fit.glm <- glm(y ~ x, family = family, ...) ## Intercept??? Exceptions???
     fit.summary <- summary(fit.glm)
+
+    if(!fit.glm$converged & trace){ ## should be consistent with lm.pval?
+      print(fit.summary)
+    }
     
-    if(!fit.glm$converged && trace)
-        {
-            print(fit.summary)
-        }
+    pval.sel <- coef(fit.summary)[,4] ## dangerous with [,4]???
     
-    if(family %in% c("poisson","binomial"))
-        {
-            zstat <- fit.summary$coefficients[-1, "z value"] ## Intercept??? Exceptions???
-            
-            ## p-values based on *normal* distribution
-            pval.sel <- 2 * pnorm(abs(zstat), lower.tail = FALSE)
-        }else{
-            tstat <- fit.summary$coefficients[-1, "t value"] ## Intercept??? Exceptions???
-            
-            pval.sel <- 2 * pt(abs(tstat), df = fit.lm$df.residual,
-                               lower.tail = FALSE)
-        }
-    
+##-     if(family %in% c("poisson", "binomial")){
+##-       zstat <- fit.summary$coefficients[-1, "z value"]
+##-         ## Intercept??? Exceptions???
+##-             
+##-       ## p-values based on *normal* distribution
+##-       pval.sel <- 2 * pnorm(abs(zstat), lower.tail = FALSE)
+##-     }else{
+##-       tstat <- fit.summary$coefficients[-1, "t value"]
+##-       ## Intercept??? Exceptions???
+##-       pval.sel <- 2 * pt(abs(tstat), df = fit.lm$df.residual,
+##-                          lower.tail = FALSE)
+##-     }
     names(pval.sel) <- colnames(x)
     pval.sel
 }

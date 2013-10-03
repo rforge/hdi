@@ -5,7 +5,7 @@
 \description{Calculates (classical) p-values for an ordinary multiple linear
   regression in the n > p situation.}
 \usage{
-lm.pval(x, y, exact = TRUE)
+lm.pval(x, y, exact = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -14,6 +14,7 @@ lm.pval(x, y, exact = TRUE)
   \item{exact}{Logical. TRUE if p-values based on t-distribution should
     be calculated. FALSE if normal distribution should be used as
     approximation.}
+  \item{...}{Additional arguments to be passed to \code{\link{lm}}.}
 }
 \details{A model with intercept is fitted but the p-value of the intercept
   is not reported in the output.}

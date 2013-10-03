@@ -225,9 +225,12 @@ clusterLowerBound <- function(x, y, method = "average", dist = NULL,
                               lpSolve = TRUE){
   if(alpha > 0.5 | alpha < 0.0005)
     warning("level alpha outside supported range [0.0005, 0.5]")
+  
   n <- nrow(x)
+  p <- ncol(x)
+  
   maxn <- 50
-  if(s>=n)
+  if(s >= n)
     s <- NULL
   if(is.null(s)){
     if(n > maxn){
@@ -246,10 +249,10 @@ clusterLowerBound <- function(x, y, method = "average", dist = NULL,
   ord <- hcl$order
 
   tmp <- merge
-  tmp[tmp > 0] <- tmp[tmp > 0] + ncol(x)
+  tmp[tmp > 0] <- tmp[tmp > 0] + p
   tmp[tmp < 0] <- abs(tmp[tmp < 0])
   
-  mergeext   <- rbind(cbind(1:ncol(x), rep(0, ncol(x))), tmp)
+  mergeext   <- rbind(cbind(1:p, rep(0, p)), tmp)
   ncl        <- nrow(mergeext)
 
   lb <- matrix(0, nrow = ncl, ncol = 2)
@@ -263,34 +266,38 @@ clusterLowerBound <- function(x, y, method = "average", dist = NULL,
                           lpSolve = lpSolve)
   
   sel <- sort(which(lb$resmat[,1] > 0))
-  x <- list()
-  x$groupNumber <- sel
-  x$members     <- lb$groupsl[sel]
-  x$noMembers   <- lb$resmat[sel, 1]
-  x$lowerBound  <- lb$resmat[sel, 2]
-  x$position    <- rep(0,length(sel))
-  x$leftChild   <- x$leftChild <- rep(-1, length(sel))
   
-  for (k in 1:length(sel)){
+  out <- list()
+  out$groupNumber <- sel
+  out$members     <- lb$groupsl[sel]
+  out$noMembers   <- lb$resmat[sel, 1]
+  out$lowerBound  <- lb$resmat[sel, 2]
+  out$position    <- rep(0,length(sel))
+  out$leftChild   <- out$leftChild <- rep(-1, length(sel))
+  
+  for(k in 1:length(sel)){
     tmp <- which(sel == mergeext[sel[k], 1] & sel < sel[k])
-    x$leftChild[k] <- if(length(tmp)>0) tmp else -1
+    out$leftChild[k] <- if(length(tmp)>0) tmp else -1
     
-    tmp <- which(sel == mergeext[sel[k],2] & sel < sel[k])
-    x$rightChild[k] <- if(length(tmp)>0) tmp else -1
-    x$position[k]   <- mean(((1:length(ord)))[ord %in% x$members[[k]]]/ncol(x))
+    tmp <- which(sel == mergeext[sel[k], 2] & sel < sel[k])
+    out$rightChild[k] <- if(length(tmp)>0) tmp else -1
+    out$position[k] <- mean(((1:length(ord)))[ord %in% out$members[[k]]]/p)
   }
 
-  ##x$isLeaf <- (x$leftChild < 0 & x$rightChild < 0)
+  ##out$isLeaf <- (out$leftChild < 0 & out$rightChild < 0)
 
-  ##zeroChilds <- (x$lowerBound[ pmax(1,x$leftChild)] == 0) &
-  ##    (x$lowerBound[pmax(1,x$rightChild)] == 0)
+  ##zeroChilds <- (out$lowerBound[ pmax(1,out$leftChild)] == 0) &
+  ##    (out$lowerBound[pmax(1,out$rightChild)] == 0)
   
-  ##x$isLeaf <- x$isLeaf | zeroChilds
+  ##out$isLeaf <- out$isLeaf | zeroChilds
 
-  leafLeft  <- (x$leftChild < 0 | x$lowerBound[pmax(1, x$leftChild)] == 0)
-  leafRight <- (x$rightChild < 0 | x$lowerBound[pmax(1, x$rightChild)] == 0)
-  x$isLeaf  <- leafLeft & leafRight
-  return(x)
+  leafLeft  <- (out$leftChild < 0 | out$lowerBound[pmax(1, out$leftChild)] == 0)
+  leafRight <- (out$rightChild < 0 | out$lowerBound[pmax(1, out$rightChild)] == 0)
+  out$isLeaf  <- leafLeft & leafRight
+
+  out$method <- "clusterLowerBound"
+  class(out) <- c("clusterLowerBound", "hdi")
+  return(out)
 }
 
 getmfactold <- function(n,conf){
