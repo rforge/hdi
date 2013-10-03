@@ -50,7 +50,7 @@ lowerGroupBoundWithPrediction <- function(x, y, group, mfact, pred,
   n      <- nrow(x)
   porig  <- ncol(x)
   
-  M    <- ceiling(mfact*n) * 2
+  M    <- ceiling(mfact * n) * 2
   Z    <- matrix(nrow = n, ncol = M)
   lvec <- rep(0, M)
 
@@ -65,19 +65,19 @@ lowerGroupBoundWithPrediction <- function(x, y, group, mfact, pred,
   penalty[1] <- 0
 
   if(!is.null(useseed)){
-    oldseed <- round(10000*runif(1))
-    set.seed(useseed +301)
+    oldseed <- round(10000 * runif(1))
+    set.seed(useseed + 301)
   }
-  for (m in 1:(round(M/2))){
+  for (m in 1:(round(M / 2))){
     noisenew <- rnorm(n)
     noisenew <- noisenew / sqrt(sum(noisenew^2))
       
-    Z[,2*m-1] <-  noisenew
-    Z[,2*m]   <- -noisenew
+    Z[, 2*m-1] <-  noisenew
+    Z[, 2*m]   <- -noisenew
   }
     
   if(!is.null(useseed))
-      set.seed(oldseed)
+    set.seed(oldseed)
     
   Z <- Z*mustar
 
@@ -101,18 +101,22 @@ lowerGroupBoundWithPrediction <- function(x, y, group, mfact, pred,
     cvec <- rep(0, ncol(Amat))
     cvec[c(group, porig + group) + as.numeric(intercept)] <-
         rep(1,2*length(group))
+    
     solB <- solveLP(cvec, bvec, Amat, lpSolve = lpSolve)$solution
     TG   <- sum(cvec*solB)
   }else{
     lg <- length(group)
     TG <- numeric(lg)
+    
     for (lc in 1:lg){
       groupc <- group[[lc]]
-      cvec <- rep(0,ncol(Amat))
-      cvec[c(groupc,porig+groupc)+as.numeric(intercept)] <-
-          rep(1,2*length(groupc))
-      solB <- solveLP(cvec,bvec, Amat,lpSolve=lpSolve)$solution
-      TG[lc] <- sum(cvec*solB)
+      
+      cvec <- rep(0, ncol(Amat))
+      cvec[c(groupc, porig + groupc) + as.numeric(intercept)] <-
+          rep(1, 2 * length(groupc))
+      
+      solB <- solveLP(cvec, bvec, Amat, lpSolve = lpSolve)$solution
+      TG[lc] <- sum(cvec * solB)
     }
   }
   return(TG)
@@ -230,8 +234,10 @@ clusterLowerBound <- function(x, y, method = "average", dist = NULL,
   p <- ncol(x)
   
   maxn <- 50
+  
   if(s >= n)
     s <- NULL
+  
   if(is.null(s)){
     if(n > maxn){
       warning("sample size", n,
@@ -239,6 +245,7 @@ clusterLowerBound <- function(x, y, method = "average", dist = NULL,
       s <- maxn
     }
   }
+  
   if(is.null(dist))
     dist <- as.dist(1 - abs(cor(x)))
   
@@ -277,11 +284,11 @@ clusterLowerBound <- function(x, y, method = "average", dist = NULL,
   
   for(k in 1:length(sel)){
     tmp <- which(sel == mergeext[sel[k], 1] & sel < sel[k])
-    out$leftChild[k] <- if(length(tmp)>0) tmp else -1
+    out$leftChild[k] <- if(length(tmp) > 0) tmp else -1
     
     tmp <- which(sel == mergeext[sel[k], 2] & sel < sel[k])
-    out$rightChild[k] <- if(length(tmp)>0) tmp else -1
-    out$position[k] <- mean(((1:length(ord)))[ord %in% out$members[[k]]]/p)
+    out$rightChild[k] <- if(length(tmp) > 0) tmp else -1
+    out$position[k] <- mean(((1:length(ord)))[ord %in% out$members[[k]]] / p)
   }
 
   ##out$isLeaf <- (out$leftChild < 0 & out$rightChild < 0)
@@ -291,8 +298,12 @@ clusterLowerBound <- function(x, y, method = "average", dist = NULL,
   
   ##out$isLeaf <- out$isLeaf | zeroChilds
 
-  leafLeft  <- (out$leftChild < 0 | out$lowerBound[pmax(1, out$leftChild)] == 0)
-  leafRight <- (out$rightChild < 0 | out$lowerBound[pmax(1, out$rightChild)] == 0)
+  leafLeft  <- (out$leftChild < 0  |
+                out$lowerBound[pmax(1, out$leftChild)] == 0)
+  
+  leafRight <- (out$rightChild < 0 |
+                out$lowerBound[pmax(1, out$rightChild)] == 0)
+  
   out$isLeaf  <- leafLeft & leafRight
 
   out$method <- "clusterLowerBound"
@@ -301,19 +312,26 @@ clusterLowerBound <- function(x, y, method = "average", dist = NULL,
 }
 
 getmfactold <- function(n,conf){
-  x <- c(5,10,15,20,25,30,40,50)
+  x <- c(5, 10, 15, 20, 25, 30, 40, 50)
+  
   if(conf > 0.9501){
-    mfactvec <- c(3.4,3.9,5.2,7.1,9.7,13.2,25.8,42.9)
+    mfactvec <- c(3.4, 3.9, 5.2, 7.1, 9.7, 13.2, 25.8, 42.9)
   }else{
-    mfactvec <- c(3.4,3.9,5.2,7.1,9.7,13.2,25.8,42.9)
+    mfactvec <- c(3.4, 3.9, 5.2, 7.1, 9.7, 13.2, 25.8, 42.9)
   }
-  func <- approxfun(x,mfactvec,method="linear",rule=2)
+  
+  func <- approxfun(x, mfactvec, method = "linear", rule = 2)
   return(func(n))
 }
 
 getmfact <- function(n,conf){
-  nvec <- c( 3,4,5,6,7,8,9,10,12,13,14,15,17,20,22,25,27,30,35,40,45,50)
-  if(! n %in% nvec) n <- min(nvec[nvec>=n])
+  nvec <- c(3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 17,
+            20, 22, 25, 27,
+            30, 35,
+            40, 45,
+            50)
+  
+  if(! n %in% nvec) n <- min(nvec[nvec >= n])
 
   mfactvec <- switch(as.character(n),
                      "3" = c(1.02,1.02,1.02,1.02,1.3459,1.3459,1.3459,1.6734,2.0399,3.3467,20.287,20.287,20.287,20.287,20.287,20.287),
@@ -342,6 +360,7 @@ getmfact <- function(n,conf){
   func <- approxfun(c(0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,0.975,0.98,
                       0.99,0.995,0.999,0.9995), mfactvec, method = "linear",
                     rule = 2)
+  
   return(func(conf))
 }
     
