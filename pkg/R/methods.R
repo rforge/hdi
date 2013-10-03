@@ -6,7 +6,10 @@ print.hdi <- function(x, ...)
   ## ----------------------------------------------------------------------
   ## Author: Lukas Meier, Date:  3 Apr 2013, 15:12
 
-  method <- x$method
+  if(is.list(x))
+    method <- x$method
+  else
+    method <- ""
 
   #####################
   ## Multi-Splitting ##
@@ -20,6 +23,7 @@ print.hdi <- function(x, ...)
     cat("------\n")
     cat("Familywise error rate controlled at level alpha.\n")
   }
+  
   ###############
   ## Stability ##
   ###############
@@ -31,6 +35,7 @@ print.hdi <- function(x, ...)
     cat("------\n")
     cat("Expected number of false positives controlled at level EV.\n")
   }
+
   #########################
   ## Cluster Lower-Bound ##
   #########################
@@ -56,6 +61,13 @@ print.hdi <- function(x, ...)
       }
     }
     cat("\n ")
+  }
+
+  ######################
+  ## Other situations ##
+  ######################
+  else{
+    print.default(x, ...)
   }
 }
 

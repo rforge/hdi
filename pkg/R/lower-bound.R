@@ -14,19 +14,19 @@ getMembers <- function(me, sel, members = numeric(0)){
 getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
                               s = 10, nsplit = 11, silent = FALSE,
                               setseed = TRUE, lpSolve = TRUE){
-  group <- getMembers(me,sel)
+  group <- getMembers(me, sel)
   if(!silent)
     cat("\n ", sel, "  ", length(group), "members")
   res <- lowerGroupBound(x, y, group = group, alpha = alpha, s = s,
                          nsplit = nsplit, silent = TRUE,
                          setseed = setseed, lpSolve = lpSolve)
-  resmat[sel,2]  <- res
-  resmat[sel,1]  <- length(group)
+  resmat[sel, 2]  <- res
+  resmat[sel, 1]  <- length(group)
   groupsl[[sel]] <- group
   if(!silent)
     cat("\t lower bound", res)
     
-  if(res>0 & length(group)>1){
+  if(res > 0 & length(group)>1){
     if(all(me[sel,]>0)){
       for (kk in 1:2){
         tmp <- getLowerBoundNode(x,y,me, me[sel,kk],resmat ,groupsl,
@@ -219,8 +219,10 @@ lowerGroupBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
   else
     TG <- apply(TG, 1, median)
 
-  class(TG) <- c("hdi", "lowerbound")
-  return(TG)
+  out        <- TG
+  class(out) <- c("lowerBound", "hdi")
+  
+  return(out)
 }
 
 clusterLowerBound <- function(x, y, method = "average", dist = NULL,
