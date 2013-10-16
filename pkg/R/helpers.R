@@ -32,6 +32,41 @@ lasso.firstq <- function(x, y, q, ...)
   m[[take]]
 }
 
+require(plus)
+scale.lasso <- function(obj, epsilon = 1e-10, sigma.hat = 1)
+{
+  ## Purpose:
+  ## This is the scaled lasso procedure
+  ## Can modify this to accept different values for lambda0
+  ## Presumes a = 0 (in Scaled Sparse Linear Regression paper, eq(3))
+  ## ----------------------------------------------------------------------
+  ## Arguments:
+  ## obj: any plus object, which has beta.hat calculated along lambda.path
+  ## eps: stopping algorithm when change in sigma.hat < epsilon
+  ## sigma.hat: start value for the estimate of sigma
+  ## ----------------------------------------------------------------------
+  ## Output:
+  ## beta: estimated beta.hat from algorithm
+  ## sigma: estimated sigma
+  ## lambda: the lambda used to estimate beta, = sigma*lambda0
+  ## ----------------------------------------------------------------------
+  ## Authors: Tingni Sun, Cun-Hui Zhang
+  ## http://arxiv.org/abs/1104.4595
+  
+  lambda0 = sqrt(2/nrow(obj$x)*log(ncol(obj$x)))
+  while (TRUE)
+    {
+      beta.hat <- coef(obj,min(sigma.hat*lambda0,obj$lam.path[1]-0.0001))
+      old.sigmahat <- sigma.hat
+      sigma.hat <- sqrt(crossprod(obj$y-obj$x%*%beta.hat)/
+                        nrow(obj$x))[1,1]
+      if (abs(sigma.hat-old.sigmahat)<epsilon) break
+    }
+  beta.hat2 <- coef(obj,sigma.hat*lambda0/4)
+  return(list("beta" = beta.hat, "beta2" = beta.hat2, "sigma"=sigma.hat,
+              "lambda"=lambda0*sigma.hat))
+}
+
 lm.pval <- function(x, y, exact = TRUE, ...)
 {
   ## Purpose:
