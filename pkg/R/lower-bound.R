@@ -17,7 +17,7 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
   group <- getMembers(me, sel)
   if(!silent)
     cat("\n ", sel, "  ", length(group), "members")
-  res <- lowerGroupBound(x, y, group = group, alpha = alpha, s = s,
+  res <- groupLowerBound(x, y, group = group, alpha = alpha, s = s,
                          nsplit = nsplit, silent = TRUE,
                          setseed = setseed, lpSolve = lpSolve)
   resmat[sel, 2]  <- res
@@ -41,7 +41,7 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
 }
 
   
-lowerGroupBoundWithPrediction <- function(x, y, group, mfact, pred,
+groupLowerBoundWithPrediction <- function(x, y, group, mfact, pred,
                              intercept = TRUE, useseed = NULL,
                              lpSolve = TRUE){
   ## not to be called by user (?)
@@ -122,7 +122,7 @@ lowerGroupBoundWithPrediction <- function(x, y, group, mfact, pred,
   return(TG)
 }
 
-lowerGroupBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
+groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
                         setseed = TRUE, silent = FALSE, lpSolve = TRUE){
   if(!silent){
     if(alpha > 0.5 | alpha < 0.0005)
@@ -187,7 +187,7 @@ lowerGroupBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
       A <- t(A)
       mfact <- getmfact(s, 1 - alpha / 2)
       
-      TGsplit <- lowerGroupBoundWithPrediction(A %*% x[outsam,],
+      TGsplit <- groupLowerBoundWithPrediction(A %*% x[outsam,],
                                                as.numeric(A %*% y[outsam]),
                                                group, mfact,
                                                as.numeric(A %*% pred),
@@ -197,7 +197,7 @@ lowerGroupBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
                                                lpSolve = lpSolve)
    }else{
      mfact   <- getmfact(nrow(x), 1 - alpha / 2)
-     TGsplit <- lowerGroupBoundWithPrediction(x[outsam,], y[outsam], group,
+     TGsplit <- groupLowerBoundWithPrediction(x[outsam,], y[outsam], group,
                                               mfact, pred,
                                               intercept = TRUE,
                                               useseed = if(setseed) useseed
