@@ -4,7 +4,7 @@
 \title{Function to perform stability selection}
 \description{Function to perform stability selection}
 \usage{
-stability(x, y, EV, q, B = 100, fraction = 0.5,
+stability(x, y, EV, threshold = 0.75, B = 100, fraction = 0.5,
           model.selector = lasso.firstq, args.model.selector = NULL,
           trace = FALSE)
 }
@@ -12,9 +12,8 @@ stability(x, y, EV, q, B = 100, fraction = 0.5,
 \arguments{
   \item{x}{Design matrix (without intercept).}
   \item{y}{Response vector.}
-  \item{EV}{Bound(s) for expected number of false positives. Can
-    be a vector.}
-  \item{q}{Bound for model size. Must be a scalar.}
+  \item{EV}{Bound for expected number of false positives.}
+  \item{threshold}{Threshold for selection frequency. Must be in (0.5, 1).}
   \item{B}{Number of sub-sample iterations.}
   \item{fraction}{Fraction of data used at each of the B sub-samples.}
   \item{model.selector}{Function to perform model selection. Default is
@@ -31,11 +30,10 @@ stability(x, y, EV, q, B = 100, fraction = 0.5,
 \details{...}
 
 \value{
-  \item{select}{List with selected predictors
-    for the supplied values of EV.}
-  \item{EV}{Vector of corresponding values of EV.}
-  \item{thresholds}{Thresholds corresponding to different values of EV.}
+  \item{select}{Vector of selected predictors.}
   \item{freq}{Vector of selection frequencies.}
+  \item{q}{Size of fitted models in order to control error rate at
+  desired level.}
 }
 
 \references{
@@ -52,9 +50,9 @@ stability(x, y, EV, q, B = 100, fraction = 0.5,
 \examples{
 x <- matrix(rnorm(100*1000), nrow = 100, ncol = 1000)
 y <- x[,1] * 2 + x[,2] * 2.5 + rnorm(100)
-fit.stab <- stability(x, y, EV = c(1, 2), q = 10)
+fit.stab <- stability(x, y, EV = 1)
 fit.stab
-fit.stab$freq[1:10] ## frequency of the first 10 predictors
+fit.stab$freq[1:10] ## selection frequency of the first 10 predictors
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

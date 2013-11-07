@@ -1,4 +1,4 @@
-stability <- function(x, y, EV, q, B = 100, fraction = 0.5,
+stability <- function(x, y, EV, threshold = 0.75, B = 100, fraction = 0.5,
                       model.selector = lasso.firstq,
                       args.model.selector = NULL, trace = FALSE)
 {
@@ -10,11 +10,13 @@ stability <- function(x, y, EV, q, B = 100, fraction = 0.5,
 
   ## error checking
 
-  if(any(EV >= q))
-    stop("q should be larger than EV")
-
-  if(length(q) > 1) ## q has to be a scalar (EV can be a vector)
-    stop("q must be a scalar")
+  if(threshold > 1 | threshold < 0.5)
+    stop("threshold has to be in (0.5, 1)")
+  ##-   if(any(EV >= q))
+  ##-     stop("q should be larger than EV")
+  ##- 
+  ##-   if(length(q) > 1) ## q has to be a scalar (EV can be a vector)
+  ##-     stop("q must be a scalar")
 
   ##
 
@@ -23,10 +25,12 @@ stability <- function(x, y, EV, q, B = 100, fraction = 0.5,
   
   col.nam <- colnames(x)
 
-  thresholds <- 0.5 * (1 + q^2 / (p * EV)) ## vector of thresholds
+  q <- ceiling(sqrt(EV * p * (2 * threshold - 1)))
+  
+  ##thresholds <- 0.5 * (1 + q^2 / (p * EV)) ## vector of thresholds
 
-  if(any(thresholds > 1))
-    warning("Some thresholds larger than 1. Decrease q or increase EV.")
+  ##if(any(thresholds > 1))
+  ##  warning("Some thresholds larger than 1. Decrease q or increase EV.")
 
   ## Matrix of selected models:
   ## rows = subsamples
@@ -55,22 +59,23 @@ stability <- function(x, y, EV, q, B = 100, fraction = 0.5,
   freq <- colMeans(sel.mat)
   names(freq) <- col.nam
         
-  out <- list(); length(out) <- length(EV)
+  out <- list(); ##length(out) <- length(EV)
   
-  for(i in 1:length(EV)){
-    sel.current        <- which(freq >= thresholds[i])
-    names(sel.current) <- col.nam[sel.current]
+  ##for(i in 1:length(EV)){
+  sel.current        <- which(freq >= threshold)
+  names(sel.current) <- col.nam[sel.current]
     
-    if(length(sel.current) == 0)
-      sel.current <- NULL ## for safety reasons...
+  if(length(sel.current) == 0)
+    sel.current <- NULL ## for safety reasons...
     
-    out[[i]] <- sel.current
-  }
+  out <- sel.current
+  ##}
 
-  out <- list(select     = out,
+  out <- list(select     = sel.current,
               EV         = EV,
-              thresholds = thresholds,
+              threshold  = threshold,
               freq       = freq,
+              q          = q,
               method     = "stability",
               call       = match.call())
   

@@ -28,12 +28,20 @@ print.hdi <- function(x, ...)
   ## Stability ##
   ###############
   else if(method == "stability"){
-    for(i in 1:length(x$select)){
-      cat("EV = ", x$EV[[i]], ":", sep = "")
-      cat(" Selected predictors:", x$select[[i]], "\n")
+    cat("Selected predictors:\n")
+    cat("--------------------\n")
+    if(is.null(x$select)){
+      cat("none\n")
+    }else{
+      print(x$select)
     }
-    cat("------\n")
-    cat("Expected number of false positives controlled at level EV.\n")
+   
+    ##for(i in 1:length(x$select)){
+    ##  cat("EV = ", x$EV[[i]], ":", sep = "")
+    ##  cat(" Selected predictors:", x$select[[i]], "\n")
+    #}
+    cat("--------------------\n")
+    cat("Expected number of false positives controlled at level", x$EV, "\n")
   }
 
   #########################

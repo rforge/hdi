@@ -1,7 +1,7 @@
 hdi <- function(x, y, method = "multi.split", B = NULL,
                 fraction = 0.5,
                 model.selector = NULL,
-                EV = NULL, q = NULL,                 ## stability args
+                EV = NULL, threshold = 0.75,         ## stability args
                 gamma = seq(0.05, 0.99, by = 0.01),  ## multi-split args
                 classical.fit = NULL,                ## multi-split args
                 args.model.selector = NULL,          ## list
@@ -27,7 +27,7 @@ hdi <- function(x, y, method = "multi.split", B = NULL,
   if(method %in% c("multi.split", "multi-split")){ ## for compatibility reasons
     ## argument checking
     if(is.null(B))
-      B <- 50
+      B <- 100
 
     if(is.null(model.selector))
       model.selector <- lasso.cv
@@ -59,16 +59,16 @@ hdi <- function(x, y, method = "multi.split", B = NULL,
     if(is.null(EV))
         stop("EV not defined")
     
-    if(is.null(q))
-      stop("q not defined")
+    ##if(is.null(threshold))
+    ##  stop("threshold not defined")
     
     if(is.null(model.selector))
       model.selector <- lasso.firstq
 
     ## perform stability-selection
     out <- stability(x = x, y = y, B = B, fraction = fraction,
-                     model.selector = model.selector,
-                     EV = EV, q = q,
+                     threshold = threshold, model.selector = model.selector,
+                     EV = EV,
                      args.model.selector = args.model.selector,
                      trace = trace,...)
   }
