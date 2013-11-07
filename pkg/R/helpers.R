@@ -32,7 +32,6 @@ lasso.firstq <- function(x, y, q, ...)
   m[[take]]
 }
 
-require(plus)
 scale.lasso <- function(obj, epsilon = 1e-10, sigma.hat = 1)
 {
   ## Purpose:
