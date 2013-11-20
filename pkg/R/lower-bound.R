@@ -42,8 +42,8 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
 
   
 groupLowerBoundWithPrediction <- function(x, y, group, mfact, pred,
-                             intercept = TRUE, useseed = NULL,
-                             lpSolve = TRUE){
+                                          intercept = TRUE, useseed = NULL,
+                                          lpSolve = TRUE){
   ## not to be called by user (?)
   Resid  <- y - pred
   mustar <- 3 * sqrt(sum(Resid^2))
@@ -62,7 +62,8 @@ groupLowerBoundWithPrediction <- function(x, y, group, mfact, pred,
   p <- ncol(x)
     
   penalty    <- rep(1,p)
-  penalty[1] <- 0
+  if(intercept)
+    penalty[1] <- 0
 
   if(!is.null(useseed)){
     oldseed <- round(10000 * runif(1))
