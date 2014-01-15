@@ -105,7 +105,7 @@ glm.pval <- function(x, y, family = "binomial", trace = FALSE, ...)
       print(fit.summary)
     }
     
-    pval.sel <- coef(fit.summary)[,4] ## dangerous with [,4]???
+    pval.sel <- coef(fit.summary)[-1,4] ## dangerous with [,4]???
     
 ##-     if(family %in% c("poisson", "binomial")){
 ##-       zstat <- fit.summary$coefficients[-1, "z value"]
