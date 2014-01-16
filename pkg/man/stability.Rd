@@ -36,10 +36,11 @@ stability(x, y, EV, threshold = 0.75, B = 100, fraction = 0.5,
   desired level.}
 }
 
-\references{
-  Meinshausen, N. and B\"uhlmann, P. (2010), \emph{Stability selection
-  (with discussion)}, Journal of the Royal Statistical Society: Series B,
-  72, 417-473.}
+\references{B\"hlmann, P., Kalisch, M. and Meier,
+  L. (2013). \emph{High-dimensional statistics with a view towards
+  applications in biology}. To appear in Annual Review of Statistics and
+  its Applications. Preprint}
+
 
 \author{Lukas Meier}
 
