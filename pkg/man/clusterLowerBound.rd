@@ -22,7 +22,7 @@
  (default is "average" linkage).}
   \item{dist}{
  A distance matrix can be entered as an argument, on which the
- hierarchical clusering will be based. If \code{NULL}, then the distance
+ hierarchical clustering will be based. If \code{NULL}, then the distance
  between variables will be calculated as 1 less the absolute correlation
  matrix.}
   \item{alpha}{
@@ -30,7 +30,7 @@
  \item{nsplit}{
  The number of data splits used.}
   \item{s}{
- The dimensionaility of the projection that is used. Lower values lead
+ The dimensionality of the projection that is used. Lower values lead
  to faster computation and if n > 50, then s is set to 50 if left
  unspecified to avoid lengthy computations.}
 \item{silent}{
@@ -44,8 +44,8 @@
  (setting it to false will results in much slower computations; only use
  on small problems).}
 }
-\details{
-}
+%\details{
+%}
 \value{
 Returns a list with components
  \item{groupNumber}{The index of the group tested in the original
@@ -72,8 +72,8 @@ Returns a list with components
 \author{
  Nicolai Meinshausen meinshausen@stat.math.ethz.ch
 }
-\note{
-}
+%\note{
+%}
 
 \seealso{
   Use \code{clusterLowerBound} to test all groups in a hierarchical
@@ -82,14 +82,14 @@ Returns a list with components
   groups of variables.
 }
 \examples{
-## Create a regression problem with block-design and p = 100 and n = 50 and
-## B = 10 blocks and within-block correlation of rho = 0.99
-p   <- 100
-n   <- 50
-B   <- 10
+## Create a regression problem with block-design: p = 10, n = 30,
+## block size B = 5 and within-block correlation of rho = 0.99
+p   <- 10
+n   <- 30
+B   <- 5
 rho <- 0.99
 
-ind   <- rep(1:ceiling(p / B), each = B)[1:p]
+ind <- rep(1:ceiling(p / B), each = B)[1:p]
 Sigma <- diag(p)
 
 for (ii in unique(ind)){
@@ -101,13 +101,12 @@ diag(Sigma) <- 1
 x <- matrix(rnorm(n * p), nrow = n) \%*\% chol(Sigma)
 
 ## Create response with active variables 1 and 21 
-beta          <- rep(0, p)
-beta[c(1,21)] <- c(5, 5)
-sd <- 0.1
-y  <- as.numeric(x \%*\% beta + sd * rnorm(n))
-            
-## Compute the lower bound for all groups in a hierarchical clustering tree
-out <- clusterLowerBound(x, y)
+beta    <- rep(0, p)
+beta[1] <- 5
+
+y  <- as.numeric(x \%*\% beta + rnorm(n))
+
+out <- clusterLowerBound(x, y, s = 2, nsplit = 3)
 
 ## Plot and print the hierarchical group-test
 plot(out)

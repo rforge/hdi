@@ -54,18 +54,18 @@ groupLowerBound(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
  Assumption-free confidence intervals for groups of variables in sparse
  high-dimensional regression. http://arxiv.org/abs/1309.3489}
 \author{Nicolai Meinshausen meinshausen@stat.math.ethz.ch}
-\note{
-}
+%\note{
+%}
 
 \seealso{Use \code{clusterLowerBound} to test all groups in a hierarchical
- clustering tree. }
+ clustering tree.}
 
 \examples{
-## Create a regression problem with block-design and p = 100 and n = 50
-## and B = 10 blocks and within-block correlation of rho = 0.99
-p   <- 100
-n   <- 50
-B   <- 10
+## Create a regression problem with block-design: p = 10, n = 30,
+## block size B = 5 and within-block correlation of rho = 0.99
+p   <- 10
+n   <- 30
+B   <- 5
 rho <- 0.99
 
 ind <- rep(1:ceiling(p / B), each = B)[1:p]
@@ -80,22 +80,21 @@ diag(Sigma) <- 1
 x <- matrix(rnorm(n * p), nrow = n) \%*\% chol(Sigma)
 
 ## Create response with active variables 1 and 21 
-beta          <- rep(0, p)
-beta[c(1,21)] <- c(5, 5)
+beta    <- rep(0, p)
+beta[1] <- 10
 
-sd <- 0.1
-y  <- as.numeric(x \%*\% beta + sd * rnorm(n))
+y  <- as.numeric(x \%*\% beta + rnorm(n))
             
 ## Compute lower bounds:
-## Lower bounds for variable 1 in itself, then groups 1-10 and 1-20
-lowerBound <- groupLowerBound(x, y, list(1, 1:10, 1:30))
-cat("\n\n   lower bound for the groups {1}, 1-10 and 1-30: ", lowerBound)
+## Lower bounds for variable 1 in itself, then groups 1-5
+lowerBound <- groupLowerBound(x, y, list(1, 1:5), s = 2, nsplit = 3)
+cat("\n\n   lower bound for the groups {1}, 1-5: ", lowerBound)
 
-## Lower bound for the l1-norm of all variables 1-100 of the sparsest
+## Lower bound for the l1-norm of all variables 1-10 of the sparsest
 ## optimal vector  
-lowerBoundAll <- groupLowerBound(x, y, 1:100)
+lowerBoundAll <- groupLowerBound(x, y, 1:10, s = 2, nsplit = 3)
 print(lowerBoundAll)
-cat("\n\n   lower bound for all variables 1-100          : ", lowerBoundAll)
+cat("\n\n   lower bound for all variables 1-10: ", lowerBoundAll)
 }
 \keyword{confidence intervals}
 \keyword{regression}

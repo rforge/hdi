@@ -19,7 +19,7 @@
   \item{col}{The colour of the symbols for the nodes.}
   \item{...}{Additional arguments.}
 }
-\details{}
+%\details{}
 \value{Nothing is returned}
 \references{
  Nicolai Meinshausen (2013) 
@@ -28,7 +28,7 @@
  http://arxiv.org/abs/1309.3489
 }
 \author{Nicolai Meinshausen meinshausen@stat.math.ethz.ch}
-\note{}
+%\note{}
 
 \seealso{
   Use \code{clusterLowerBound} to test all groups in a hierarchical
@@ -37,33 +37,32 @@
   groups of variables. 
 }
 \examples{
-## Create a regression problem with block-design and p = 100 and n = 50 and
-## B = 10 blocks and within-block correlation of rho = 0.99
-p   <- 100
-n   <- 50
-B   <- 10
+## Create a regression problem with block-design: p = 10, n = 30,
+## block size B = 5 and within-block correlation of rho = 0.99
+p   <- 10
+n   <- 30
+B   <- 5
 rho <- 0.99
 
-ind   <- rep(1:ceiling(p / B), each = B)[1:p]
+ind <- rep(1:ceiling(p / B), each = B)[1:p]
 Sigma <- diag(p)
 
 for (ii in unique(ind)){
   id <- which(ind == ii)
-  Sigma[id,id] <- rho
+  Sigma[id, id] <- rho
 }
 diag(Sigma) <- 1
 
 x <- matrix(rnorm(n * p), nrow = n) \%*\% chol(Sigma)
 
 ## Create response with active variables 1 and 21 
-beta          <- rep(0, p)
-beta[c(1,21)] <- c(5, 5)
+beta    <- rep(0, p)
+beta[1] <- 10
 
-sd <- 0.1
-y  <- as.numeric(x \%*\% beta + sd * rnorm(n))
+y  <- as.numeric(x \%*\% beta + rnorm(n))
             
 ## Compute the lower bound for all groups in a hierarchical clustering tree
-out <- clusterLowerBound(x, y)
+out <- clusterLowerBound(x, y, s = 2, nsplit = 3)
 
 ## Plot the tree with y-axis proportional to the (log) of the number of
 ## group members and node sizes proportional to the lower l1-norm bound.

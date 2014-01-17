@@ -1,3 +1,7 @@
+import(glmnet)
+import(linprog)
+import(plus)
+
 export(hdi, hdi)
 export(hdi, stability)
 export(hdi, multi.split)
