@@ -40,7 +40,7 @@
 ## Create a regression problem with block-design: p = 10, n = 30,
 ## block size B = 5 and within-block correlation of rho = 0.99
 p   <- 10
-n   <- 30
+n   <- 100
 B   <- 5
 rho <- 0.99
 
@@ -57,12 +57,12 @@ x <- matrix(rnorm(n * p), nrow = n) \%*\% chol(Sigma)
 
 ## Create response with active variables 1 and 21 
 beta    <- rep(0, p)
-beta[1] <- 10
+beta[1] <- 5
 
 y  <- as.numeric(x \%*\% beta + rnorm(n))
             
 ## Compute the lower bound for all groups in a hierarchical clustering tree
-out <- clusterLowerBound(x, y, s = 2, nsplit = 3)
+out <- clusterLowerBound(x, y, nsplit = 5)
 
 ## Plot the tree with y-axis proportional to the (log) of the number of
 ## group members and node sizes proportional to the lower l1-norm bound.

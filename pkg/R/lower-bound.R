@@ -29,10 +29,10 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
   if(res > 0 & length(group)>1){
     if(all(me[sel,]>0)){
       for (kk in 1:2){
-        tmp <- getLowerBoundNode(x,y,me, me[sel,kk],resmat ,groupsl,
-                                 alpha=alpha,s=s,nsplit=nsplit,
-                                 silent=silent,lpSolve=lpSolve)
-        resmat <- tmp$resmat
+        tmp <- getLowerBoundNode(x, y, me, me[sel,kk], resmat, groupsl,
+                                 alpha = alpha, s = s, nsplit = nsplit,
+                                 silent = silent, lpSolve = lpSolve)
+        resmat  <- tmp$resmat
         groupsl <- tmp$groupsl
       }      
     }
@@ -123,8 +123,9 @@ groupLowerBoundWithPrediction <- function(x, y, group, mfact, pred,
   return(TG)
 }
 
-groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
-                        setseed = TRUE, silent = FALSE, lpSolve = TRUE){
+groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
+                            s = min(10, ncol(x) - 1),
+                            setseed = TRUE, silent = FALSE, lpSolve = TRUE){
   if(!silent){
     if(alpha > 0.5 | alpha < 0.0005)
       warning("level alpha outside supported range [0.0005, 0.5]")
@@ -138,23 +139,23 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
     TG <- matrix(0, nrow = length(group), ncol = nsplit)
   
   n    <- nrow(x)
-  maxn <- 50
-  
-  if(s >= n)
-    s <- NULL
-  
-  if(is.null(s)){
-    if(n > maxn){
-      warning("sample size", n, 
-              " taking too long, compressing to s = 50 measurements")
-      s <- maxn
-    }
+  maxn <- 20
+
+  if(s > maxn){
+    s.new <- min(maxn, ncol(x) - 1)
+    warning("Number of projections s = ", s, 
+            " taking too long, reducing to s = ", s.new, " projections.")
+    s <- s.new
+  }
+  if(s > ncol(x)){
+    s <- ncol(x) - 1
+    warning("Reduced s to ", ncol(x) - 1, " because s >= ncol(x).")
   }
   
-  oldseed <- round(10000*runif(1))
-  probsel <- rep(0,ncol(x))
+  oldseed <- round(10000 * runif(1))
+  probsel <- rep(0, ncol(x))
   
-  for (splitc in 1:nsplit){
+  for(splitc in 1:nsplit){
     if(setseed)
       set.seed(useseed <- splitc + 201) ## useful???
     
@@ -165,7 +166,7 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
         
     pred <- as.numeric(predict(cvg, x[outsam,]))
     if(!silent){
-      cat("\n split no.", splitc, "/",nsplit, "\n   // residual variance",
+      cat("split no.", splitc, "/",nsplit, "\n   // residual variance",
           signif(sum((pred - y[outsam])^2) / 
                  sum((y[outsam] - mean(y[outsam]))^2), 2))
     }
@@ -206,7 +207,7 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
                                               lpSolve = lpSolve)
    }
    if(!silent)
-     cat("\n   // lower l1-norm bound", signif(TGsplit, 2))
+     cat("\n   // lower l1-norm bound", signif(TGsplit, 2), "\n")
    if(setseed)
      set.seed(oldseed)
 
@@ -227,7 +228,8 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
 }
 
 clusterLowerBound <- function(x, y, method = "average", dist = NULL,
-                              alpha = 0.05, nsplit = 11, s = 10,
+                              alpha = 0.05, nsplit = 11,
+                              s = min(10, ncol(x) - 1),
                               silent = FALSE, setseed = TRUE,
                               lpSolve = TRUE){
   if(alpha > 0.5 | alpha < 0.0005)
@@ -236,17 +238,17 @@ clusterLowerBound <- function(x, y, method = "average", dist = NULL,
   n <- nrow(x)
   p <- ncol(x)
   
-  maxn <- 50
-  
-  if(s >= n)
-    s <- NULL
-  
-  if(is.null(s)){
-    if(n > maxn){
-      warning("sample size", n,
-              " taking too long, compressing to s = 50 measurements")
-      s <- maxn
-    }
+  maxn <- 20
+
+  if(s > maxn){
+    s.new <- min(maxn, p - 1)
+    warning("Number of projections s = ", s, 
+            " taking too long, reducing to s = ", s.new, " projections.")
+    s <- s.new
+  }
+  if(s > p){
+    s <- p - 1
+    warning("Reduced s to ", ncol(x) - 1, " because s >= ncol(x).")
   }
   
   if(is.null(dist))

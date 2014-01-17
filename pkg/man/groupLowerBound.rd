@@ -13,8 +13,9 @@
  approximation to the noiseless data.}
 
 \usage{
-groupLowerBound(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
-                setseed = TRUE, silent = FALSE, lpSolve = TRUE)}
+groupLowerBound(x, y, group, alpha = 0.05, nsplit = 11,
+                s = min(10, ncol(x) - 1), setseed = TRUE,
+                silent = FALSE, lpSolve = TRUE)}
 \arguments{
   \item{x}{The design matrix of the regression with p columns for p predictor
     variables and n rows that correspond to n observations.}
@@ -64,7 +65,7 @@ groupLowerBound(x, y, group, alpha = 0.05, nsplit = 11, s = 10,
 ## Create a regression problem with block-design: p = 10, n = 30,
 ## block size B = 5 and within-block correlation of rho = 0.99
 p   <- 10
-n   <- 30
+n   <- 100
 B   <- 5
 rho <- 0.99
 
@@ -81,20 +82,22 @@ x <- matrix(rnorm(n * p), nrow = n) \%*\% chol(Sigma)
 
 ## Create response with active variables 1 and 21 
 beta    <- rep(0, p)
-beta[1] <- 10
+beta[1] <- 5
 
 y  <- as.numeric(x \%*\% beta + rnorm(n))
             
 ## Compute lower bounds:
-## Lower bounds for variable 1 in itself, then groups 1-5
-lowerBound <- groupLowerBound(x, y, list(1, 1:5), s = 2, nsplit = 3)
-cat("\n\n   lower bound for the groups {1}, 1-5: ", lowerBound)
 
 ## Lower bound for the l1-norm of all variables 1-10 of the sparsest
 ## optimal vector  
-lowerBoundAll <- groupLowerBound(x, y, 1:10, s = 2, nsplit = 3)
+lowerBoundAll <- groupLowerBound(x, y, 1:p)
 print(lowerBoundAll)
-cat("\n\n   lower bound for all variables 1-10: ", lowerBoundAll)
+cat("\nlower bound for all variables 1-10: ", lowerBoundAll, "\n")
+
+## Compute lower bounds:
+## Lower bounds for variable 1 in itself, then groups 1-5
+lowerBound <- groupLowerBound(x, y, list(1, 1:5))
+cat("lower bound for the groups {1}, {1,...,5}: ", lowerBound, "\n")
 }
 \keyword{confidence intervals}
 \keyword{regression}

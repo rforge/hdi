@@ -8,8 +8,8 @@
  parameters in a hierarchical clustering tree.}
 \usage{
   clusterLowerBound(x, y, method = "average", dist = NULL, alpha = 0.05,
-                    nsplit = 11, s = 10, silent = FALSE, setseed = TRUE,
-                    lpSolve = TRUE)}
+                    nsplit = 11, s = min(10, ncol(x) - 1),
+                    silent = FALSE, setseed = TRUE, lpSolve = TRUE)}
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
@@ -85,7 +85,7 @@ Returns a list with components
 ## Create a regression problem with block-design: p = 10, n = 30,
 ## block size B = 5 and within-block correlation of rho = 0.99
 p   <- 10
-n   <- 30
+n   <- 100
 B   <- 5
 rho <- 0.99
 
@@ -106,7 +106,7 @@ beta[1] <- 5
 
 y  <- as.numeric(x \%*\% beta + rnorm(n))
 
-out <- clusterLowerBound(x, y, s = 2, nsplit = 3)
+out <- clusterLowerBound(x, y, nsplit = 5)
 
 ## Plot and print the hierarchical group-test
 plot(out)
