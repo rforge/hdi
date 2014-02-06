@@ -172,7 +172,8 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
                               alpha=alpha,
                               lpSolve=lpSolve,
                               group=list(group=group),
-                              oldseed=oldseed)
+                              oldseed=oldseed,
+                              mc.cores=ncores)
       ##print("after parallel")
       ##print(TGsplit.out)
       TG <- TGsplit.out
