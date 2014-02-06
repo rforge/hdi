@@ -125,6 +125,10 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
   
   names(pvals.current) <- names(which.gamma) <- colnames(x)
 
+  ##just take median for ci
+  lci.current <- apply(lci,2,median)
+  uci.current <- apply(uci,2,median)
+
   if(!return.nonaggr) ## Overwrite pvals with NULL if no output is wanted
     pvals <- NULL
       
