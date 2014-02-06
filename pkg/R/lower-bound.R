@@ -1,5 +1,6 @@
 ##- library(glmnet)
 ##- library(linprog)
+##library(parallel)
 
 getMembers <- function(me, sel, members = numeric(0)){
   if(all(me[sel,] > 0)){
@@ -125,7 +126,9 @@ groupLowerBoundWithPrediction <- function(x, y, group, mfact, pred,
 
 groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
                             s = min(10, ncol(x) - 1),
-                            setseed = TRUE, silent = FALSE, lpSolve = TRUE){
+                            setseed = TRUE, silent = FALSE, lpSolve = TRUE,
+                            parallel=FALSE,
+                            ncores=10){
   if(!silent){
     if(alpha > 0.5 | alpha < 0.0005)
       warning("level alpha outside supported range [0.0005, 0.5]")
@@ -154,68 +157,48 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
   
   oldseed <- round(10000 * runif(1))
   probsel <- rep(0, ncol(x))
-  
-  for(splitc in 1:nsplit){
-    if(setseed)
-      set.seed(useseed <- splitc + 201) ## useful???
-    
-    insam  <- sort(sample(1:n, round(n / 2)))
-    outsam <- (1:n)[-insam]
-    cvg    <- cv.glmnet(x[insam,], y[insam], nfolds = 10, grouped = FALSE)
-    selvar <- which(coef(cvg)[-1] != 0)
-        
-    pred <- as.numeric(predict(cvg, x[outsam,]))
-    if(!silent){
-      cat("split no.", splitc, "/",nsplit, "\n   // residual variance",
-          signif(sum((pred - y[outsam])^2) / 
-                 sum((y[outsam] - mean(y[outsam]))^2), 2))
-    }
-    ## Projection step
-    if(!is.null(s)){
-      nout <- length(outsam)
 
-      ## Projection matrix: 1st column = prediction, remaining cols = random
-      A  <- cbind(pred / sqrt(sum(pred^2)), 
-                  matrix(rnorm(nout * (s - 1)), nrow = nout))
-      
-      for(sc in 2:s){
-        tmpP <- A[,1:(sc-1), drop = FALSE]
-        tmp <- A[,sc] - tmpP %*% solve(t(tmpP) %*% tmpP +
-                                       0.00001 * diag(sc - 1), ## small ridge pen
-                                       t(tmpP) %*% A[,sc])
-        
-        A[,sc] <- tmp / sqrt(sum(tmp^2))
+  if(parallel)
+    {
+      TGsplit.out <- mcmapply(do.splits,
+                              splitc=1:nsplit,
+                              nsplit=nsplit,
+                              n=n,
+                              x=list(x=x),
+                              y=list(y=y),
+                              s=s,
+                              setseed=setseed,
+                              silent=silent,
+                              alpha=alpha,
+                              lpSolve=lpSolve,
+                              group=list(group=group),
+                              oldseed=oldseed)
+      ##print("after parallel")
+      ##print(TGsplit.out)
+      TG <- TGsplit.out
+    }else{
+      for(splitc in 1:nsplit){
+        TGsplit <- do.splits(splitc=splitc,
+                             nsplit=nsplit,
+                             n=n,
+                             x=x,
+                             y=y,
+                             s=s,
+                             setseed=setseed,
+                             silent=silent,
+                             alpha=alpha,
+                             lpSolve=lpSolve,
+                             group=group,
+                             oldseed=oldseed)
+        if(!listg)
+          TG[splitc] <- TGsplit
+        else
+          TG[,splitc] <- TGsplit
       }
-      A <- t(A)
-      mfact <- getmfact(s, 1 - alpha / 2)
-      
-      TGsplit <- groupLowerBoundWithPrediction(A %*% x[outsam,],
-                                               as.numeric(A %*% y[outsam]),
-                                               group, mfact,
-                                               as.numeric(A %*% pred),
-                                               intercept = TRUE,
-                                               useseed = if(setseed) useseed
-                                               else NULL,
-                                               lpSolve = lpSolve)
-   }else{
-     mfact   <- getmfact(nrow(x), 1 - alpha / 2)
-     TGsplit <- groupLowerBoundWithPrediction(x[outsam,], y[outsam], group,
-                                              mfact, pred,
-                                              intercept = TRUE,
-                                              useseed = if(setseed) useseed
-                                              else NULL,
-                                              lpSolve = lpSolve)
-   }
-   if(!silent)
-     cat("\n   // lower l1-norm bound", signif(TGsplit, 2), "\n")
-   if(setseed)
-     set.seed(oldseed)
-
-   if(!listg)
-     TG[splitc] <- TGsplit
-   else
-    TG[,splitc] <- TGsplit
-  }
+      ##print("after single core")
+      ##print(TG)
+    }
+  
   if(!listg)
     TG <- median(TG)
   else
@@ -226,6 +209,78 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
   
   return(out)
 }
+
+do.splits <- function(splitc,
+                      nsplit,
+                      n,
+                      x,
+                      y,
+                      s,
+                      setseed,
+                      silent,
+                      alpha,
+                      lpSolve,
+                      group,
+                      oldseed)
+{
+  if(setseed)
+    set.seed(useseed <- splitc + 201) ## useful???
+  
+  insam  <- sort(sample(1:n, round(n / 2)))
+  outsam <- (1:n)[-insam]
+  cvg    <- cv.glmnet(x[insam,], y[insam], nfolds = 10, grouped = FALSE)
+  selvar <- which(coef(cvg)[-1] != 0)
+  
+  pred <- as.numeric(predict(cvg, x[outsam,]))
+  if(!silent){
+    cat("split no.", splitc, "/",nsplit, "\n   // residual variance",
+        signif(sum((pred - y[outsam])^2) / 
+               sum((y[outsam] - mean(y[outsam]))^2), 2))
+  }
+  ## Projection step
+  if(!is.null(s)){
+    nout <- length(outsam)
+    
+    ## Projection matrix: 1st column = prediction, remaining cols = random
+    A  <- cbind(pred / sqrt(sum(pred^2)), 
+                matrix(rnorm(nout * (s - 1)), nrow = nout))
+    
+    for(sc in 2:s){
+      tmpP <- A[,1:(sc-1), drop = FALSE]
+      tmp <- A[,sc] - tmpP %*% solve(t(tmpP) %*% tmpP +
+                                     0.00001 * diag(sc - 1), ## small ridge pen
+                                     t(tmpP) %*% A[,sc])
+      
+      A[,sc] <- tmp / sqrt(sum(tmp^2))
+    }
+    A <- t(A)
+    mfact <- getmfact(s, 1 - alpha / 2)
+    
+    TGsplit <- groupLowerBoundWithPrediction(A %*% x[outsam,],
+                                             as.numeric(A %*% y[outsam]),
+                                             group, mfact,
+                                             as.numeric(A %*% pred),
+                                             intercept = TRUE,
+                                             useseed = if(setseed) useseed
+                                             else NULL,
+                                             lpSolve = lpSolve)
+  }else{
+    mfact   <- getmfact(nrow(x), 1 - alpha / 2)
+    TGsplit <- groupLowerBoundWithPrediction(x[outsam,], y[outsam], group,
+                                             mfact, pred,
+                                             intercept = TRUE,
+                                             useseed = if(setseed) useseed
+                                             else NULL,
+                                             lpSolve = lpSolve)
+  }
+  if(!silent)
+    cat("\n   // lower l1-norm bound", signif(TGsplit, 2), "\n")
+  if(setseed)
+    set.seed(oldseed)
+  
+  return(TGsplit)
+}
+
 
 clusterLowerBound <- function(x, y, method = "average", dist = NULL,
                               alpha = 0.05, nsplit = 11,
