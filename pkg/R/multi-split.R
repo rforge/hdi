@@ -13,6 +13,7 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
   ## Arguments:
   ## ----------------------------------------------------------------------
   ## Author: Lukas Meier, Date:  2 Apr 2013, 11:52
+  ##    Updated with confidence interval calculation, Ruben Dezeure, Date: 5 Feb 2014
 
   n <- nrow(x)
   p <- ncol(x)
@@ -21,6 +22,8 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
   ## rows = sample-splits
   ## cols = predictors
   pvals <- matrix(1, nrow = B, ncol = p)
+  uci <- matrix(rep(Inf,B*p),nrow=B)
+  lci <- matrix(rep(-Inf,B*p),nrow=B)##lower and upper bound of the confidence intervals
   colnames(pvals) <- colnames(x)
 
   if(return.selmodels){
@@ -66,6 +69,15 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
                                 y = y.right), args.classical.fit))
         ## Bonferroni on small model
         pvals[b, sel.model] <- pmin(sel.pval * p.sel, 1)
+        if(identical(classical.fit,lm.pval))
+          {
+            sel.ci <- do.call(classical.fit,
+                              args =  c(list(x = x.right[,sel.model],
+                                y = y.right), args.classical.fit,
+                                ci=TRUE))
+            lci[b,sel.model] <- sel.ci[,1]
+            uci[b,sel.model] <- sel.ci[,2]
+          }
 
         if(return.selmodels)
           sel.model.all[b, sel.model] <- TRUE
@@ -117,6 +129,8 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
     pvals <- NULL
       
   out <- list(pval          = pvals.current,
+              lci           = lci.current,
+              uci           = uci.current,
               gamma.min     = gamma[which.gamma],
               pvals.nonaggr = pvals,
               sel.models    = sel.model.all,

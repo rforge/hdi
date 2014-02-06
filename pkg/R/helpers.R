@@ -66,13 +66,14 @@ scale.lasso <- function(obj, epsilon = 1e-10, sigma.hat = 1)
               "lambda"=lambda0*sigma.hat))
 }
 
-lm.pval <- function(x, y, exact = TRUE, ...)
+lm.pval <- function(x, y, exact = TRUE, ci=FALSE,signif.level=0.05, ...)
 {
   ## Purpose:
   ## ----------------------------------------------------------------------
   ## Arguments:
   ## ----------------------------------------------------------------------
   ## Author: Lukas Meier, Date:  2 Apr 2013, 11:34
+  ##    Updated with confidence interval calculation, Ruben Dezeure, Date: 5 Feb 2014
 
   fit.lm <- lm(y ~ x, ...) ## Intercept??? Exceptions???
   fit.summary <- summary(fit.lm)
@@ -85,9 +86,16 @@ lm.pval <- function(x, y, exact = TRUE, ...)
   }else{ ## p-values based on *normal* distribution
     pval.sel <- 2 * pnorm(abs(tstat), lower.tail = FALSE)
   }
-  
+
+  ci.sel <- confint(fit.lm)[-1,,drop=FALSE]
+
   names(pval.sel) <- colnames(x)
-  pval.sel
+  if(ci)
+    {
+      ci.sel
+    }else{
+      pval.sel
+    }
 }
 
 glm.pval <- function(x, y, family = "binomial", trace = FALSE, ...)
