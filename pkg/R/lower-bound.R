@@ -160,23 +160,25 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
 
   if(parallel)
     {
-      TGsplit.out <- mcmapply(do.splits,
-                              splitc=1:nsplit,
+      TGsplit.out <- mclapply(split(1:nsplit,1:nsplit),
+                              do.splits,
                               nsplit=nsplit,
                               n=n,
-                              x=list(x=x),
-                              y=list(y=y),
+                              x=x,
+                              y=y,
                               s=s,
                               setseed=setseed,
                               silent=silent,
                               alpha=alpha,
                               lpSolve=lpSolve,
-                              group=list(group=group),
+                              group=group,
                               oldseed=oldseed,
                               mc.cores=ncores)
-      ##print("after parallel")
-      ##print(TGsplit.out)
-      TG <- TGsplit.out
+      ##TG <- TGsplit.out
+      TG <- do.call(cbind,TGsplit.out)
+      print("after parallel")
+      print(TG)
+      
     }else{
       for(splitc in 1:nsplit){
         TGsplit <- do.splits(splitc=splitc,
