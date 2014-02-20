@@ -66,14 +66,13 @@ scale.lasso <- function(obj, epsilon = 1e-10, sigma.hat = 1)
               "lambda"=lambda0*sigma.hat))
 }
 
-lm.pval <- function(x, y, exact = TRUE, ci=FALSE,signif.level=0.05, ...)
+lm.pval <- function(x, y, exact = TRUE, ...)
 {
   ## Purpose:
   ## ----------------------------------------------------------------------
   ## Arguments:
   ## ----------------------------------------------------------------------
   ## Author: Lukas Meier, Date:  2 Apr 2013, 11:34
-  ##    Updated with confidence interval calculation, Ruben Dezeure, Date: 5 Feb 2014
 
   fit.lm <- lm(y ~ x, ...) ## Intercept??? Exceptions???
   fit.summary <- summary(fit.lm)
@@ -86,16 +85,23 @@ lm.pval <- function(x, y, exact = TRUE, ci=FALSE,signif.level=0.05, ...)
   }else{ ## p-values based on *normal* distribution
     pval.sel <- 2 * pnorm(abs(tstat), lower.tail = FALSE)
   }
-
-  ci.sel <- confint(fit.lm)[-1,,drop=FALSE]
-
+  
   names(pval.sel) <- colnames(x)
-  if(ci)
-    {
-      ci.sel
-    }else{
-      pval.sel
-    }
+  pval.sel
+}
+
+lm.ci <- function(x, y, level = 0.95, ...)
+{
+  ## Purpose:
+  ## ----------------------------------------------------------------------
+  ## Arguments:
+  ## ----------------------------------------------------------------------
+  ## Author: Lukas Meier, Date: 20 Feb 2014, 13:43
+
+  fit.lm <- lm(y ~ x, ...) ## Intercept??? Exceptions???
+
+  ci.sel <- confint(fit.lm, level = level)[-1,, drop = FALSE]
+  ci.sel
 }
 
 glm.pval <- function(x, y, family = "binomial", trace = FALSE, ...)
@@ -153,9 +159,7 @@ fdr.adjust <- function(p)
   p.fin
 }
 
-calc.ci <- function(bj,
-                    se,
-                    signif.level=0.05)
+calc.ci <- function(bj, se, level = 0.95)
 {
   ## Purpose:
   ## calculating confidence intervals with the given coefficients, standard
@@ -164,11 +168,13 @@ calc.ci <- function(bj,
   ## Arguments:
   ## ----------------------------------------------------------------------
   ## Author: Ruben Dezeure, Date: 6 Feb 2014, 14:27
-  numbse <- qnorm(signif.level/2,lower.tail=FALSE)
   
-  lci <- bj - se*numbse
-  rci <- bj + se*numbse
-  return(list(lci=lci,rci=rci))
+  numbse <- qnorm(1 - (1 - level) / 2)
+  
+  lci <- bj - se * numbse
+  rci <- bj + se * numbse
+  
+  return(list(lci=lci, rci = rci))
 }
 
 
@@ -177,7 +183,7 @@ p.adjust.wy <- function(cov,
                         N=10000)
 {
   ## Purpose:
-  ## multiple testing correction with a westfall young-like procedure as
+  ## multiple testing correction with a Westfall young-like procedure as
   ## in ridge projection method, http://arxiv.org/abs/1202.1377 P.Buehlmann 
   ## ----------------------------------------------------------------------
   ## Arguments:
@@ -191,7 +197,7 @@ p.adjust.wy <- function(cov,
   ## Simulate distribution  
   zz  <- mvrnorm(N, rep(0, ncol(cov)), cov)
   zz2 <- scale(zz, center = FALSE, scale = sqrt(diag(cov)))
-  Gz  <- apply(2 * pnorm(abs(zz2),lower.tail=FALSE), 1, min)
+  Gz  <- apply(2 * pnorm(abs(zz2),lower.tail = FALSE), 1, min)
   
   ## Corrected p-values
   pcorr <- ecdf(Gz)(pval) ## is this efficient???

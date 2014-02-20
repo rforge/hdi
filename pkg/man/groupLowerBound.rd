@@ -15,7 +15,8 @@
 \usage{
 groupLowerBound(x, y, group, alpha = 0.05, nsplit = 11,
                 s = min(10, ncol(x) - 1), setseed = TRUE,
-                silent = FALSE, lpSolve = TRUE)}
+                silent = FALSE, lpSolve = TRUE,
+                parallel = FALSE, ncores = 8)}
 \arguments{
   \item{x}{The design matrix of the regression with p columns for p predictor
     variables and n rows that correspond to n observations.}
@@ -37,7 +38,9 @@ groupLowerBound(x, y, group, alpha = 0.05, nsplit = 11,
   \item{silent}{Output is supressed if this option is set to true.}
   \item{lpSolve}{Only set to false if lpSolve is not working on the
     current machine (setting it to false will results in much slower
-    computations; only use on small problems).}}
+    computations; only use on small problems).}
+  \item{parallel}{Should parallelization be used? (logical)}
+  \item{ncores}{Number of cores used for parallelization.}}
 
 \details{The data are split since the noise level is unknown. On the
   first part of the random split, a cross-validated lasso solution is

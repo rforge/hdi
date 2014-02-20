@@ -1,7 +1,3 @@
-##- library(glmnet)
-##- library(linprog)
-##library(parallel)
-
 getMembers <- function(me, sel, members = numeric(0)){
   if(all(me[sel,] > 0)){
     for (k in 1:2)
@@ -127,8 +123,8 @@ groupLowerBoundWithPrediction <- function(x, y, group, mfact, pred,
 groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
                             s = min(10, ncol(x) - 1),
                             setseed = TRUE, silent = FALSE, lpSolve = TRUE,
-                            parallel=FALSE,
-                            ncores=10){
+                            parallel = FALSE,
+                            ncores = 8){
   if(!silent){
     if(alpha > 0.5 | alpha < 0.0005)
       warning("level alpha outside supported range [0.0005, 0.5]")
@@ -158,49 +154,47 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
   oldseed <- round(10000 * runif(1))
   probsel <- rep(0, ncol(x))
 
-  if(parallel)
-    {
-      TGsplit.out <- mclapply(split(1:nsplit,1:nsplit),
-                              do.splits,
-                              nsplit=nsplit,
-                              n=n,
-                              x=x,
-                              y=y,
-                              s=s,
-                              setseed=setseed,
-                              silent=silent,
-                              alpha=alpha,
-                              lpSolve=lpSolve,
-                              group=group,
-                              oldseed=oldseed,
-                              mc.cores=ncores)
-      ##TG <- TGsplit.out
-      TG <- do.call(cbind,TGsplit.out)
-      print("after parallel")
-      print(TG)
-      
-    }else{
-      for(splitc in 1:nsplit){
-        TGsplit <- do.splits(splitc=splitc,
-                             nsplit=nsplit,
-                             n=n,
-                             x=x,
-                             y=y,
-                             s=s,
-                             setseed=setseed,
-                             silent=silent,
-                             alpha=alpha,
-                             lpSolve=lpSolve,
-                             group=group,
-                             oldseed=oldseed)
-        if(!listg)
-          TG[splitc] <- TGsplit
-        else
-          TG[,splitc] <- TGsplit
-      }
-      ##print("after single core")
-      ##print(TG)
+  if(parallel){
+    TGsplit.out <- mclapply(split(1:nsplit,1:nsplit),
+                            do.splits,
+                            nsplit=nsplit,
+                            n=n,
+                            x=x,
+                            y=y,
+                            s=s,
+                            setseed=setseed,
+                            silent=silent,
+                            alpha=alpha,
+                            lpSolve=lpSolve,
+                            group=group,
+                            oldseed=oldseed,
+                            mc.cores=ncores)
+    ##TG <- TGsplit.out
+    TG <- do.call(cbind,TGsplit.out)
+    ##print("after parallel")
+    ##print(TG)
+  }else{
+    for(splitc in 1:nsplit){
+      TGsplit <- do.splits(splitc=splitc,
+                           nsplit=nsplit,
+                           n=n,
+                           x=x,
+                           y=y,
+                           s=s,
+                           setseed=setseed,
+                           silent=silent,
+                           alpha=alpha,
+                           lpSolve=lpSolve,
+                           group=group,
+                           oldseed=oldseed)
+      if(!listg)
+        TG[splitc] <- TGsplit
+      else
+        TG[,splitc] <- TGsplit
     }
+    ##print("after single core")
+    ##print(TG)
+  }
   
   if(!listg)
     TG <- median(TG)
