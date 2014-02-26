@@ -87,14 +87,12 @@ lasso.proj.Z <- function(x,
   
   ## Bias estimate
   y <- as.numeric(y)
-  pluslasso <- plus(x, y, method = "lasso", intercept = FALSE) ## ???intercept
-  ##take no intercept?
   
-  scaledlassofit <- scale.lasso(pluslasso)
-  betalasso      <- scaledlassofit$beta
+  scaledlassofit <- scalreg(X=x,y=y,lam0="univ")
+  betalasso      <- scaledlassofit$coefficients
   
   if(is.null(sigma))
-    sigmahat <- scaledlassofit$sigma
+    sigmahat <- scaledlassofit$hsigma
   else
     sigmahat <- sigma
   
@@ -179,13 +177,11 @@ lasso.proj.thetahat <- function(x,
   
   ## Initial estimate
   y <- as.numeric(y)
-  pluslasso <- plus(x, y, method = "lasso", intercept = FALSE) ## ???intercept
-  ## take no intercept?
   
-  scaledlassofit <- scale.lasso(pluslasso)
-  betalasso      <- scaledlassofit$beta
+  scaledlassofit <- scalreg(X=x,y=y,lam0="univ")
+  betalasso      <- scaledlassofit$coefficients
   if(is.null(sigma))
-    sigmahat <- scaledlassofit$sigma
+    sigmahat <- scaledlassofit$hsigma
   else
     sigmahat <- sigma
   

@@ -1,8 +1,8 @@
 import(glmnet)
 import(linprog)
-import(plus)
 import(parallel)
 import(MASS)
+import(scalreg)
 
 export(hdi, hdi)
 export(hdi, stability)

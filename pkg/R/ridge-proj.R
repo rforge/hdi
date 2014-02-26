@@ -50,11 +50,9 @@ ridge.proj <- function(x, y, verbose = FALSE,
   
   ## Check:
   ## - standardization options in plus?
-  obj        <- plus(x, y, method = "lasso", intercept = FALSE)
-  
-  fit.scaleL <- scale.lasso(obj)
-  beta.lasso <- fit.scaleL$beta
-  hat.sigma2 <- fit.scaleL$sigma^2 ## added ^2 to fix bug!
+  fit.scaleL <- scalreg(X=x,y=y,lam0="univ")
+  beta.lasso <- fit.scaleL$coefficients
+  hat.sigma2 <- fit.scaleL$hsigma^2 ## added ^2 to fix bug!
 
   if(verbose){
     print("beta.lasso")
