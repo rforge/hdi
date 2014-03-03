@@ -5,7 +5,7 @@
 \description{P-values based on ridge projection method}
 \usage{
 ridge.proj(x, y, verbose = FALSE, ci.level = 0.95,
-           multiplecorr.method = "holm", N = 10000, ridge.unprojected = TRUE,
+           multiplecorr.method = "holm", N = 10000, 
            group.testing = FALSE, groups = NULL, activeset = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -17,7 +17,6 @@ ridge.proj(x, y, verbose = FALSE, ci.level = 0.95,
   \item{multiplecorr.method}{Either "WY" or any of p.adjust.methods}
   \item{N}{Number of empirical samples (only used if multiplecorr.method
   == "WY")}
-  \item{ridge.unprojected}{tbd}
   \item{group.testing}{Should group testing be performed? (logical)
     (not yet implemented)} 
   \item{groups}{Definition of groups (not yet implemented)}

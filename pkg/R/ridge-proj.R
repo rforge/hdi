@@ -2,7 +2,6 @@ ridge.proj <- function(x, y, verbose = FALSE,
                        ci.level = 0.95,
                        multiplecorr.method = "holm",
                        N = 10000, 
-                       ridge.unprojected = TRUE,
                        group.testing = FALSE,
                        groups = NULL,
                        activeset = NULL)
@@ -26,16 +25,19 @@ ridge.proj <- function(x, y, verbose = FALSE,
   ## ci:         the confidence intervals calculated for each parameter
   ## ----------------------------------------------------------------------
   ## Author: Peter Buehlmann (initial version),
-  ## with adaptations by L.Meier and R.Dezeure
+  ##         adaptations by L. Meier and R. Dezeure
+
+  ridge.unprojected <- TRUE
+  x <- scale(x, scale = FALSE) ## *center* the columns (!)
   
   p  <- ncol(x)
   n  <- nrow(x)
   y  <- as.numeric(y)
 
   biascorr <- Delta <- numeric(p)
-  lambda   <- 1 ## other choices?
+  lambda   <- 1  ## other choices?
 
-  h1         <- svd(x) ## x must be centered (?!) ??? check ???
+  h1         <- svd(x)           ## x must be *centered*, see above
   Px         <- tcrossprod(h1$v)
   Px.offdiag <- Px
   diag(Px.offdiag) <- 0
@@ -50,7 +52,7 @@ ridge.proj <- function(x, y, verbose = FALSE,
   
   ## Check:
   ## - standardization options in plus?
-  fit.scaleL <- scalreg(X=x,y=y,lam0="univ")
+  fit.scaleL <- scalreg(X = x, y = y, lam0 = "univ")
   beta.lasso <- fit.scaleL$coefficients
   hat.sigma2 <- fit.scaleL$hsigma^2 ## added ^2 to fix bug!
 

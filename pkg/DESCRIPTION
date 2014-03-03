@@ -1,7 +1,7 @@
 Package: hdi
 Type: Package
 Title: High-Dimensional Inference
-Version: 0.0-7
+Version: 0.0-8
 Date: 2014-02-20
 Author: Lukas Meier, Nicolai Meinshausen, Ruben Dezeure
 Maintainer: Lukas Meier <meier@stat.math.ethz.ch>
