@@ -8,6 +8,7 @@ export(hdi, hdi)
 export(hdi, stability)
 export(hdi, multi.split)
 export(hdi, ridge.proj)
+export(hdi, lasso.proj)
 
 export(hdi, lasso.cv)
 export(hdi, lm.pval)

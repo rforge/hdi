@@ -4,7 +4,7 @@
 \title{P-values based on ridge projection method}
 \description{P-values based on ridge projection method}
 \usage{
-ridge.proj(x, y, verbose = FALSE, ci.level = 0.95,
+ridge.proj(x, y, ci.level = 0.95,
            multiplecorr.method = "holm", N = 10000, 
            group.testing = FALSE, groups = NULL, activeset = NULL)
 }
@@ -12,9 +12,9 @@ ridge.proj(x, y, verbose = FALSE, ci.level = 0.95,
 \arguments{
   \item{x}{Design matrix (without intercept).}
   \item{y}{Response vector.}
-  \item{verbose}{replace with trace}
-  \item{ci.level}{Coverage level of confidence intervals}
-  \item{multiplecorr.method}{Either "WY" or any of p.adjust.methods}
+  \item{ci.level}{Coverage level of confidence intervals.}
+  \item{multiplecorr.method}{Either "WY" or any of
+    \code{\link{p.adjust.methods}}.}
   \item{N}{Number of empirical samples (only used if multiplecorr.method
   == "WY")}
   \item{group.testing}{Should group testing be performed? (logical)
@@ -31,15 +31,10 @@ ridge.proj(x, y, verbose = FALSE, ci.level = 0.95,
   \item{bhat}{de-sparsified \eqn{\beta^0} estimate used for p-value calculation}
   \item{sigmahat}{\eqn{\widehat{\sigma}} coming from the scaled lasso}}
 
-\references{
-B\"uhlmann, P. (2013), \emph{Statistical significance in high-dimensional linear
-models}, Bernoulli 19, 1212-1242.
-}
+\references{B\"uhlmann, P. (2013), \emph{Statistical significance in
+    high-dimensional linear models}, Bernoulli 19, 1212-1242.}
 
-
-\author{
-Peter Buehlmann, Ruben Dezeure, Lukas Meier
-}
+\author{Peter Buehlmann, Ruben Dezeure, Lukas Meier}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 

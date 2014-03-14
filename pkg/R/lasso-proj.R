@@ -1,6 +1,6 @@
 lasso.proj <- function(x, y, ci.level = 0.95,
+                       multiplecorr.method = "holm",
                        useThetahat = FALSE,
-                       multiplecorr.method="holm",
                        parallel = FALSE, ncores = 4,
                        sigma = NULL, ## sigma estimate provided by the user
                        Z = NULL)##Z or \Thetahat potentially provided by the user

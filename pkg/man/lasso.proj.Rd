@@ -1,0 +1,53 @@
+\name{lasso.proj}
+\alias{lasso.proj}
+%- Also NEED an '\alias' for EACH other topic documented here.
+\title{P-values based on lasso projection method}
+\description{P-values based on lasso projection method}
+\usage{
+lasso.proj(x, y, ci.level = 0.95, multiplecorr.method = "holm",
+           useThetahat = FALSE,
+           parallel = FALSE, ncores = 4,
+           sigma = NULL, Z = NULL)
+}
+\arguments{
+  \item{x}{Design matrix (without intercept).}
+  \item{y}{Response vector.}
+  \item{ci.level}{Coverage level of confidence intervals.}
+  \item{multiplecorr.method}{Either "WY" or any of
+    \code{\link{p.adjust.methods}}.}
+  \item{useThetahat}{user input}
+  \item{parallel}{Should parallelization be used? (logical)}
+  \item{ncores}{Number of cores used for parallelization.}
+  \item{sigma}{Estimate of error standard deviation.}
+  \item{Z}{user input}
+}
+\value{
+  \item{individual}{individual p-values for each parameter}
+  \item{corrected}{multiple testing corrected p-values for each
+    parameter}
+  \item{ci}{confidence intervals calculated for each parameter}
+  \item{betahat}{initial estimate by the scaled lasso of \eqn{\beta^0}}
+  \item{bhat}{de-sparsified \eqn{\beta^0} estimate used for p-value calculation}
+  \item{sigmahat}{\eqn{\widehat{\sigma}} coming from the scaled lasso}
+}
+\references{van de Geer, S., B\"uhlmann, P., Ritov, Y. and Dezeure,
+  R. (2013). On asymptotically optimal confidence regions and tests for
+  high-dimensional models. Preprint.
+
+  Zhang, C.,  Zhang, S. (2014), Confidence intervals for low dimensional
+  parameters in high dimensional linear models, Journal of the Royal
+  Statistical Society: Series B (Statistical Methodology).}
+\author{Ruben Dezeure}
+
+%% ~Make other sections like Warning with \section{Warning }{....} ~
+
+\examples{
+x <- matrix(rnorm(100*20), nrow = 100, ncol = 20)
+y <- x[,1] * 2 + x[,2] * 2.5 + rnorm(100)
+fit.lasso <- lasso.proj(x, y)
+}
+
+% Add one or more standard keywords, see file 'KEYWORDS' in the
+% R documentation directory.
+\keyword{models}
+\keyword{regression}

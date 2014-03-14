@@ -135,12 +135,12 @@ calc.ci <- function(bj, se, level = 0.95)
   ## ----------------------------------------------------------------------
   ## Author: Ruben Dezeure, Date: 6 Feb 2014, 14:27
   
-  numbse <- qnorm(1 - (1 - level) / 2)
+  quant <- qnorm(1 - (1 - level) / 2)
   
-  lci <- bj - se * numbse
-  rci <- bj + se * numbse
+  lci <- bj - se * quant
+  rci <- bj + se * quant
   
-  return(list(lci=lci, rci = rci))
+  return(list(lci = lci, rci = rci))
 }
 
 
