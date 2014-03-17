@@ -28,7 +28,6 @@ ridge.proj <- function(x, y, ci.level = 0.95,
 
   ## these are some old arguments that are still used in the code below
   ridge.unprojected <- TRUE
-  verbose <- FALSE
   
   x <- scale(x, scale = FALSE) ## *center* the columns
   y <- scale(y, scale = FALSE)
@@ -61,28 +60,19 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   beta.lasso <- fit.scaleL$coefficients
   hat.sigma2 <- fit.scaleL$hsigma^2 ## added ^2 to fix bug!
 
-  if(verbose){
-    print("beta.lasso")
-    print(beta.lasso)
-    print("beta.lasso[1:15]")
-    print(beta.lasso[1:15])
-    print("hat.sigma2")
-    print(hat.sigma2)
-  }
-
   ## bias correction
-  biascorr     <- crossprod(Px.offdiag, beta.lasso)
+  biascorr <- crossprod(Px.offdiag, beta.lasso)
 
   ## ridge estimator
-  hat.beta     <- hh %*% y
+  hat.beta <- hh %*% y
 
   hat.betacorr <- hat.beta - biascorr
 
-  if(ridge.unprojected){
+  if(ridge.unprojected){ ## bring it back to the original scale
     hat.betacorr <- hat.betacorr / diag(Px)
   }
   
-  ## Ruben Note: a_n = 1/scale.vec, there is no factor sqrt(n) because this
+  ## Ruben Note: a_n = 1 / scale.vec, there is no factor sqrt(n) because this
   ## falls away with the way diag.cov2 is calculated see paper
   scale.vec  <- sqrt(hat.sigma2 * diag.cov2)
   
@@ -92,7 +82,7 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   }
   
   hat.betast <- hat.betacorr / scale.vec ## sqrt(hat.sigma2 * diag(cov2))
-  Delta      <- apply(abs(Px.offdiag), 2, max) * (log(p)/n)^(0.45) / scale.vec
+  Delta      <- apply(abs(Px.offdiag), 2, max) * (log(p) / n)^(0.45) / scale.vec
   ## new
   if(ridge.unprojected ){ ## 2
     Delta <- Delta / abs(diag(Px))
@@ -106,11 +96,6 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   #########################
   
   res.pval <- c(pmin(2 * pnorm(hat.gamma1 - Delta, lower.tail = FALSE), 1))
-
-  if(verbose){
-    print("single testing pvals")
-    print(res.pval)
-  }
 
   #########################################
   ## Multiple testing corrected p-values ##
@@ -143,11 +128,6 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## standard normal dist and we want to bring it to the distribution of
   ## \hat{\beta}_j 
 
-  if(verbose){
-    print("multiple testing corrected pvals")
-    print(pcorr)
-  }
-  
   list(individual    = res.pval,
        corrected     = pcorr,
        ci            = cbind(myci$lci, myci$rci),
