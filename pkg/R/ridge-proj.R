@@ -41,7 +41,17 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   lambda <- 1  ## other choices?
 
   h1 <- svd(x) ## x must be *centered*, see above
-  
+
+  ## Overwrite h1 with the version corresponding to non-zero singular values
+  sval  <- h1$d
+  tol   <- min(n, p) * .Machine$double.eps
+  rankX <- sum(sval >= tol * sval[1])
+
+  h1$u <- h1$u[,1:rankX]
+  h1$d <- h1$d[1:rankX]
+  h1$v <- h1$v[,1:rankX]
+  ## End overwrite h1 with the version corresponding to non-zero singular values
+
   Px               <- tcrossprod(h1$v)
   Px.offdiag       <- Px
   diag(Px.offdiag) <- 0 ## set all diagonal elements to zero

@@ -70,6 +70,9 @@ lasso.proj.Z <- function(x,
   ## of the ridge projection method ridge-proj.R
   ## by P. Buehlmann + adaptations by L. Meier.
 
+  n <- nrow(x)
+  p <- ncol(x)
+
   ## Calculate Z
   if(is.null(Z)){
     nodewiselasso.out <- score.nodewiselasso(x = x,
@@ -79,8 +82,6 @@ lasso.proj.Z <- function(x,
     Z <- nodewiselasso.out$out
   }
   
-  n <- nrow(x)
-  p <- ncol(x)
   
   ## Projection estimator
   bproj <- t(Z) %*% y / n
@@ -88,7 +89,7 @@ lasso.proj.Z <- function(x,
   ## Bias estimate
   y <- as.numeric(y)
   
-  scaledlassofit <- scalreg(X=x,y=y,lam0="univ")
+  scaledlassofit <- scalreg(X = x, y = y, lam0 = "univ")
   betalasso      <- scaledlassofit$coefficients
   
   if(is.null(sigma))
@@ -105,7 +106,7 @@ lasso.proj.Z <- function(x,
   bproj <- bproj - bias
 
   ## Normalise
-  scaleb <- n / (sigmahat * sqrt(diag(crossprod(Z))))
+  scaleb        <- n / (sigmahat * sqrt(diag(crossprod(Z))))
   bprojrescaled <- bproj*scaleb
   
   ## Calculate pvalue
@@ -136,11 +137,11 @@ lasso.proj.Z <- function(x,
                            
   ##return list
   list(individual = as.vector(pval),
-       corrected = pcorr,
-       bhat = bproj,
-       betahat = betalasso,
-       sigmahat = sigmahat,
-       ci = cbind(myci$lci,myci$rci))
+       corrected  = pcorr,
+       bhat       = bproj,
+       betahat    = betalasso,
+       sigmahat   = sigmahat,
+       ci         = cbind(myci$lci,myci$rci))
 }
 
 lasso.proj.thetahat <- function(x,
