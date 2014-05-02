@@ -125,8 +125,8 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
                             setseed = TRUE, silent = FALSE, lpSolve = TRUE,
                             parallel = FALSE, ncores = 8){
   if(!silent){
-    if(alpha > 0.5 | alpha < 0.0005)
-      warning("level alpha outside supported range [0.0005, 0.5]")
+    if(alpha > 0.5 | alpha < 0.005)
+      warning("level alpha outside supported range [0.005, 0.5]")
   }
   
   listg <- is.list(group)
@@ -252,7 +252,7 @@ do.splits <- function(splitc,
       A[,sc] <- tmp / sqrt(sum(tmp^2))
     }
     A <- t(A)
-    mfact <- getmfact(s, 1 - alpha / 2)
+    mfact <- getmfact(s, 1 - alpha / 10)
     
     TGsplit <- groupLowerBoundWithPrediction(A %*% x[outsam,],
                                              as.numeric(A %*% y[outsam]),
@@ -263,7 +263,7 @@ do.splits <- function(splitc,
                                              else NULL,
                                              lpSolve = lpSolve)
   }else{
-    mfact   <- getmfact(nrow(x), 1 - alpha / 2)
+    mfact   <- getmfact(nrow(x), 1 - alpha / 10)
     TGsplit <- groupLowerBoundWithPrediction(x[outsam,], y[outsam], group,
                                              mfact, pred,
                                              intercept = TRUE,
