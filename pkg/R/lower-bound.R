@@ -123,8 +123,7 @@ groupLowerBoundWithPrediction <- function(x, y, group, mfact, pred,
 groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
                             s = min(10, ncol(x) - 1),
                             setseed = TRUE, silent = FALSE, lpSolve = TRUE,
-                            parallel = FALSE,
-                            ncores = 8){
+                            parallel = FALSE, ncores = 8){
   if(!silent){
     if(alpha > 0.5 | alpha < 0.0005)
       warning("level alpha outside supported range [0.0005, 0.5]")
@@ -197,9 +196,11 @@ groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
   }
   
   if(!listg)
-    TG <- median(TG)
+    TG <- quantile(TG, probs = 0.9, type = 5)
   else
-    TG <- apply(TG, 1, median)
+    TG <- apply(TG, 1, quantile, probs = 0.9, type = 5)
+  
+  out <- TG
 
   out        <- TG
   class(out) <- c("lowerBound", "hdi")
