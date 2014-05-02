@@ -169,3 +169,63 @@ p.adjust.wy <- function(cov,
   pcorr <- ecdf(Gz)(pval) ## is this efficient???
   return(pcorr)
 }
+
+calculate.pvalue.for.group <- function(brescaled,
+                                       group,
+                                       individual,
+                                       cov,
+                                       N,
+                                       Delta=NULL,
+                                       correct=TRUE,
+                                       alt=TRUE)
+{
+  ## Purpose:
+  ## calculation of p-values for groups
+  ## using the maximum as test statistic
+  ## http://arxiv.org/abs/1202.1377 P.Buehlmann
+  ## Author: Ruben Dezeure 2 May 2014
+  stopifnot(is.logical(group))
+  stopifnot(length(group)==length(brescaled))
+
+  p <- length(brescaled)
+  
+  if(alt)
+    {##alt proposed by Nicolai
+      pvalue <- min(individual[group])
+    }else{
+      ## max test statistics according to http://arxiv.org/abs/1202.1377 P.Buehlmann
+
+      ## Simulate distribution
+      set.seed(3)##always give the same result
+      zz  <- mvrnorm(N, rep(0, ncol(cov)), cov)
+      zz2 <- scale(zz, center = FALSE, scale = sqrt(diag(cov)))
+      if(sum(group) > 1)
+        {
+          group.coefficients <- abs(brescaled[group])
+          max.coefficient <- max(group.coefficients)
+          group.zz <- abs(zz2[,group])
+
+          if(!is.null(Delta))
+            {
+              ##because of Ridge method
+              group.Delta <- Delta[group]
+              group.zz <- sweep(group.zz,2,group.Delta,"+")
+              ##End special thing for Ridge
+            }
+          
+          Gz <- apply(group.zz,1,max)
+          
+          pvalue <- 1-ecdf(Gz)(max.coefficient)
+        }else{
+          pvalue <- individual[group]##we don't have a group,only a single variable,
+        }      
+    }
+  if(correct)
+    {
+      pvalue <- min(1,p*pvalue)##bonferroni correction
+      ##we cannot use p.adjust since we need to correct for all variables p
+      ##and pvalue might be a single value!
+    }
+  return(pvalue)
+}
+                                       

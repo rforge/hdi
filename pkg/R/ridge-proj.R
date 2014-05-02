@@ -1,9 +1,6 @@
 ridge.proj <- function(x, y, ci.level = 0.95,
                        multiplecorr.method = "holm",
-                       N = 10000, 
-                       group.testing = FALSE,
-                       groups = NULL,
-                       activeset = NULL)
+                       N = 10000)
 {
   ## Purpose:
   ## calculation of the ridge projection method proposed in
@@ -136,8 +133,24 @@ ridge.proj <- function(x, y, ci.level = 0.95,
 
   ## need to multiply Delta with se because it is on the scale of
   ## standard normal dist and we want to bring it to the distribution of
-  ## \hat{\beta}_j 
+  ## \hat{\beta}_j
 
+  ##############################################
+  ## function to calculate p-value for groups ##
+  ##############################################
+
+  group.testing.function <- function(group)
+    {
+      calculate.pvalue.for.group(brescaled=hat.betast,
+                                 group=group,
+                                 individual=res.pval,
+                                 cov=cov2,
+                                 N=N,
+                                 Delta=Delta,
+                                 correct=TRUE,
+                                 alt=TRUE)
+    }
+  
   list(individual    = res.pval,
        corrected     = pcorr,
        ci            = cbind(myci$lci, myci$rci),
@@ -146,5 +159,6 @@ ridge.proj <- function(x, y, ci.level = 0.95,
        normalisation = 1/scale.vec,
        bhat          = hat.betacorr,
        betahat       = beta.lasso,
-       sigmahat      = sqrt(hat.sigma2))
+       sigmahat      = sqrt(hat.sigma2),
+       group.testing.function=group.testing.function)
 }
