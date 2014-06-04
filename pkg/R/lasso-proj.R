@@ -1,8 +1,10 @@
 lasso.proj <- function(x, y, ci.level = 0.95,
+                       standardize = TRUE,
                        multiplecorr.method = "holm",
+                       N = 10000,
                        parallel = FALSE, ncores = 4,
                        sigma = NULL, ## sigma estimate provided by the user
-                       Z = NULL)##Z or \Thetahat potentially provided by the user
+                       Z = NULL)     ## Z or Thetahat provided by the user
 {
   ## Purpose:
   ## An implementation of the LDPE method http://arxiv.org/abs/1110.2563
@@ -23,41 +25,29 @@ lasso.proj <- function(x, y, ci.level = 0.95,
   ## in part based on an implementation of the ridge projection method
   ## ridge-proj.R by P. Buehlmann + adaptations by L. Meier.
 
-  out <- lasso.proj.Z(x = x,
-                      y = y,
-                      ci.level = ci.level,
-                      multiplecorr.method = multiplecorr.method,
-                      parallel = parallel,
-                      ncores = ncores,
-                      sigma = sigma,
-                      Z = Z)
-  return(out)
-}
-
-lasso.proj.Z <- function(x,
-                         y,
-                         ci.level,
-                         multiplecorr.method,
-                         N = 10000,
-                         parallel,
-                         ncores,
-                         sigma,
-                         Z)
-{
-  ## Purpose:
-  ## An implementation of the LDPE method http://arxiv.org/abs/1110.2563
-  ## ----------------------------------------------------------------------
-  ## Arguments:
-  ## ----------------------------------------------------------------------
-  ## Author: Ruben Dezeure, Date: 29 Nov 2012 (initial version),
-  ## in part based on an implementation
-  ## of the ridge projection method ridge-proj.R
-  ## by P. Buehlmann + adaptations by L. Meier.
-
+  ####################
+  ## Get data ready ##
+  ####################
+  
   n <- nrow(x)
   p <- ncol(x)
 
-  ## Calculate Z
+  if(standardize)
+    sds <- apply(x, 2, sd)
+  else
+    sds <- rep(1, p)
+
+  ## *center* (scale) the columns
+  x <- scale(x, center = TRUE, scale = standardize) 
+  y <- scale(y, scale = FALSE)
+  
+  y  <- as.numeric(y)
+
+  
+  ######################################
+  ## Calculate Z using nodewise lasso ##
+  ######################################
+  
   if(is.null(Z)){
     nodewiselasso.out <- score.nodewiselasso(x = x,
                                              wantTheta = FALSE,
@@ -65,52 +55,60 @@ lasso.proj.Z <- function(x,
                                              ncores = ncores)
     Z <- nodewiselasso.out$out
   }else{
-    ##we assume
-    if(all.equal(rep(1,p), colSums(Z*x)/n, tolerance = 10^-8))
-      {
-        ##all is well
-      }else{
-        print("Z was not properly normalized with x, we assume diag(Z^T x)/n == 1 in the code")
-        print("rescaling Z ourselves")
-        Z <- score.rescale(Z=Z,x=x)
-      }
+    ## Check if normalization is fulfilled
+    if(!all.equal(rep(1, p), colSums(Z * x) / n, tolerance = 10^-8)){
+      print("Z not properly normalized...")
+      print("...we assume all(colSums(Z * x) / n == rep(1, p))")
+      print("...rescaling Z ourselves.")
+      Z <- score.rescale(Z = Z, x = x)
+    }
   }
   
+
+  ###################################
+  ## Projection estimator and bias ##
+  ###################################
   
-  ## Projection estimator
   bproj <- t(Z) %*% y / n
   
-  ## Bias estimate
-  y <- as.numeric(y)
-  
+  ## Bias estimate based on lasso estimate
   scaledlassofit <- scalreg(X = x, y = y, lam0 = "univ")
   betalasso      <- scaledlassofit$coefficients
-  
+
+  ## Get estimated standard deviation
   if(is.null(sigma))
     sigmahat <- scaledlassofit$hsigma
   else
     sigmahat <- sigma
-  
+
+  ## Subtract bias
   bias <- numeric(p)
-  for(j in 1:p){
-    bias[j] <- bias[j] + (t(Z[,j]) %*% x[,-j]) %*% betalasso[-j] / n
+  for(j in 1:p){ ## replace loop?
+    bias[j] <- (t(Z[,j]) %*% x[,-j]) %*% betalasso[-j] / n
   }
   
-  ## Subtracting bias
   bproj <- bproj - bias
 
-  ## Normalise
-  scaleb        <- n / (sigmahat * sqrt(diag(crossprod(Z))))
-  bprojrescaled <- bproj*scaleb
+  #########################
+  ## p-Value calculation ##
+  #########################
+
+  ## Determine normalization factor
+  scaleb        <- n / (sigmahat * colSums(Z^2)) ##sqrt(diag(crossprod(Z)))
+  bprojrescaled <- bproj * scaleb
   
-  ## Calculate pvalue
+  ## Calculate p-value
   pval <- 2 * pnorm(abs(bprojrescaled), lower.tail = FALSE)
+
   
-  ## Multiple testing correction
+  #################################
+  ## Multiple testing correction ##
+  #################################
+  
   if(multiplecorr.method == "WY"){
     ## Westfall-Young like procedure as in ridge projection method,
     ## P.Buhlmann & L.Meier
-    ##method related to the Westfall - Young procedure
+    ## method related to the Westfall - Young procedure
     cov2 <- crossprod(Z)
     ## constants left out since we'll rescale anyway
     ## otherwise cov2 <- crossprod(Z)/n
@@ -125,32 +123,37 @@ lasso.proj.Z <- function(x,
 
   ## Also return the confidence intervals
   se   <- 1 / scaleb
-  myci <- calc.ci(bj = bproj,
-                  level = ci.level,
-                  se = se)
+  myci <- calc.ci(bj = bproj, level = ci.level, se = se)
 
-  ##############################################
-  ## function to calculate p-value for groups ##
-  ##############################################
-
-  group.testing.function <- function(group)
-    {
-      calculate.pvalue.for.group(brescaled=bprojrescaled,
-                                 group=group,
-                                 individual=pval,
-                                 cov=cov2,
-                                 N=N,
-                                 correct=TRUE,
-                                 alt=TRUE)
-    }
   
-  ##return list
-  list(individual = as.vector(pval),
-       corrected  = pcorr,
-       bhat       = bproj,
-       betahat    = betalasso,
-       sigmahat   = sigmahat,
-       ci         = cbind(myci$lci,myci$rci),
-       group.testing.function=group.testing.function)
+  ##############################################
+  ## Function to calculate p-value for groups ##
+  ##############################################
+
+  group.testing.function <- function(group, N){
+    calculate.pvalue.for.group(brescaled  = bprojrescaled,
+                               group      = group,
+                               individual = pval,
+                               cov        = cov2,
+                               N          = N,
+                               correct    = TRUE,
+                               alt        = TRUE)
+  }
+
+  
+  ############################
+  ## Return all information ##
+  ############################
+  
+  list(individual  = as.vector(pval),
+       corrected   = pcorr,
+       ci          = cbind(myci$lci / sds, myci$rci / sds), 
+       groupTest   = group.testing.function,
+       sigmahat    = sigmahat,
+       standardize = standardize,
+       sds         = sds,
+       bhat        = bproj,
+       betahat     = betalasso,
+       call        = match.call())
 }
 

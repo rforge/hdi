@@ -228,7 +228,7 @@ aggregate.ci <- function(lci,rci,centers,
   ##find an inside point: we need to find a point that is definitely in the confidence intervals
   inner <- find.inside.point.gammamin(low=min(centers),
                                       high=max(centers),
-                                      ci.inf=ci.info,
+                                      ci.info=ci.info,
                                       verbose=verbose)
 
   ##inner <- max(lci)
@@ -452,7 +452,7 @@ does.it.cover.gammamin <- function(beta.j,
   if(multi.corr)
     {
       stop("not implemented yet, we need the S0 information for this")
-      level <- (1-0.05*gamma.b/(1-log(gamma.min)*S0))
+      #level <- (1-0.05*gamma.b/(1-log(gamma.min)*S0))
     }else{
       level <- (1-0.05*gamma.b/(1-log(gamma.min)))
     }

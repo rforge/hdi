@@ -1,6 +1,6 @@
 ridge.proj <- function(x, y, ci.level = 0.95,
-                       multiplecorr.method = "holm",
-                       N = 10000)
+                       standardize = TRUE,
+                       multiplecorr.method = "holm", N = 10000)
 {
   ## Purpose:
   ## calculation of the ridge projection method proposed in
@@ -11,6 +11,7 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## y: the response vector
   ## ci.level: the significance level to be used for the confidence
   ##           interval calculation
+  ## N: number of simulations for the WY procedure
   ## ----------------------------------------------------------------------
   ## Return values:
   ## individual: the individual testing p-values for each parameter
@@ -25,20 +26,29 @@ ridge.proj <- function(x, y, ci.level = 0.95,
 
   ## these are some old arguments that are still used in the code below
   ridge.unprojected <- TRUE
-  
-  x <- scale(x, scale = FALSE) ## *center* the columns
-  y <- scale(y, scale = FALSE)
 
   n  <- nrow(x)
   p  <- ncol(x)
+
+  ## Save columnwise standard deviations 
+  if(standardize)
+    sds <- apply(x, 2, sd)
+  else
+    sds <- rep(1, p)
+
+  ## *center* (scale) the columns
+  x <- scale(x, center = TRUE, scale = standardize) 
+  y <- scale(y, scale = FALSE)
+  
   y  <- as.numeric(y)
 
   biascorr <- Delta <- numeric(p)
   
   lambda <- 1  ## other choices?
 
-  h1 <- svd(x) ## x must be *centered*, see above
-
+  h1 <- svd(x)
+  
+  ## Determine rank of design matrix
   ## Overwrite h1 with the version corresponding to non-zero singular values
   sval  <- h1$d
   tol   <- min(n, p) * .Machine$double.eps
@@ -83,7 +93,7 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## falls away with the way diag.cov2 is calculated see paper
   scale.vec  <- sqrt(hat.sigma2 * diag.cov2)
   
-  ##1, is coupled with 2!! don't shut this off and not the other or vice versa
+  ## 1, is coupled with 2!! don't shut this off and not the other or vice versa
   if(ridge.unprojected){
     scale.vec <- scale.vec / abs(diag(Px))
   }
@@ -128,8 +138,8 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   
   myci <- calc.ci(bj = hat.betacorr, se = se, level = ci.level)
   
-  myci$lci <- myci$lci - Delta * se
-  myci$rci <- myci$rci + Delta * se
+  myci$lci <- (myci$lci - Delta * se) 
+  myci$rci <- (myci$rci + Delta * se) 
 
   ## need to multiply Delta with se because it is on the scale of
   ## standard normal dist and we want to bring it to the distribution of
@@ -139,26 +149,29 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## function to calculate p-value for groups ##
   ##############################################
 
-  group.testing.function <- function(group)
-    {
-      calculate.pvalue.for.group(brescaled=hat.betast,
-                                 group=group,
-                                 individual=res.pval,
-                                 cov=cov2,
-                                 N=N,
-                                 Delta=Delta,
-                                 correct=TRUE,
-                                 alt=TRUE)
-    }
+  group.testing.function <- function(group, N){
+    calculate.pvalue.for.group(brescaled  = hat.betast,
+                               group      = group,
+                               individual = res.pval,
+                               cov     = cov2,
+                               N       = N,
+                               Delta   = Delta,
+                               correct = TRUE,
+                               alt     = TRUE)
+  }
+
   
   list(individual    = res.pval,
        corrected     = pcorr,
-       ci            = cbind(myci$lci, myci$rci),
+       ci            = cbind(myci$lci / sds, myci$rci / sds), 
+       groupTest     = group.testing.function,
+       sigmahat      = sqrt(hat.sigma2),
+       standardize   = standardize,
+       sds           = sds,
        bhatuncorr    = hat.beta,
        biascorr      = biascorr,
-       normalisation = 1/scale.vec,
+       normalisation = 1 / scale.vec,
        bhat          = hat.betacorr,
        betahat       = beta.lasso,
-       sigmahat      = sqrt(hat.sigma2),
-       group.testing.function=group.testing.function)
+       call          = match.call())
 }
