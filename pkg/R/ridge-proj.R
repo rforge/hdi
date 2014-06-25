@@ -1,5 +1,7 @@
 ridge.proj <- function(x, y, ci.level = 0.95,
                        standardize = TRUE,
+                       lambda = 1,
+                       sigma = NULL,
                        multiplecorr.method = "holm", N = 10000)
 {
   ## Purpose:
@@ -44,7 +46,7 @@ ridge.proj <- function(x, y, ci.level = 0.95,
 
   biascorr <- Delta <- numeric(p)
   
-  lambda <- 1  ## other choices?
+  ##lambda <- 1  ## other choices?
 
   h1 <- svd(x)
   
@@ -74,8 +76,13 @@ ridge.proj <- function(x, y, ci.level = 0.95,
 
   ## Estimate regression parameters (initial estimator) and noise level sigma
   fit.scaleL <- scalreg(X = x, y = y, lam0 = "univ")
+
   beta.lasso <- fit.scaleL$coefficients
-  hat.sigma2 <- fit.scaleL$hsigma^2 ## added ^2 to fix bug!
+  
+  if(is.null(sigma))
+    hat.sigma2 <- fit.scaleL$hsigma^2 ## added ^2 to fix bug!
+  else
+    hat.sigma2 <- sigma^2
 
   ## bias correction
   biascorr <- crossprod(Px.offdiag, beta.lasso)

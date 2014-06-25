@@ -4,8 +4,8 @@
 \title{P-values based on ridge projection method}
 \description{P-values based on ridge projection method}
 \usage{
-ridge.proj(x, y, ci.level = 0.95, standardize = TRUE,
-           multiplecorr.method = "holm", N = 10000)
+ridge.proj(x, y, ci.level = 0.95, standardize = TRUE, lambda = 1,
+           sigma = NULL, multiplecorr.method = "holm", N = 10000)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -13,7 +13,9 @@ ridge.proj(x, y, ci.level = 0.95, standardize = TRUE,
   \item{y}{Response vector.}
   \item{ci.level}{Coverage level of confidence intervals.}
   \item{standardize}{Should design matrix be standardized to unit column
-    standard deviation.}
+    standard deviation (logical)?}
+  \item{lambda}{Value of penalty parameter lambda (ridge regression).}
+  \item{sigma}{Estimate of error standard deviation}
   \item{multiplecorr.method}{Either "WY" or any of
     \code{\link{p.adjust.methods}}.}
   \item{N}{Number of empirical samples (only used if multiplecorr.method
