@@ -4,7 +4,8 @@ lasso.proj <- function(x, y, ci.level = 0.95,
                        N = 10000,
                        parallel = FALSE, ncores = 4,
                        sigma = NULL, ## sigma estimate provided by the user
-                       Z = NULL)     ## Z or Thetahat provided by the user
+                       Z = NULL,     ## Z or Thetahat provided by the user
+                       family="gaussian")
 {
   ## Purpose:
   ## An implementation of the LDPE method http://arxiv.org/abs/1110.2563
@@ -24,6 +25,17 @@ lasso.proj <- function(x, y, ci.level = 0.95,
   ## Author: Ruben Dezeure, Date: 18 Oct 2013 (initial version),
   ## in part based on an implementation of the ridge projection method
   ## ridge-proj.R by P. Buehlmann + adaptations by L. Meier.
+
+  dataset <- switch(family,
+                    "gaussian"={list(x=x,y=y)},
+                    {
+                      switch.family(x=x,y=y,
+                                    family=family)
+                      ##Warning: should we allow user to still specify their own Z here?
+                      ##Z <- NULL##will have to recalculate Z
+                    })
+x <- dataset$x
+y <- dataset$y		    
 
   ####################
   ## Get data ready ##
@@ -129,17 +141,20 @@ lasso.proj <- function(x, y, ci.level = 0.95,
   ##############################################
   ## Function to calculate p-value for groups ##
   ##############################################
-
-  group.testing.function <- function(group, N){
-    calculate.pvalue.for.group(brescaled  = bprojrescaled,
-                               group      = group,
-                               individual = pval,
-                               cov        = cov2,
-                               N          = N,
-                               correct    = TRUE,
-                               alt        = TRUE)
-  }
-
+  alt.group.approach <- TRUE
+  pre <- preprocess.group.testing(N=N,
+                                  cov=cov2,
+                                  alt=alt.group.approach)
+  
+  group.testing.function <- function(group)
+    {
+      calculate.pvalue.for.group(brescaled=bprojrescaled,
+                                 group=group,
+                                 individual=pval,
+                                 correct=TRUE,
+                                 alt=alt.group.approach,
+                                 zz2=pre)
+    }
   
   ############################
   ## Return all information ##

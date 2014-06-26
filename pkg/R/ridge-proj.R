@@ -1,4 +1,5 @@
 ridge.proj <- function(x, y, ci.level = 0.95,
+                       family="gaussian",
                        standardize = TRUE,
                        lambda = 1,
                        sigma = NULL,
@@ -25,7 +26,15 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## ----------------------------------------------------------------------
   ## Author: Peter Buehlmann (initial version),
   ##         adaptations by L. Meier and R. Dezeure
-
+  dataset <- switch(family,
+                    "gaussian"={list(x=x,y=y)},
+                    {
+                      switch.family(x=x,y=y,
+                                    family=family)
+                    })
+  x <- dataset$x
+  y <- dataset$y
+  
   ## these are some old arguments that are still used in the code below
   ridge.unprojected <- TRUE
 
@@ -155,17 +164,20 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ##############################################
   ## function to calculate p-value for groups ##
   ##############################################
-
-  group.testing.function <- function(group, N){
-    calculate.pvalue.for.group(brescaled  = hat.betast,
-                               group      = group,
-                               individual = res.pval,
-                               cov     = cov2,
-                               N       = N,
-                               Delta   = Delta,
-                               correct = TRUE,
-                               alt     = TRUE)
-  }
+  alt.group.approach <- TRUE
+  pre <- preprocess.group.testing(N=N,
+                                  cov=cov2,
+                                  alt=alt.group.approach)
+  group.testing.function <- function(group)
+    {
+      calculate.pvalue.for.group(brescaled=hat.betast,
+                                 group=group,
+                                 individual=res.pval,
+                                 Delta=Delta,
+                                 correct=TRUE,
+                                 alt=alt.group.approach,
+                                 zz2=pre)
+    }
 
   
   list(individual    = res.pval,

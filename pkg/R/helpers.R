@@ -170,14 +170,31 @@ p.adjust.wy <- function(cov,
   return(pcorr)
 }
 
+preprocess.group.testing <- function(N,cov,
+                                     alt)
+  {
+    if(alt)
+      {
+        ##no preprocessing to do
+        zz2 <- NULL
+      }
+    else
+      {
+        ## Simulate distribution
+        set.seed(3)##always give the same result
+        zz  <- mvrnorm(N, rep(0, ncol(cov)), cov)
+        zz2 <- scale(zz, center = FALSE, scale = sqrt(diag(cov)))
+      }
+    return(zz2)
+  }
 calculate.pvalue.for.group <- function(brescaled,
                                        group,
                                        individual,
-                                       cov,
-                                       N = 10000,
-                                       Delta = NULL,
-                                       correct = TRUE,
-                                       alt = TRUE){
+                                       Delta=NULL,
+                                       correct=TRUE,
+                                       alt=TRUE,
+                                       zz2)
+{
   ## Purpose:
   ## calculation of p-values for groups
   ## using the maximum as test statistic
@@ -194,27 +211,30 @@ calculate.pvalue.for.group <- function(brescaled,
   }else{
     ## max test statistics according to http://arxiv.org/abs/1202.1377
     ## P.Buehlmann
-
-    ## Simulate distribution
-    set.seed(3) ## always give the same result
-    zz  <- mvrnorm(N, rep(0, ncol(cov)), cov)
-    zz2 <- scale(zz, center = FALSE, scale = sqrt(diag(cov)))
-    if(sum(group) > 1){
-      group.coefficients <- abs(brescaled[group])
-      max.coefficient <- max(group.coefficients)
-      group.zz <- abs(zz2[,group])
+    if(is.null(zz2))
+      stop("you need to preprocess the zz2 by calling preprocess.group.testing")
+    if(sum(group) > 1)
+      {
+        group.coefficients <- abs(brescaled[group])
+        max.coefficient <- max(group.coefficients)
+        group.zz <- abs(zz2[,group])
         
-      if(!is.null(Delta)){ ## special treatment of ridge method
-        group.Delta <- Delta[group]
-        group.zz <- sweep(group.zz, 2, group.Delta, "+")
-      }
+        if(!is.null(Delta))
+          {
+            ##because of Ridge method
+            group.Delta <- Delta[group]
+            group.zz <- sweep(group.zz,2,group.Delta,"+")
+            ##End special thing for Ridge
+          }
         
-      Gz <- apply(group.zz,1,max)
-      pvalue <- 1-ecdf(Gz)(max.coefficient)
-    }else{ ## We don't have a group,only a single variable
-      pvalue <- individual[group]
-    }
+        Gz <- apply(group.zz,1,max)
+        
+        pvalue <- 1-ecdf(Gz)(max.coefficient)
+      }else{
+        pvalue <- individual[group]##we don't have a group,only a single variable,
+      }      
   }
+  
   
   if(correct){
     pvalue <- min(1, p * pvalue) ## Bonferroni correction
@@ -222,5 +242,33 @@ calculate.pvalue.for.group <- function(brescaled,
     ## and pvalue might be a single value!
   }
   return(pvalue)
+}
+
+switch.family <- function(x,y,family)
+{
+  switch(family,
+         "binomial"={
+           fitnet <- cv.glmnet(x,y,family="binomial")
+           glmnetfit <- fitnet$glmnet.fit
+           netlambda.min <- fitnet$lambda.min
+           netpred <- predict(glmnetfit,x,s=netlambda.min,type = "response")
+           betahat <- predict(glmnetfit,x,s=netlambda.min,type="coefficients")
+           betahat <- as.vector(betahat)
+           pihat <- netpred[,1]
+           
+           diagW <- pihat*(1-pihat)
+           W <- diag(diagW)
+           xl <- cbind(rep(1,nrow(x)),x)
+
+           ##adjusted design matrix
+           xw <- sqrt(diagW) * x
+           
+           ##adjusted response
+           yw <- sqrt(diagW) * (xl %*% betahat + solve(W,y-pihat))
+         },
+         {
+           stop("The provided family is not supported (yet). Currently supported are gaussian and binomial.")
+         })
+  return(list(x=xw,y=yw))
 }
                                        
