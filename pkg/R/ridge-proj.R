@@ -27,7 +27,9 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## Author: Peter Buehlmann (initial version),
   ##         adaptations by L. Meier and R. Dezeure
   dataset <- switch(family,
-                    "gaussian"={list(x=x,y=y)},
+                    "gaussian"={
+                      list(x=x,y=y)
+                    },
                     {
                       switch.family(x=x,y=y,
                                     family=family)

@@ -27,16 +27,21 @@ lasso.proj <- function(x, y, ci.level = 0.95,
   ## ridge-proj.R by P. Buehlmann + adaptations by L. Meier.
 
   dataset <- switch(family,
-                    "gaussian"={list(x=x,y=y)},
+                    "gaussian"={
+                      list(x=x,y=y)
+                    },
                     {
                       switch.family(x=x,y=y,
                                     family=family)
                       ##Warning: should we allow user to still specify their own Z here?
                       ##Z <- NULL##will have to recalculate Z
+                      
+                      ##force sigmahat to 1 when doing glm!
+                      sigma <- 1
                     })
-x <- dataset$x
-y <- dataset$y		    
-
+  x <- dataset$x
+  y <- dataset$y
+  
   ####################
   ## Get data ready ##
   ####################
@@ -106,7 +111,7 @@ y <- dataset$y
   #########################
 
   ## Determine normalization factor
-  scaleb        <- n / (sigmahat * colSums(Z^2)) ##sqrt(diag(crossprod(Z)))
+  scaleb        <- n / (sigmahat * sqrt(colSums(Z^2))) ##sqrt(diag(crossprod(Z)))
   bprojrescaled <- bproj * scaleb
   
   ## Calculate p-value
