@@ -21,4 +21,5 @@ export(hdi, clusterLowerBound)
 export(hdi, groupLowerBound)
 
 S3method(print, hdi)
+S3method(confint, hdi)
 S3method(plot, clusterLowerBound)

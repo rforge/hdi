@@ -1,11 +1,10 @@
-lasso.proj <- function(x, y, ci.level = 0.95,
+lasso.proj <- function(x, y, ci.level = 0.95, family="gaussian",
                        standardize = TRUE,
                        multiplecorr.method = "holm",
                        N = 10000,
                        parallel = FALSE, ncores = 4,
                        sigma = NULL, ## sigma estimate provided by the user
-                       Z = NULL,     ## Z or Thetahat provided by the user
-                       family="gaussian")
+                       Z = NULL)     ## Z or Thetahat provided by the user
 {
   ## Purpose:
   ## An implementation of the LDPE method http://arxiv.org/abs/1110.2563
@@ -146,34 +145,44 @@ lasso.proj <- function(x, y, ci.level = 0.95,
   ##############################################
   ## Function to calculate p-value for groups ##
   ##############################################
-  alt.group.approach <- TRUE
-  pre <- preprocess.group.testing(N=N,
-                                  cov=cov2,
-                                  alt=alt.group.approach)
   
-  group.testing.function <- function(group)
-    {
-      calculate.pvalue.for.group(brescaled=bprojrescaled,
-                                 group=group,
-                                 individual=pval,
-                                 correct=TRUE,
-                                 alt=alt.group.approach,
-                                 zz2=pre)
-    }
+  alt.group.approach <- TRUE
+  
+  pre <- preprocess.group.testing(N   = N,
+                                  cov = cov2,
+                                  alt = alt.group.approach)
+  
+  group.testing.function <- function(group){
+    calculate.pvalue.for.group(brescaled  = bprojrescaled,
+                               group      = group,
+                               individual = pval,
+                               correct    = TRUE,
+                               alt        = alt.group.approach,
+                               zz2        = pre)
+  }
   
   ############################
   ## Return all information ##
   ############################
   
-  list(individual  = as.vector(pval),
-       corrected   = pcorr,
-       ci          = cbind(myci$lci / sds, myci$rci / sds), 
-       groupTest   = group.testing.function,
-       sigmahat    = sigmahat,
-       standardize = standardize,
-       sds         = sds,
-       bhat        = bproj,
-       betahat     = betalasso,
-       call        = match.call())
+  out <- list(individual  = as.vector(pval),
+              corrected   = pcorr,
+              ci          = cbind(myci$lci / sds, myci$rci / sds), 
+              groupTest   = group.testing.function,
+              sigmahat    = sigmahat,
+              standardize = standardize,
+              sds         = sds,
+              bhat        = bproj / sds,
+              se          = se / sds,
+              betahat     = betalasso / sds,
+              method      = "lasso.proj",
+              call        = match.call())
+
+  names(out$individual) <- names(out$corrected) <- names(out$bhat) <-
+    names(out$sds) <- names(out$se) <- names(out$betahat) <-
+      colnames(x)
+
+  class(out) <- "hdi"
+  return(out)
 }
 

@@ -167,32 +167,43 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## function to calculate p-value for groups ##
   ##############################################
   alt.group.approach <- TRUE
-  pre <- preprocess.group.testing(N=N,
-                                  cov=cov2,
-                                  alt=alt.group.approach)
-  group.testing.function <- function(group)
-    {
-      calculate.pvalue.for.group(brescaled=hat.betast,
-                                 group=group,
-                                 individual=res.pval,
-                                 Delta=Delta,
-                                 correct=TRUE,
-                                 alt=alt.group.approach,
-                                 zz2=pre)
-    }
+  pre <- preprocess.group.testing(N = N,
+                                  cov = cov2,
+                                  alt = alt.group.approach)
+  group.testing.function <- function(group){
+    calculate.pvalue.for.group(brescaled  = hat.betast,
+                               group      = group,
+                               individual = res.pval,
+                               Delta      = Delta,
+                               correct    = TRUE,
+                               alt        = alt.group.approach,
+                               zz2        = pre)
+  }
+
 
   
-  list(individual    = res.pval,
-       corrected     = pcorr,
-       ci            = cbind(myci$lci / sds, myci$rci / sds), 
-       groupTest     = group.testing.function,
-       sigmahat      = sqrt(hat.sigma2),
-       standardize   = standardize,
-       sds           = sds,
-       bhatuncorr    = hat.beta / sds,
-       biascorr      = biascorr / sds,
-       normalisation = 1 / scale.vec,
-       bhat          = hat.betacorr / sds,
-       betahat       = beta.lasso / sds,
-       call          = match.call())
+  out <- list(individual    = res.pval,
+              corrected     = pcorr,
+              ci            = cbind(myci$lci / sds, myci$rci / sds), 
+              groupTest     = group.testing.function,
+              sigmahat      = sqrt(hat.sigma2),
+              standardize   = standardize,
+              sds           = sds,
+              bhatuncorr    = hat.beta / sds,
+              biascorr      = biascorr / sds,
+              normalisation = 1 / scale.vec,
+              bhat          = hat.betacorr / sds,
+              se            = se / sds,
+              delta         = Delta,
+              betahat       = beta.lasso / sds,
+              method        = "ridge.proj",
+              call          = match.call())
+  
+  names(out$individual) <- names(out$corrected) <- names(out$bhat) <-
+    names(out$sds) <- names(out$se) <- names(out$delta) <- names(out$betahat) <-
+      colnames(x)
+
+  class(out) <- "hdi"
+
+  return(out)
 }

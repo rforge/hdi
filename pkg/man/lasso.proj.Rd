@@ -4,7 +4,7 @@
 \title{P-values based on lasso projection method}
 \description{P-values based on lasso projection method}
 \usage{
-lasso.proj(x, y, ci.level = 0.95, standardize = TRUE,
+lasso.proj(x, y, ci.level = 0.95, family = "gaussian", standardize = TRUE,
            multiplecorr.method = "holm", N = 10000,
            parallel = FALSE, ncores = 4,
            sigma = NULL, Z = NULL)
@@ -13,6 +13,7 @@ lasso.proj(x, y, ci.level = 0.95, standardize = TRUE,
   \item{x}{Design matrix (without intercept).}
   \item{y}{Response vector.}
   \item{ci.level}{Coverage level of confidence intervals.}
+  \item{family}{family}
   \item{standardize}{Should design matrix be standardized to unit column
     standard deviation.}
   \item{multiplecorr.method}{Either "WY" or any of

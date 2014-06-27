@@ -4,14 +4,15 @@
 \title{P-values based on ridge projection method}
 \description{P-values based on ridge projection method}
 \usage{
-ridge.proj(x, y, ci.level = 0.95, standardize = TRUE, lambda = 1,
-           sigma = NULL, multiplecorr.method = "holm", N = 10000)
+ridge.proj(x, y, ci.level = 0.95, family = "gaussian", standardize = TRUE,
+           lambda = 1, sigma = NULL, multiplecorr.method = "holm", N = 10000)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{Design matrix (without intercept).}
   \item{y}{Response vector.}
   \item{ci.level}{Coverage level of confidence intervals.}
+  \item{family}{family}
   \item{standardize}{Should design matrix be standardized to unit column
     standard deviation (logical)?}
   \item{lambda}{Value of penalty parameter lambda (ridge regression).}

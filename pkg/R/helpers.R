@@ -170,23 +170,20 @@ p.adjust.wy <- function(cov,
   return(pcorr)
 }
 
-preprocess.group.testing <- function(N,cov,
-                                     alt)
-  {
-    if(alt)
-      {
-        ##no preprocessing to do
-        zz2 <- NULL
-      }
-    else
-      {
-        ## Simulate distribution
-        set.seed(3)##always give the same result
-        zz  <- mvrnorm(N, rep(0, ncol(cov)), cov)
-        zz2 <- scale(zz, center = FALSE, scale = sqrt(diag(cov)))
-      }
-    return(zz2)
+preprocess.group.testing <- function(N, cov, alt){
+  if(alt){
+    ##no preprocessing to do
+    zz2 <- NULL
   }
+  else{
+    ## Simulate distribution
+    set.seed(3)##always give the same result
+    zz  <- mvrnorm(N, rep(0, ncol(cov)), cov)
+    zz2 <- scale(zz, center = FALSE, scale = sqrt(diag(cov)))
+  }
+  return(zz2)
+}
+
 calculate.pvalue.for.group <- function(brescaled,
                                        group,
                                        individual,
@@ -213,28 +210,25 @@ calculate.pvalue.for.group <- function(brescaled,
     ## P.Buehlmann
     if(is.null(zz2))
       stop("you need to preprocess the zz2 by calling preprocess.group.testing")
-    if(sum(group) > 1)
-      {
-        group.coefficients <- abs(brescaled[group])
-        max.coefficient <- max(group.coefficients)
-        group.zz <- abs(zz2[,group])
+    if(sum(group) > 1){
+      group.coefficients <- abs(brescaled[group])
+      max.coefficient <- max(group.coefficients)
+      group.zz <- abs(zz2[,group])
         
-        if(!is.null(Delta))
-          {
-            ##because of Ridge method
-            group.Delta <- Delta[group]
-            group.zz <- sweep(group.zz,2,group.Delta,"+")
-            ##End special thing for Ridge
-          }
-        
-        Gz <- apply(group.zz,1,max)
-        
-        pvalue <- 1-ecdf(Gz)(max.coefficient)
-      }else{
-        pvalue <- individual[group]##we don't have a group,only a single variable,
-      }      
+      if(!is.null(Delta)){
+        ##because of Ridge method
+        group.Delta <- Delta[group]
+        group.zz <- sweep(group.zz,2,group.Delta,"+")
+        ##End special thing for Ridge
+      }
+      
+      Gz <- apply(group.zz,1,max)
+      
+      pvalue <- 1-ecdf(Gz)(max.coefficient)
+    }else{
+      pvalue <- individual[group]##we don't have a group,only a single variable,
+    }      
   }
-  
   
   if(correct){
     pvalue <- min(1, p * pvalue) ## Bonferroni correction
@@ -248,22 +242,22 @@ switch.family <- function(x,y,family)
 {
   switch(family,
          "binomial"={
-           fitnet <- cv.glmnet(x,y,family="binomial")
+           fitnet    <- cv.glmnet(x,y,family="binomial")
            glmnetfit <- fitnet$glmnet.fit
            netlambda.min <- fitnet$lambda.min
            netpred <- predict(glmnetfit,x,s=netlambda.min,type = "response")
            betahat <- predict(glmnetfit,x,s=netlambda.min,type="coefficients")
            betahat <- as.vector(betahat)
-           pihat <- netpred[,1]
+           pihat   <- netpred[,1]
            
            diagW <- pihat*(1-pihat)
-           W <- diag(diagW)
-           xl <- cbind(rep(1,nrow(x)),x)
+           W     <- diag(diagW)
+           xl    <- cbind(rep(1,nrow(x)),x)
 
-           ##adjusted design matrix
+           ## adjusted design matrix
            xw <- sqrt(diagW) * x
            
-           ##adjusted response
+           ## adjusted response
            yw <- sqrt(diagW) * (xl %*% betahat + solve(W,y-pihat))
          },
          {

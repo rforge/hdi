@@ -118,5 +118,39 @@ plot.clusterLowerBound <- function(x, cexfactor = 1, yaxis = "members",
 }
 
 
+confint.hdi <- function(object, parm, level = 0.95, ...)
+{
+  ## Purpose:
+  ## ----------------------------------------------------------------------
+  ## Arguments:
+  ## ----------------------------------------------------------------------
+  ## Author: Lukas Meier, Date: 27 Jun 2014, 11:30
 
+  if(object$method %in% c("lasso.proj", "ridge.proj")){
+
+    pnames <- names(object$bhat)
+    
+    if(missing(parm))
+      parm <- pnames
+    else if (is.numeric(parm))
+      parm <- pnames[parm]
+        
+    quant <- qnorm(1 - (1 - level) / 2)
+
+    if(object$method == "ridge.proj")
+      delta <- object$delta[parm]
+    else
+      delta <- rep(0, length(parm))
+        
+    add   <- object$se[parm] * quant + object$se[parm] * delta
+    m     <- cbind(object$bhat[parm] - add, object$bhat[parm] + add)
+
+    colnames(m) <- c("lower", "upper")
+    rownames(m) <- parm
+  }
+  else
+    stop("Not supported object type")
+
+  return(m)
+}
 
