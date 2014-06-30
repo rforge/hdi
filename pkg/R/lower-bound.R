@@ -24,7 +24,7 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
     cat("\t lower bound", res)
     
   if(res > 0 & length(group)>1){
-    if(all(me[sel,]>0)){
+    if(all(me[sel,] > 0)){
       for (kk in 1:2){
         tmp <- getLowerBoundNode(x, y, me, me[sel,kk], resmat, groupsl,
                                  alpha = alpha, s = s, nsplit = nsplit,
@@ -123,7 +123,7 @@ groupLowerBoundWithPrediction <- function(x, y, group, mfact, pred,
 groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
                             s = min(10, ncol(x) - 1),
                             setseed = TRUE, silent = FALSE, lpSolve = TRUE,
-                            parallel = FALSE, ncores = 8){
+                            parallel = FALSE, ncores = 4){
   if(!silent){
     if(alpha > 0.5 | alpha < 0.005)
       warning("level alpha outside supported range [0.005, 0.5]")

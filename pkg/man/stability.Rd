@@ -6,7 +6,7 @@
 \usage{
 stability(x, y, EV, threshold = 0.75, B = 100, fraction = 0.5,
           model.selector = lasso.firstq, args.model.selector = NULL,
-          trace = FALSE)
+          parallel = FALSE, ncores = 4, trace = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -25,6 +25,8 @@ stability(x, y, EV, threshold = 0.75, B = 100, fraction = 0.5,
     \code{args.model.selector}.}
   \item{args.model.selector}{Named list of further arguments for
     function \code{model.selector}.}
+    \item{parallel}{Should parallelization be used? (logical)}
+  \item{ncores}{Number of cores used for parallelization.}
   \item{trace}{Should information be printed out while computing (logical).}
 }
 \details{...}

@@ -16,7 +16,7 @@
 groupLowerBound(x, y, group, alpha = 0.05, nsplit = 11,
                 s = min(10, ncol(x) - 1), setseed = TRUE,
                 silent = FALSE, lpSolve = TRUE,
-                parallel = FALSE, ncores = 8)}
+                parallel = FALSE, ncores = 4)}
 \arguments{
   \item{x}{The design matrix of the regression with p columns for p predictor
     variables and n rows that correspond to n observations.}
