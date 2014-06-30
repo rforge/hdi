@@ -1,4 +1,4 @@
-lasso.proj <- function(x, y, ci.level = 0.95, family="gaussian",
+lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
                        standardize = TRUE,
                        multiplecorr.method = "holm",
                        N = 10000,
@@ -25,22 +25,6 @@ lasso.proj <- function(x, y, ci.level = 0.95, family="gaussian",
   ## in part based on an implementation of the ridge projection method
   ## ridge-proj.R by P. Buehlmann + adaptations by L. Meier.
 
-  dataset <- switch(family,
-                    "gaussian"={
-                      list(x=x,y=y)
-                    },
-                    {
-                      switch.family(x=x,y=y,
-                                    family=family)
-                      ##Warning: should we allow user to still specify their own Z here?
-                      ##Z <- NULL##will have to recalculate Z
-                      
-                      ##force sigmahat to 1 when doing glm!
-                      sigma <- 1
-                    })
-  x <- dataset$x
-  y <- dataset$y
-  
   ####################
   ## Get data ready ##
   ####################
@@ -54,12 +38,30 @@ lasso.proj <- function(x, y, ci.level = 0.95, family="gaussian",
     sds <- rep(1, p)
 
   ## *center* (scale) the columns
-  x <- scale(x, center = TRUE, scale = standardize) 
-  y <- scale(y, scale = FALSE)
-  
-  y  <- as.numeric(y)
+  x <- scale(x, center = TRUE, scale = standardize)
 
+  dataset <- switch(family,
+                    "gaussian" = {
+                      list(x = x, y = y)
+                    },
+                    {
+                      switch.family(x = x, y = y,
+                                    family = family)
+                    })
+
+  ## center the columns the response to get rid of the intercept
+  x <- scale(dataset$x, center = TRUE, scale = FALSE)
+  y <- scale(dataset$y, scale = FALSE)
+  y <- as.numeric(y)
+
+  ## Warning: should we allow user to still specify their
+  ## own Z here?
+  ## Z <- NULL##will have to recalculate Z
   
+  ## force sigmahat to 1 when doing glm!
+  if(family == "binomial")
+    sigma <- 1
+
   ######################################
   ## Calculate Z using nodewise lasso ##
   ######################################
@@ -175,6 +177,7 @@ lasso.proj <- function(x, y, ci.level = 0.95, family="gaussian",
               bhat        = bproj / sds,
               se          = se / sds,
               betahat     = betalasso / sds,
+              family      = family,
               method      = "lasso.proj",
               call        = match.call())
 

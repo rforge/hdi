@@ -1,5 +1,5 @@
 ridge.proj <- function(x, y, ci.level = 0.95,
-                       family="gaussian",
+                       family = "gaussian",
                        standardize = TRUE,
                        lambda = 1,
                        sigma = NULL,
@@ -26,28 +26,41 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## ----------------------------------------------------------------------
   ## Author: Peter Buehlmann (initial version),
   ##         adaptations by L. Meier and R. Dezeure
-  dataset <- switch(family,
-                    "gaussian"={
-                      list(x=x,y=y)
-                    },
-                    {
-                      switch.family(x=x,y=y,
-                                    family=family)
-                    })
-  x <- dataset$x
-  y <- dataset$y
-  
-  ## these are some old arguments that are still used in the code below
-  ridge.unprojected <- TRUE
 
-  n  <- nrow(x)
-  p  <- ncol(x)
+  n <- nrow(x)
+  p <- ncol(x)
 
-  ## Save columnwise standard deviations 
   if(standardize)
     sds <- apply(x, 2, sd)
   else
     sds <- rep(1, p)
+
+  ## *center* (scale) the columns
+  x <- scale(x, center = TRUE, scale = standardize)
+
+  dataset <- switch(family,
+                    "gaussian" = {
+                      list(x = x, y = y)
+                    },
+                    {
+                      switch.family(x = x, y = y,
+                                    family = family)
+                    })
+
+  x <- scale(dataset$x, center = TRUE, scale = FALSE)
+  y <- scale(dataset$y, scale = FALSE)
+  y <- as.numeric(y)
+
+  ## Warning: should we allow user to still specify their
+  ## own Z here?
+  ## Z <- NULL##will have to recalculate Z
+  
+  ## force sigmahat to 1 when doing glm!
+  if(family == "binomial")
+    sigma <- 1
+
+  ## these are some old arguments that are still used in the code below
+  ridge.unprojected <- TRUE
 
   ## *center* (scale) the columns
   x <- scale(x, center = TRUE, scale = standardize) 
@@ -180,8 +193,6 @@ ridge.proj <- function(x, y, ci.level = 0.95,
                                zz2        = pre)
   }
 
-
-  
   out <- list(individual    = res.pval,
               corrected     = pcorr,
               ci            = cbind(myci$lci / sds, myci$rci / sds), 
@@ -196,6 +207,7 @@ ridge.proj <- function(x, y, ci.level = 0.95,
               se            = se / sds,
               delta         = Delta,
               betahat       = beta.lasso / sds,
+              family        = family,
               method        = "ridge.proj",
               call          = match.call())
   

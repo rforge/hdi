@@ -238,31 +238,34 @@ calculate.pvalue.for.group <- function(brescaled,
   return(pvalue)
 }
 
-switch.family <- function(x,y,family)
+switch.family <- function(x, y, family)
 {
   switch(family,
-         "binomial"={
-           fitnet    <- cv.glmnet(x,y,family="binomial")
-           glmnetfit <- fitnet$glmnet.fit
+         "binomial" = {
+           fitnet        <- cv.glmnet(x, y, family = "binomial",
+                                      standardize = FALSE)
+           glmnetfit     <- fitnet$glmnet.fit
            netlambda.min <- fitnet$lambda.min
-           netpred <- predict(glmnetfit,x,s=netlambda.min,type = "response")
-           betahat <- predict(glmnetfit,x,s=netlambda.min,type="coefficients")
+           netpred <- predict(glmnetfit, x, s = netlambda.min,
+                              type = "response")
+           betahat <- predict(glmnetfit, x, s = netlambda.min,
+                              type = "coefficients")
            betahat <- as.vector(betahat)
            pihat   <- netpred[,1]
            
-           diagW <- pihat*(1-pihat)
+           diagW <- pihat * (1 - pihat)
            W     <- diag(diagW)
-           xl    <- cbind(rep(1,nrow(x)),x)
+           xl    <- cbind(rep(1, nrow(x)), x)
 
-           ## adjusted design matrix
+           ## Adjusted design matrix
            xw <- sqrt(diagW) * x
            
-           ## adjusted response
-           yw <- sqrt(diagW) * (xl %*% betahat + solve(W,y-pihat))
+           ## Adjusted response
+           yw <- sqrt(diagW) * (xl %*% betahat + solve(W, y - pihat))
          },
          {
            stop("The provided family is not supported (yet). Currently supported are gaussian and binomial.")
          })
-  return(list(x=xw,y=yw))
+  return(list(x = xw, y = yw))
 }
                                        
