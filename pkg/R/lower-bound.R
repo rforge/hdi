@@ -14,9 +14,9 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
   group <- getMembers(me, sel)
   if(!silent)
     cat("\n ", sel, "  ", length(group), "members")
-  res <- groupLowerBound(x, y, group = group, alpha = alpha, s = s,
-                         nsplit = nsplit, silent = TRUE,
-                         setseed = setseed, lpSolve = lpSolve)
+  res <- groupBound(x, y, group = group, alpha = alpha, s = s,
+                    nsplit = nsplit, silent = TRUE,
+                    setseed = setseed, lpSolve = lpSolve)
   resmat[sel, 2]  <- res
   resmat[sel, 1]  <- length(group)
   groupsl[[sel]] <- group
@@ -38,9 +38,9 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
 }
 
   
-groupLowerBoundWithPrediction <- function(x, y, group, mfact, pred,
-                                          intercept = TRUE, useseed = NULL,
-                                          lpSolve = TRUE){
+groupBoundWithPrediction <- function(x, y, group, mfact, pred,
+                                     intercept = TRUE, useseed = NULL,
+                                     lpSolve = TRUE){
   ## not to be called by user (?)
   Resid  <- y - pred
   mustar <- 3 * sqrt(sum(Resid^2))
@@ -120,10 +120,10 @@ groupLowerBoundWithPrediction <- function(x, y, group, mfact, pred,
   return(TG)
 }
 
-groupLowerBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
-                            s = min(10, ncol(x) - 1),
-                            setseed = TRUE, silent = FALSE, lpSolve = TRUE,
-                            parallel = FALSE, ncores = 4){
+groupBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
+                       s = min(10, ncol(x) - 1),
+                       setseed = TRUE, silent = FALSE, lpSolve = TRUE,
+                       parallel = FALSE, ncores = 4){
   if(!silent){
     if(alpha > 0.5 | alpha < 0.005)
       warning("level alpha outside supported range [0.005, 0.5]")
@@ -254,22 +254,22 @@ do.splits <- function(splitc,
     A <- t(A)
     mfact <- getmfact(s, 1 - alpha / 10)
     
-    TGsplit <- groupLowerBoundWithPrediction(A %*% x[outsam,],
-                                             as.numeric(A %*% y[outsam]),
-                                             group, mfact,
-                                             as.numeric(A %*% pred),
-                                             intercept = TRUE,
-                                             useseed = if(setseed) useseed
-                                             else NULL,
-                                             lpSolve = lpSolve)
+    TGsplit <- groupBoundWithPrediction(A %*% x[outsam,],
+                                        as.numeric(A %*% y[outsam]),
+                                        group, mfact,
+                                        as.numeric(A %*% pred),
+                                        intercept = TRUE,
+                                        useseed = if(setseed) useseed
+                                        else NULL,
+                                        lpSolve = lpSolve)
   }else{
     mfact   <- getmfact(nrow(x), 1 - alpha / 10)
-    TGsplit <- groupLowerBoundWithPrediction(x[outsam,], y[outsam], group,
-                                             mfact, pred,
-                                             intercept = TRUE,
-                                             useseed = if(setseed) useseed
-                                             else NULL,
-                                             lpSolve = lpSolve)
+    TGsplit <- groupBoundWithPrediction(x[outsam,], y[outsam], group,
+                                        mfact, pred,
+                                        intercept = TRUE,
+                                        useseed = if(setseed) useseed
+                                        else NULL,
+                                        lpSolve = lpSolve)
   }
   if(!silent)
     cat("\n   // lower l1-norm bound", signif(TGsplit, 2), "\n")
@@ -280,7 +280,7 @@ do.splits <- function(splitc,
 }
 
 
-clusterLowerBound <- function(x, y, method = "average", dist = NULL,
+clusterGroupBound <- function(x, y, method = "average", dist = NULL,
                               alpha = 0.05, nsplit = 11,
                               s = min(10, ncol(x) - 1),
                               silent = FALSE, setseed = TRUE,
@@ -364,8 +364,8 @@ clusterLowerBound <- function(x, y, method = "average", dist = NULL,
   
   out$isLeaf  <- leafLeft & leafRight
 
-  out$method <- "clusterLowerBound"
-  class(out) <- c("clusterLowerBound", "hdi")
+  out$method <- "clusterGroupBound"
+  class(out) <- c("clusterGroupBound", "hdi")
   return(out)
 }
 

@@ -79,7 +79,7 @@ print.hdi <- function(x, ...)
   }
 }
 
-plot.clusterLowerBound <- function(x, cexfactor = 1, yaxis = "members",
+plot.clusterGroupBound <- function(x, cexfactor = 1, yaxis = "members",
                                    col = NULL, ...){
   hh <- x$noMembers
   hh2 <- sqrt(x$lowerBound)

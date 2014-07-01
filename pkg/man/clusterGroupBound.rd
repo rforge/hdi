@@ -1,5 +1,5 @@
-\name{clusterLowerBound}
-\alias{clusterLowerBound}
+\name{clusterGroupBound}
+\alias{clusterGroupBound}
 \title{
  Group test of variable importance in a high-dimensional linear model,
  using a hierarchical structure.} 
@@ -7,7 +7,7 @@
  Computes confidence intervals for the l1-norm of groups of regression
  parameters in a hierarchical clustering tree.}
 \usage{
-  clusterLowerBound(x, y, method = "average", dist = NULL, alpha = 0.05,
+  clusterGroupBound(x, y, method = "average", dist = NULL, alpha = 0.05,
                     nsplit = 11, s = min(10, ncol(x) - 1),
                     silent = FALSE, setseed = TRUE, lpSolve = TRUE)}
 %- maybe also 'usage' for other objects documented here.
@@ -76,9 +76,9 @@ Returns a list with components
 %}
 
 \seealso{
-  Use \code{clusterLowerBound} to test all groups in a hierarchical
+  Use \code{clusterGroupBound} to test all groups in a hierarchical
   clustering tree.
-  Use \code{lowerGroupBound} to compute the lower bound for selected
+  Use \code{groupBound} to compute the lower bound for selected
   groups of variables.
 }
 \examples{
@@ -106,7 +106,7 @@ beta[1] <- 5
 
 y  <- as.numeric(x \%*\% beta + rnorm(n))
 
-out <- clusterLowerBound(x, y, nsplit = 5)
+out <- clusterGroupBound(x, y, nsplit = 5)
 
 ## Plot and print the hierarchical group-test
 plot(out)

@@ -17,9 +17,9 @@ export(hdi, glm.pval)
 export(hdi, lasso.firstq)
 export(hdi, fdr.adjust)
 
-export(hdi, clusterLowerBound)
-export(hdi, groupLowerBound)
+export(hdi, clusterGroupBound)
+export(hdi, groupBound)
 
 S3method(print, hdi)
 S3method(confint, hdi)
-S3method(plot, clusterLowerBound)
+S3method(plot, clusterGroupBound)
