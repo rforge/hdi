@@ -95,7 +95,7 @@ stability <- function(x, y, EV, threshold = 0.75, B = 100, fraction = 0.5,
   out <- sel.current
   ##}
 
-  out <- list(select     = sel.current,
+  out <- list(selected   = sel.current,
               EV         = EV,
               threshold  = threshold,
               freq       = freq,

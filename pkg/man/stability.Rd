@@ -32,7 +32,7 @@ stability(x, y, EV, threshold = 0.75, B = 100, fraction = 0.5,
 \details{...}
 
 \value{
-  \item{select}{Vector of selected predictors.}
+  \item{selected}{Vector of selected predictors.}
   \item{freq}{Vector of selection frequencies.}
   \item{q}{Size of fitted models in order to control error rate at
   desired level.}
