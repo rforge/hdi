@@ -112,7 +112,7 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
         try.again <- FALSE ## break the loop, continue with next sample-split
       }
       ## Empty model selected:
-      ## Do nothing in that case. Matrix already filled with 1's.
+      ## Do nothing in that case. Matrix already filled with 0's.
       ## Print out information for the sake of completeness
       if(p.sel == 0){
         if(trace)
@@ -126,7 +126,7 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
         repeat.count <- repeat.count + 1
         warning("Too large model selected in a sample-split")
       }
-      if(repeat.count > 20){ ## too prevent never-ending loops
+      if(repeat.count > 20){ ## to prevent never-ending loops
         stop("More than 20 sample splits resulted in too large models...giving up")
         try.again <- FALSE
       }
