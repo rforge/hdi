@@ -126,15 +126,20 @@ confint.hdi <- function(object, parm, level = 0.95, ...)
   ## ----------------------------------------------------------------------
   ## Author: Lukas Meier, Date: 27 Jun 2014, 11:30
 
-  if(object$method %in% c("lasso.proj", "ridge.proj")){
+  if(!object$method %in% c("lasso.proj", "ridge.proj", "multi.split"))
+    stop("Not supported object type")
+  
+  pnames <- switch(object$method,
+                   "lasso.proj"  = names(object$bhat),
+                   "ridge.proj"  = names(object$bhat),
+                   "multi.split" = names(object$pval))
 
-    pnames <- names(object$bhat)
-    
-    if(missing(parm))
-      parm <- pnames
-    else if (is.numeric(parm))
-      parm <- pnames[parm]
-        
+  if(missing(parm))
+    parm <- pnames
+  else if (is.numeric(parm))
+    parm <- pnames[parm]
+
+  if(object$method %in% c("lasso.proj", "ridge.proj")){
     quant <- qnorm(1 - (1 - level) / 2)
 
     if(object$method == "ridge.proj")
@@ -144,12 +149,16 @@ confint.hdi <- function(object, parm, level = 0.95, ...)
         
     add   <- object$se[parm] * quant + object$se[parm] * delta
     m     <- cbind(object$bhat[parm] - add, object$bhat[parm] + add)
-
-    colnames(m) <- c("lower", "upper")
-    rownames(m) <- parm
   }
-  else
-    stop("Not supported object type")
+  else if(object$method == "multi.split"){
+    m <- cbind(object$lci[parm], object$uci[parm])
+    
+    if(level != object$ci.level)
+      warning("Ignoring argument level, using ci.level of fitted object")
+  }
+
+  colnames(m) <- c("lower", "upper")
+  rownames(m) <- parm
 
   return(m)
 }

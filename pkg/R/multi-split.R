@@ -168,18 +168,22 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
       lci.current <- t(new.ci)[,1]
       uci.current <- t(new.ci)[,2]
     }else{
-      lci.current <- apply(lci,2,median)
-      uci.current <- apply(uci,2,median)
+      lci.current <- apply(lci, 2, median)
+      uci.current <- apply(uci, 2, median)
     }
+  
   if(!return.nonaggr) ## Overwrite pvals with NULL if no output is wanted
     pvals <- NULL
-      
+
+  names(lci.current) <- names(uci.current) <- names(pvals.current)
+  
   out <- list(pval          = pvals.current,
               lci           = lci.current,
               uci           = uci.current,
               gamma.min     = gamma[which.gamma],
               pvals.nonaggr = pvals,
               sel.models    = sel.model.all,
+              ci.level      = ci.level,
               method        = "multi.split",
               call          = match.call())
   
