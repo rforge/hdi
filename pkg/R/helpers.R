@@ -183,13 +183,8 @@ preprocess.group.testing <- function(N, cov, alt)
   return(zz2)
 }
 
-calculate.pvalue.for.group <- function(brescaled,
-                                       group,
-                                       individual,
-                                       Delta = NULL,
-                                       correct = TRUE,
-                                       alt = TRUE,
-                                       zz2)
+calculate.pvalue.for.group <- function(brescaled, group, individual,
+                                       Delta = NULL, alt = TRUE, zz2)
 {
   ## Purpose:
   ## calculation of p-values for groups
@@ -200,9 +195,9 @@ calculate.pvalue.for.group <- function(brescaled,
   stopifnot(is.logical(group))
   stopifnot(length(group) == length(brescaled))
 
-  p <- sum(group) ##length(brescaled)
+  p <- length(brescaled)
   
-  if(alt){ ## conservative alternative proposed by Nicolai
+  if(alt){ ## (very) conservative alternative proposed by Nicolai
     pvalue <- min(individual[group])
     ##if(correct){ ## only for alternative method
     pvalue <- min(1, p * pvalue) ## Bonferroni correction (on group)

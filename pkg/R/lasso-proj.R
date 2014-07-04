@@ -133,7 +133,7 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
     pcorr <- p.adjust.wy(cov = cov2, pval = pval, N = N)
     }else{
       if(multiplecorr.method %in% p.adjust.methods){
-        pcorr <- p.adjust(pval,method=multiplecorr.method)
+        pcorr <- p.adjust(pval,method = multiplecorr.method)
       }else{
         stop("Unknown multiple correction method specified")
       }
@@ -148,18 +148,14 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
   ## Function to calculate p-value for groups ##
   ##############################################
   
-  alt.group.approach <- FALSE
-  
-  pre <- preprocess.group.testing(N   = N,
-                                  cov = cov2,
-                                  alt = alt.group.approach)
+  pre <- preprocess.group.testing(N   = N, cov = cov2, alt = FALSE)
   
   group.testing.function <- function(group){
     calculate.pvalue.for.group(brescaled  = bprojrescaled,
                                group      = group,
                                individual = pval,
                                ##correct    = TRUE,
-                               alt        = alt.group.approach,
+                               alt        = FALSE,
                                zz2        = pre)
   }
   
