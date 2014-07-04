@@ -179,16 +179,18 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ##############################################
   ## function to calculate p-value for groups ##
   ##############################################
-  alt.group.approach <- TRUE
+  
+  alt.group.approach <- FALSE
   pre <- preprocess.group.testing(N = N,
                                   cov = cov2,
                                   alt = alt.group.approach)
+  
   group.testing.function <- function(group){
     calculate.pvalue.for.group(brescaled  = hat.betast,
                                group      = group,
                                individual = res.pval,
                                Delta      = Delta,
-                               correct    = TRUE,
+                               ##correct    = TRUE,
                                alt        = alt.group.approach,
                                zz2        = pre)
   }

@@ -118,7 +118,8 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
   ## Calculate p-value
   pval <- 2 * pnorm(abs(bprojrescaled), lower.tail = FALSE)
 
-  
+  cov2 <- crossprod(Z)
+
   #################################
   ## Multiple testing correction ##
   #################################
@@ -127,7 +128,6 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
     ## Westfall-Young like procedure as in ridge projection method,
     ## P.Buhlmann & L.Meier
     ## method related to the Westfall - Young procedure
-    cov2 <- crossprod(Z)
     ## constants left out since we'll rescale anyway
     ## otherwise cov2 <- crossprod(Z)/n
     pcorr <- p.adjust.wy(cov = cov2, pval = pval, N = N)
@@ -148,7 +148,7 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
   ## Function to calculate p-value for groups ##
   ##############################################
   
-  alt.group.approach <- TRUE
+  alt.group.approach <- FALSE
   
   pre <- preprocess.group.testing(N   = N,
                                   cov = cov2,
@@ -158,7 +158,7 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
     calculate.pvalue.for.group(brescaled  = bprojrescaled,
                                group      = group,
                                individual = pval,
-                               correct    = TRUE,
+                               ##correct    = TRUE,
                                alt        = alt.group.approach,
                                zz2        = pre)
   }

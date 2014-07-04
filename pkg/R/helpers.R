@@ -144,9 +144,7 @@ calc.ci <- function(bj, se, level = 0.95)
 }
 
 
-p.adjust.wy <- function(cov,
-                        pval,
-                        N=10000)
+p.adjust.wy <- function(cov, pval, N = 10000)
 {
   ## Purpose:
   ## multiple testing correction with a Westfall young-like procedure as
@@ -166,11 +164,12 @@ p.adjust.wy <- function(cov,
   Gz  <- apply(2 * pnorm(abs(zz2),lower.tail = FALSE), 1, min)
   
   ## Corrected p-values
-  pcorr <- ecdf(Gz)(pval) ## is this efficient???
+  pcorr <- ecdf(Gz)(pval) 
   return(pcorr)
 }
 
-preprocess.group.testing <- function(N, cov, alt){
+preprocess.group.testing <- function(N, cov, alt)
+{
   if(alt){
     ## No preprocessing to perform
     zz2 <- NULL
@@ -190,7 +189,8 @@ calculate.pvalue.for.group <- function(brescaled,
                                        Delta = NULL,
                                        correct = TRUE,
                                        alt = TRUE,
-                                       zz2){
+                                       zz2)
+{
   ## Purpose:
   ## calculation of p-values for groups
   ## using the maximum as test statistic
@@ -200,11 +200,13 @@ calculate.pvalue.for.group <- function(brescaled,
   stopifnot(is.logical(group))
   stopifnot(length(group) == length(brescaled))
 
-  p <- length(brescaled)
+  p <- sum(group) ##length(brescaled)
   
   if(alt){ ## conservative alternative proposed by Nicolai
     pvalue <- min(individual[group])
-    ## pvalue <- min(1, p * pvalue) ## uncomment this!!!
+    ##if(correct){ ## only for alternative method
+    pvalue <- min(1, p * pvalue) ## Bonferroni correction (on group)
+    ##}
   }else{
     ## max test statistics according to http://arxiv.org/abs/1202.1377
     ## P.Buehlmann
@@ -229,12 +231,7 @@ calculate.pvalue.for.group <- function(brescaled,
       pvalue <- individual[group]
     }
   }
-  
-  if(correct){ ## only for alternative method
-    pvalue <- min(1, p * pvalue) ## Bonferroni correction
-    ## We cannot use p.adjust since we need to correct for all variables p
-    ## and pvalue might be a single value!
-  }
+
   return(pvalue)
 }
 
