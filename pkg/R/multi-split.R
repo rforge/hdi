@@ -3,6 +3,7 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
                         model.selector = lasso.cv,
                         classical.fit = lm.pval,
                         classical.ci  = lm.ci,
+                        parallel = FALSE, ncores = 4,
                         gamma = seq(0.05, 0.99, by = 0.01),
                         args.model.selector = NULL,
                         args.classical.fit = NULL,
@@ -21,36 +22,25 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
   n <- nrow(x)
   p <- ncol(x)
   
-  ## Matrix of bootstrap p-values:
-  ## rows = sample-splits
-  ## cols = predictors
-  pvals <- matrix(1, nrow = B, ncol = p)
-  colnames(pvals) <- colnames(x)
-
-  ## Lower and upper bound of the confidence intervals
-  uci <- matrix(rep(Inf, B * p), nrow = B)
-  lci <- matrix(rep(-Inf, B * p), nrow = B)
-  centers <- matrix(rep(NA,B*p),nrow=B)##centers of the confidence intervals
-  ses <- matrix(rep(Inf,B*p),nrow=B)##standard errors of the confidence intervals
-  df.res <- rep(NA,B)##degrees of freedom of the residuals in the fits
-
-  if(return.selmodels){
-    sel.model.all <- matrix(FALSE, nrow = B, ncol = p)
-    colnames(sel.model.all) <- colnames(x)
-  }else{ ## safe memory space in case no output is wanted regarding sel. models
-    sel.model.all <- NULL
-  }
-  
-  n.left <- floor(n * fraction)
+  n.left  <- floor(n * fraction)
   n.right <- n - n.left
-      
-  for(b in 1:B){
-    try.again <- TRUE
+
+  ## Helper function for one sample split
+  ## all variables are taken from the function environment
+  
+  oneSplit <- function(...){
+    pvals.v         <- rep(1, p)
+    sel.model.all.v <- logical(p) ## FALSE by default
+    lci.v           <- rep(-Inf, p)
+    uci.v           <- rep(Inf, p)
+    centers.v       <- rep(NA, p)
+    ses.v           <- rep(Inf, p)
+    df.res          <- NA
+
+    try.again    <- TRUE
     repeat.count <- 0
+    
     while(try.again){
-      if(trace)
-        cat("...Split", b, "\n")
-        
       ## Perform sample-splitting; sample *without* replacement
       split <- sample(1:n, n.left, replace = FALSE)
     
@@ -76,38 +66,38 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
                             args = c(list(x = x.right[,sel.model],
                               y = y.right), args.classical.fit))
         ## Bonferroni on small model
-        pvals[b, sel.model] <- pmin(sel.pval * p.sel, 1)
+        pvals.v[sel.model] <- pmin(sel.pval * p.sel, 1) ## new
         
         if(ci){ ## Calculations of confidence intervals
-          if(identical(classical.fit,lm.pval))
-            {##calculate confidence intervals and save all necessary information
-              tmp.fit.lm <- lm(y.right ~ x.right[,sel.model],
-                               args.classical.fit)
-              ##Based on code from getAnywhere(confint.lm)
-              a <- (1 - ci.level)/2
-              a <- c(a, 1 - a)
-              fac <- qt(a, tmp.fit.lm$df.residual)
-              sel.ses <- sqrt(diag(vcov(tmp.fit.lm)))[-1]##leave out the intercept
-              sel.centers <- coef(tmp.fit.lm)[-1]
-              sel.ci <- sel.centers + sel.ses %o% fac
-              centers[b,sel.model] <- sel.centers
-              lci[b,sel.model] <- sel.ci[,1]
-              uci[b,sel.model] <- sel.ci[,2]
-              ses[b,sel.model] <- sel.ses
-              df.res[b] <- tmp.fit.lm$df.residual             
+          if(identical(classical.fit, lm.pval)){
+            ## Calculate ci's and save all necessary information
+            tmp.fit.lm <- lm(y.right ~ x.right[,sel.model],
+                             args.classical.fit)
+            ## Based on code from getAnywhere(confint.lm)
+            a   <- (1 - ci.level) / 2
+            a   <- c(a, 1 - a)
+            fac <- qt(a, tmp.fit.lm$df.residual)
+            sel.ses     <- sqrt(diag(vcov(tmp.fit.lm)))[-1] ## without intercept
+            sel.centers <- coef(tmp.fit.lm)[-1]
+            sel.ci      <- sel.centers + sel.ses %o% fac
+            centers.v[sel.model] <- sel.centers
+            lci.v[sel.model]     <- sel.ci[,1] ## new
+            uci.v[sel.model]     <- sel.ci[,2] ## new
+            ses.v[sel.model]     <- sel.ses    ## change?
+            df.res               <- tmp.fit.lm$df.residual ## change?          
           }else{
-            ##do the primite confidence interval aggregation
+            ## do the primitive ci interval aggregation
             sel.ci <- do.call(classical.ci,
                               args =  c(list(x = x.right[, sel.model],
                                 y = y.right, level = 1 - (1 - ci.level) / 2),
                                 args.classical.ci))
-            lci[b, sel.model] <- sel.ci[, 1]
-            uci[b, sel.model] <- sel.ci[, 2]
+            lci.v[sel.model] <- sel.ci[, 1] ## new
+            uci.v[sel.model] <- sel.ci[, 2] ## new
           }
-        }
+        } ## end if(ci)
 
         if(return.selmodels)
-          sel.model.all[b, sel.model] <- TRUE
+          sel.model.all.v[sel.model] <- TRUE
         
         try.again <- FALSE ## break the loop, continue with next sample-split
       }
@@ -131,7 +121,65 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
         try.again <- FALSE
       }
     } ## end while(try.again)
+    return(list(pvals         = pvals.v,
+                sel.model.all = sel.model.all.v,
+                centers       = centers.v,
+                ses           = ses.v,
+                df.res        = df.res,
+                lci           = lci.v,
+                uci           = uci.v))
   }
+
+  ######################
+  ## Sample-splitting ##
+  ######################
+  
+  if(parallel){
+    if(trace)
+      cat("...starting parallelization of sample-splits\n")
+ 
+    split.out <- mclapply(1:B, oneSplit, mc.cores = ncores)
+  }
+  else{
+    split.out <- list(); length(split.out) <- B
+    for(b in 1:B){
+      if(trace)
+        cat("...Split", b, "\n")
+      
+      split.out[[b]] <- oneSplit()
+    }
+  }
+
+  #####################
+  ## Deparse objects ##
+  #####################
+  
+  myDeparse <- function(name){
+    matrix(unlist(lapply(split.out, "[[", name)), nrow = B, byrow = TRUE)
+  }
+
+  ## Matrix of bootstrap p-values (etc.)
+  ## rows = sample-splits
+  ## cols = predictors
+
+  pvals <- myDeparse("pvals"); colnames(pvals) <- colnames(x)
+  
+  if(return.selmodels){
+    sel.model.all <- myDeparse("sel.model.all")
+    colnames(sel.model.all) <- colnames(x)
+  }else{ ## safe memory space in case no output is wanted regarding sel. models
+    sel.model.all <- NA
+  }
+
+  lci           <- myDeparse("lci")
+  uci           <- myDeparse("uci")
+  centers       <- myDeparse("centers")
+  ses           <- myDeparse("ses")
+  df.res        <- unlist(lapply(split.out, "[[", "df.res"))
+
+  ##############################
+  ## Calculate final p-values ##
+  ##############################
   
   ## For loop is not very innovative, but it does it's job...
   pvals.current <- which.gamma <- numeric(p)
@@ -152,38 +200,37 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
   
   names(pvals.current) <- names(which.gamma) <- colnames(x)
 
-  if(ci && identical(classical.fit,lm.pval))
-    {
-      vars <- ncol(lci)
-      ##for every separate variable, aggregate the ci
-      new.ci <- mapply(aggregate.ci,
-                       lci=split(lci,rep(1:vars,each=B)),
-                       rci=split(uci,rep(1:vars,,each=B)),
-                       centers=split(centers,rep(1:vars,each=B)),                   
-                       ses=split(ses,rep(1:ncol(ses),each=B)),
-                       df.res=list(df.res=df.res),
-                       gamma.min=min(gamma),
-                       multi.corr=FALSE,##single testing confidence intervals
-                       verbose=FALSE)
-      lci.current <- t(new.ci)[,1]
-      uci.current <- t(new.ci)[,2]
-    }else{
-      lci.current <- apply(lci, 2, median)
-      uci.current <- apply(uci, 2, median)
-    }
+  if(ci && identical(classical.fit,lm.pval)){
+    vars <- ncol(lci)
+    ##for every separate variable, aggregate the ci
+    new.ci <- mapply(aggregate.ci,
+                     lci = split(lci, rep(1:vars, each = B)),
+                     rci = split(uci, rep(1:vars, each = B)),
+                     centers = split(centers,rep(1:vars, each = B)),
+                     ses = split(ses, rep(1:ncol(ses), each = B)),
+                     df.res = list(df.res = df.res),
+                     gamma.min = min(gamma),
+                     multi.corr = FALSE,##single testing confidence intervals
+                     verbose = FALSE)
+    lci.current <- t(new.ci)[,1]
+    uci.current <- t(new.ci)[,2]
+  }else{
+    lci.current <- apply(lci, 2, median)
+    uci.current <- apply(uci, 2, median)
+  }
   
   if(!return.nonaggr) ## Overwrite pvals with NULL if no output is wanted
-    pvals <- NULL
+    pvals <- NA
 
   names(lci.current) <- names(uci.current) <- names(pvals.current)
   
   out <- list(pval          = pvals.current,
-              lci           = lci.current,
-              uci           = uci.current,
+              lci           = if (ci) lci.current else NA,
+              uci           = if (ci) uci.current else NA,
               gamma.min     = gamma[which.gamma],
               pvals.nonaggr = pvals,
               sel.models    = sel.model.all,
-              ci.level      = ci.level,
+              ci.level      = ifelse(ci, ci.level, NA),
               method        = "multi.split",
               call          = match.call())
   
@@ -198,8 +245,7 @@ aggregate.ci <- function(lci,rci,centers,
                          df.res,
                          gamma.min=0.05,
                          multi.corr=FALSE,
-                         verbose=FALSE)
-{
+                         verbose=FALSE){
   ##detect the -Inf Inf intervals
   inf.ci <- is.infinite(lci)|is.infinite(rci)
   no.inf.ci <- sum(inf.ci)##this we will use later on

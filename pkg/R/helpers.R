@@ -172,12 +172,12 @@ p.adjust.wy <- function(cov,
 
 preprocess.group.testing <- function(N, cov, alt){
   if(alt){
-    ##no preprocessing to do
+    ## No preprocessing to perform
     zz2 <- NULL
   }
   else{
     ## Simulate distribution
-    set.seed(3)##always give the same result
+    set.seed(3) ## always give the same result
     zz  <- mvrnorm(N, rep(0, ncol(cov)), cov)
     zz2 <- scale(zz, center = FALSE, scale = sqrt(diag(cov)))
   }
@@ -187,11 +187,10 @@ preprocess.group.testing <- function(N, cov, alt){
 calculate.pvalue.for.group <- function(brescaled,
                                        group,
                                        individual,
-                                       Delta=NULL,
-                                       correct=TRUE,
-                                       alt=TRUE,
-                                       zz2)
-{
+                                       Delta = NULL,
+                                       correct = TRUE,
+                                       alt = TRUE,
+                                       zz2){
   ## Purpose:
   ## calculation of p-values for groups
   ## using the maximum as test statistic
@@ -203,34 +202,35 @@ calculate.pvalue.for.group <- function(brescaled,
 
   p <- length(brescaled)
   
-  if(alt){ ## alt proposed by Nicolai
+  if(alt){ ## conservative alternative proposed by Nicolai
     pvalue <- min(individual[group])
+    ## pvalue <- min(1, p * pvalue) ## uncomment this!!!
   }else{
     ## max test statistics according to http://arxiv.org/abs/1202.1377
     ## P.Buehlmann
     if(is.null(zz2))
       stop("you need to preprocess the zz2 by calling preprocess.group.testing")
+    
     if(sum(group) > 1){
       group.coefficients <- abs(brescaled[group])
-      max.coefficient <- max(group.coefficients)
-      group.zz <- abs(zz2[,group])
+      max.coefficient    <- max(group.coefficients)
+      group.zz           <- abs(zz2[,group])
         
-      if(!is.null(Delta)){
-        ##because of Ridge method
+      if(!is.null(Delta)){ ## special case Ridge method
         group.Delta <- Delta[group]
-        group.zz <- sweep(group.zz,2,group.Delta,"+")
-        ##End special thing for Ridge
+        group.zz    <- sweep(group.zz, 2, group.Delta, "+")
       }
       
-      Gz <- apply(group.zz,1,max)
-      
-      pvalue <- 1-ecdf(Gz)(max.coefficient)
-    }else{
-      pvalue <- individual[group]##we don't have a group,only a single variable,
-    }      
+      Gz <- apply(group.zz, 1, max)
+
+      ## determine simulated p-value
+      pvalue <- 1 - ecdf(Gz)(max.coefficient)
+    }else{ ## if group consists of a single variable
+      pvalue <- individual[group]
+    }
   }
   
-  if(correct){
+  if(correct){ ## only for alternative method
     pvalue <- min(1, p * pvalue) ## Bonferroni correction
     ## We cannot use p.adjust since we need to correct for all variables p
     ## and pvalue might be a single value!

@@ -7,7 +7,8 @@
 \usage{
 multi.split(x, y, B = 50, fraction = 0.5, ci = TRUE, ci.level = 0.95,
             model.selector = lasso.cv,
-            classical.fit = lm.pval, classical.ci = lm.ci, 
+            classical.fit = lm.pval, classical.ci = lm.ci,
+            parallel = FALSE, ncores = 4,
             gamma = seq(0.05, 0.99, by = 0.01),
             args.model.selector = NULL, args.classical.fit = NULL,
             args.classical.ci = NULL,
@@ -44,6 +45,8 @@ multi.split(x, y, B = 50, fraction = 0.5, ci = TRUE, ci.level = 0.95,
     matrix of confidence intervals. See \code{\link{lm.ci}} for an
     example. Additional arguments can be passed through
     \code{args.classical.ci}.}
+  \item{parallel}{Should parallelization be used? (logical)}
+  \item{ncores}{Number of cores used for parallelization.}
   \item{gamma}{Vector of gamma-values. In case gamma is a scalar, the
     value Q_j instead of P_j is being calculated (see reference below).}
   \item{args.model.selector}{Named list of further arguments for

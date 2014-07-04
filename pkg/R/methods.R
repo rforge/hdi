@@ -27,6 +27,7 @@ print.hdi <- function(x, ...)
   ###############
   ## Stability ##
   ###############
+  
   else if(method == "stability"){
     cat("Selected predictors:\n")
     cat("--------------------\n")
@@ -47,6 +48,7 @@ print.hdi <- function(x, ...)
   #########################
   ## Cluster Lower-Bound ##
   #########################
+  
   else if(method == "clusterLowerBound"){
     cat("\n lower l1-norm group bounds in a hierarchical clustering ")
     cat("\n lower bound on l1-norm of all regression coefficients:",
@@ -74,6 +76,7 @@ print.hdi <- function(x, ...)
   ######################
   ## Other situations ##
   ######################
+  
   else{
     print.default(x, ...)
   }
@@ -151,6 +154,9 @@ confint.hdi <- function(object, parm, level = 0.95, ...)
     m     <- cbind(object$bhat[parm] - add, object$bhat[parm] + add)
   }
   else if(object$method == "multi.split"){
+    if(is.na(object$ci.level))
+      stop("No confidence interval information available in fitted object")
+    
     m <- cbind(object$lci[parm], object$uci[parm])
     
     if(level != object$ci.level)
