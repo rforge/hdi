@@ -1,10 +1,10 @@
-multi.split <- function(x, y, B = 50, fraction = 0.5,
+multi.split <- function(x, y, B = 100, fraction = 0.5,
                         ci = TRUE, ci.level = 0.95,
                         model.selector = lasso.cv,
                         classical.fit = lm.pval,
                         classical.ci  = lm.ci,
                         parallel = FALSE, ncores = 4,
-                        gamma = seq(0.05, 0.99, by = 0.01),
+                        gamma = seq(ceiling(0.05*B)/B,1-1/B,by=1/B),                        
                         args.model.selector = NULL,
                         args.classical.fit = NULL,
                         args.classical.ci = NULL,
@@ -170,7 +170,7 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
   }else{ ## safe memory space in case no output is wanted regarding sel. models
     sel.model.all <- NA
   }
-
+  
   lci           <- myDeparse("lci")
   uci           <- myDeparse("uci")
   centers       <- myDeparse("centers")
@@ -183,6 +183,9 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
   
   ## For loop is not very innovative, but it does it's job...
   pvals.current <- which.gamma <- numeric(p)
+  if(!(0.05 %in% gamma))
+    Warning("0.05 is not in the gamma range due to the choice of B, the results might be incorrect. Pick a B such that some integer multiple of 1/B equals 0.05 to avoid this.")
+  
   for(j in 1:p){ ## loop through all predictors
     quant.gamma <- quantile(pvals[,j], gamma) / gamma
 
@@ -203,6 +206,13 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
   if(ci && identical(classical.fit,lm.pval)){
     vars <- ncol(lci)
     ##for every separate variable, aggregate the ci
+    if(any(is.na(sel.model.all)))
+      {
+        s0 <- NA
+      }else{
+        s0 <- apply(sel.model.all,1,sum)
+      }
+    ##calculate single-testing confidence intervals
     new.ci <- mapply(aggregate.ci,
                      lci = split(lci, rep(1:vars, each = B)),
                      rci = split(uci, rep(1:vars, each = B)),
@@ -210,15 +220,18 @@ multi.split <- function(x, y, B = 50, fraction = 0.5,
                      ses = split(ses, rep(1:ncol(ses), each = B)),
                      df.res = list(df.res = df.res),
                      gamma.min = min(gamma),
+                     ##multi.corr = TRUE,##temporarily trying multiple testing corrected ci
                      multi.corr = FALSE,##single testing confidence intervals
-                     verbose = FALSE)
+                     verbose = FALSE,
+                     s0=list(s0=s0),
+                     var=1:vars)#for debug information to have the var of this aggregate call
     lci.current <- t(new.ci)[,1]
     uci.current <- t(new.ci)[,2]
   }else{
     lci.current <- apply(lci, 2, median)
     uci.current <- apply(uci, 2, median)
   }
-  
+
   if(!return.nonaggr) ## Overwrite pvals with NULL if no output is wanted
     pvals <- NA
 
@@ -245,7 +258,9 @@ aggregate.ci <- function(lci,rci,centers,
                          df.res,
                          gamma.min=0.05,
                          multi.corr=FALSE,
-                         verbose=FALSE){
+                         verbose=FALSE,
+                         var,
+                         s0){
   ##detect the -Inf Inf intervals
   inf.ci <- is.infinite(lci)|is.infinite(rci)
   no.inf.ci <- sum(inf.ci)##this we will use later on
@@ -264,6 +279,7 @@ aggregate.ci <- function(lci,rci,centers,
   centers <- centers[!inf.ci]
   df.res <- df.res[!inf.ci]
   ses <- ses[!inf.ci]
+  s0 <- s0[!inf.ci]
   
   ci.lengths <- rci-lci
   ci.info <- list(lci=lci,
@@ -272,6 +288,7 @@ aggregate.ci <- function(lci,rci,centers,
                   ci.lengths=ci.lengths,
                   no.inf.ci=no.inf.ci,
                   ses=ses,
+                  s0=s0,
                   df.res=df.res,
                   gamma.min=gamma.min,
                   multi.corr=multi.corr)
@@ -483,7 +500,8 @@ bisection.gammamin.coverage <- function(outer,
 }
 
 does.it.cover.gammamin <- function(beta.j,
-                                   ci.info)
+                                   ci.info)#,
+                                        #non.central.t=FALSE)
 {
   if(missing(ci.info))
     stop("ci.info is missing to the function does.it.cover.gammamin")
@@ -495,29 +513,59 @@ does.it.cover.gammamin <- function(beta.j,
   df.res <- ci.info$df.res
   gamma.min <- ci.info$gamma.min
   multi.corr <- ci.info$multi.corr
+  s0 <- ci.info$s0
+  
+  ##Warning!: this is also affected by noncentral vs central t dist
   pval.rank <- rank(-abs(beta.j-centers)/(ci.lengths/2))##the rank of the pvalue in increasing order, - sign to reverse rank
   nsplit <- length(pval.rank) + no.inf.ci##the number of ci + the inf ci we left out
 
   gamma.b <- pval.rank/nsplit
   if(multi.corr)
     {
-      stop("not implemented yet, we need the S0 information for this")
-      #level <- (1-0.05*gamma.b/(1-log(gamma.min)*S0))
+      if(any(is.na(s0)))
+        stop("need s0 information to be able to create multiple testing corrected pvalues")
+      level <- (1-0.05*gamma.b/(1-log(gamma.min)*s0))
     }else{
       level <- (1-0.05*gamma.b/(1-log(gamma.min)))
     }
   ##from the getAnywhere(confint.lm) code
   a <- (1 - level)/2
   a <- 1-a
+
+  ##Warning!: this is also affected by noncentral vs central t dist
+  ##if(non.central.t)
+  ##  {
+  ##    ##CHECK: is this the correct way of doing things?
+  ##    ##browser()
+  ##    ##non-central t-distribution! --> not symmetric anymore!!!!
+  ##    lfac <- qt(1-a,df.res,ncp=(centers-beta.j)/ses)
+  ##    ufac <- qt(a,df.res,ncp=(centers-beta.j)/ses)
+  ##    ##Are these the correct non centers to pick? not the point where we want to test!?!?
+  ##    ##TODO DEBUG
+  ##    nlci <- beta.j+lfac*ses
+  ##    nrci <- beta.j+ufac*ses
+  ##    if(all(gamma.b <= gamma.min))
+  ##      {##the fraction of non Inf ci of all splits is smaller than gamma.min
+  ##        beta.is.in <- TRUE
+  ##      }else{
+  ##        ##should not check gamma.b < 1 because we already removed the -Inf Inf ci!
+  ##        beta.is.in <- all(nlci[gamma.b > gamma.min ] <= beta.j) && all(nrci[gamma.b > gamma.min ] >= beta.j)##the centers are in the ci around beta.j/c
+  ##      }
+  ##  }else{
+  
+  ##central t-distribution, approximations are made! if df big enough this shouldn't be a problem
   fac <- qt(a,df.res)
+  
   nlci <- centers - fac*ses
   nrci <- centers + fac*ses
   if(all(gamma.b <= gamma.min))
     {##the fraction of non Inf ci of all splits is smaller than gamma.min
       beta.is.in <- TRUE
     }else{
+      ##should not check gamma.b < 1 because we already removed the -Inf Inf ci!
       beta.is.in <- all(nlci[gamma.b > gamma.min] <= beta.j) && all(nrci[gamma.b > gamma.min] >= beta.j)##beta_j is in the required intervals
     }
+  
   return(beta.is.in)
 }
 
