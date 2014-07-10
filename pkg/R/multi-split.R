@@ -237,7 +237,8 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
 
   names(lci.current) <- names(uci.current) <- names(pvals.current)
   
-  out <- list(pval          = pvals.current,
+  out <- list(pval          = NA,
+              pval.corr     = pvals.current,
               lci           = if (ci) lci.current else NA,
               uci           = if (ci) uci.current else NA,
               gamma.min     = gamma[which.gamma],
@@ -371,7 +372,7 @@ find.inside.point.gammamin <- function(low,
           print("df.res")
           print(ci.info$df.res)
           
-          stop("couldn't find an inside point between low and high")
+          stop("couldn't find an inside point between low and high. The confidence interval doesn't exist!")
         }
     }
   if(verbose)

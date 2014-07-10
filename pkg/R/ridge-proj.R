@@ -17,8 +17,8 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## N: number of simulations for the WY procedure
   ## ----------------------------------------------------------------------
   ## Return values:
-  ## individual: the individual testing p-values for each parameter
-  ## corrected:  the multiple testing corrected p-values for each parameter
+  ## pval: the individual testing p-values for each parameter
+  ## pval.corr:  the multiple testing corrected p-values for each parameter
   ## betahat:    the initial estimate by the scaled lasso of \beta^0
   ## bhat:       the de-sparsified \beta^0 estimate used for p-value calculation
   ## sigmahat:   the \sigma estimate coming from the scaled lasso
@@ -192,8 +192,8 @@ ridge.proj <- function(x, y, ci.level = 0.95,
                                zz2        = pre)
   }
 
-  out <- list(individual    = res.pval,
-              corrected     = pcorr,
+  out <- list(pval          = res.pval,
+              pval.corr     = pcorr,
               ci            = cbind(myci$lci / sds, myci$rci / sds), 
               groupTest     = group.testing.function,
               sigmahat      = sqrt(hat.sigma2),

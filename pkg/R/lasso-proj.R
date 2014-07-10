@@ -14,8 +14,8 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
   ## Arguments:
   ## ----------------------------------------------------------------------
   ## Return values:
-  ## individual: p-values for every parameter (individual tests)
-  ## corrected:  multiple testing corrected p-values for every parameter
+  ## pval: p-values for every parameter (individual tests)
+  ## pval.corr:  multiple testing corrected p-values for every parameter
   ## betahat:    initial estimate by the scaled lasso of \beta^0
   ## bhat:       de-sparsified \beta^0 estimate used for p-value calculation
   ## sigmahat:   \sigma estimate coming from the scaled lasso
@@ -163,8 +163,8 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
   ## Return all information ##
   ############################
   
-  out <- list(individual  = as.vector(pval),
-              corrected   = pcorr,
+  out <- list(pval        = as.vector(pval),
+              pval.corr   = pcorr,
               ci          = cbind(myci$lci / sds, myci$rci / sds), 
               groupTest   = group.testing.function,
               sigmahat    = sigmahat,

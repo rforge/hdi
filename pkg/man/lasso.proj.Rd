@@ -26,8 +26,8 @@ lasso.proj(x, y, ci.level = 0.95, family = "gaussian", standardize = TRUE,
   \item{Z}{user input}
 }
 \value{
-  \item{individual}{Individual p-values for each parameter.}
-  \item{corrected}{Multiple testing corrected p-values for each
+  \item{pval}{Individual p-values for each parameter.}
+  \item{pval.corr}{Multiple testing corrected p-values for each
     parameter.}
   \item{ci}{Confidence intervals calculated for each parameter.}
     \item{groupTest}{Function to perform groupwise tests. Groups are

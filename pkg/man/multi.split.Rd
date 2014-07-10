@@ -62,7 +62,7 @@ multi.split(x, y, B = 50, fraction = 0.5, ci = TRUE, ci.level = 0.95,
 }
 \details{...}
 \value{
-  \item{pval}{Vector of p-values.}
+  \item{pval.corr}{Vector of multiple testing corrected p-values.}
   \item{gamma.min}{Value of gamma where minimal p-values was attained.}
 }
 \references{
@@ -84,7 +84,7 @@ y <- x[,1] * 2 + x[,2] * 2.5 + rnorm(100)
 fit.multi <- multi.split(x, y, model.selector =lasso.firstq,
                          args.model.selector = list(q = 10))
 fit.multi
-fit.multi$pval[1:10] ## the first 10 p-values
+fit.multi$pval.corr[1:10] ## the first 10 p-values
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
