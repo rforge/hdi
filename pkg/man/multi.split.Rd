@@ -5,11 +5,11 @@
 
 \description{Function to calculate p-values based on multi-splitting approach}
 \usage{
-multi.split(x, y, B = 50, fraction = 0.5, ci = TRUE, ci.level = 0.95,
+multi.split(x, y, B = 100, fraction = 0.5, ci = TRUE, ci.level = 0.95,
             model.selector = lasso.cv,
             classical.fit = lm.pval, classical.ci = lm.ci,
             parallel = FALSE, ncores = 4,
-            gamma = seq(0.05, 0.99, by = 0.01),
+            gamma = seq(ceiling(0.05*B)/B,1-1/B,by=1/B),
             args.model.selector = NULL, args.classical.fit = NULL,
             args.classical.ci = NULL,
             return.nonaggr = FALSE, return.selmodels = FALSE, trace = FALSE)

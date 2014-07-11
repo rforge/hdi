@@ -184,7 +184,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
   ## For loop is not very innovative, but it does it's job...
   pvals.current <- which.gamma <- numeric(p)
   if(!(0.05 %in% gamma))
-    Warning("0.05 is not in the gamma range due to the choice of B, the results might be incorrect. Pick a B such that some integer multiple of 1/B equals 0.05 to avoid this.")
+    warning("0.05 is not in the gamma range due to the choice of B, the results might be incorrect. Pick a B such that some integer multiple of 1/B equals 0.05 to avoid this.")
   
   for(j in 1:p){ ## loop through all predictors
     quant.gamma <- quantile(pvals[,j], gamma) / gamma

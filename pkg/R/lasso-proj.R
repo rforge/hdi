@@ -177,7 +177,7 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
               method      = "lasso.proj",
               call        = match.call())
 
-  names(out$individual) <- names(out$corrected) <- names(out$bhat) <-
+  names(out$pval) <- names(out$pval.corr) <- names(out$bhat) <-
     names(out$sds) <- names(out$se) <- names(out$betahat) <-
       colnames(x)
 

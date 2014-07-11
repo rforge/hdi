@@ -210,7 +210,7 @@ ridge.proj <- function(x, y, ci.level = 0.95,
               method        = "ridge.proj",
               call          = match.call())
   
-  names(out$individual) <- names(out$corrected) <- names(out$bhat) <-
+  names(out$pval) <- names(out$pval.corr) <- names(out$bhat) <-
     names(out$sds) <- names(out$se) <- names(out$delta) <- names(out$betahat) <-
       colnames(x)
 

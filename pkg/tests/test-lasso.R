@@ -43,7 +43,7 @@ fit.lasso <- lasso.proj(x = x.use, y = y)
 ## Check standardization
 set.seed(3)
 fit.lasso2 <- lasso.proj(x = 2 + 4 * x.use, y = y)
-stopifnot(all.equal(fit.lasso$individual, fit.lasso2$individual))
+stopifnot(all.equal(fit.lasso$pval, fit.lasso2$pval))
 
 stopifnot(all.equal(max(abs(range(fit.lasso$bhat / fit.lasso2$bhat - 4))), 0))
 

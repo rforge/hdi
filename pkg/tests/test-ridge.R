@@ -38,11 +38,11 @@ x.use <- x[,1:200]
 
 fit.ridge  <- ridge.proj(x = x.use, y = y)
 fit.ridge1 <- ridge.proj(x = x.use + 10^-16, y = y)
-stopifnot(all.equal(fit.ridge$individual, fit.ridge1$individual))
+stopifnot(all.equal(fit.ridge$pval, fit.ridge1$pval))
 
 ## Check standardization
 fit.ridge2 <- ridge.proj(x = 2 + 4 * x.use, y = y)
-stopifnot(all.equal(fit.ridge$individual, fit.ridge2$individual))
+stopifnot(all.equal(fit.ridge$pval, fit.ridge2$pval))
 
 stopifnot(all.equal(max(abs(range(fit.ridge$bhat / fit.ridge2$bhat - 4))), 0))
 
