@@ -132,11 +132,16 @@ confint.hdi <- function(object, parm, level = 0.95, ...)
   if(!object$method %in% c("lasso.proj", "ridge.proj", "multi.split"))
     stop("Not supported object type")
   
-  pnames <- switch(object$method,
-                   "lasso.proj"  = names(object$bhat),
-                   "ridge.proj"  = names(object$bhat),
-                   "multi.split" = names(object$pval))
-
+  obj <- switch(object$method,
+                "lasso.proj"  = object$bhat,
+                "ridge.proj"  = object$bhat,
+                "multi.split" = object$pval)
+  
+  if(is.null(names(obj)))
+    pnames <- 1:length(obj)
+  else
+    pnames <- names(obj)
+      
   if(missing(parm))
     parm <- pnames
   else if (is.numeric(parm))

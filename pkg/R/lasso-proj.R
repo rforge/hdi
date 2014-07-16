@@ -131,14 +131,14 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
     ## constants left out since we'll rescale anyway
     ## otherwise cov2 <- crossprod(Z)/n
     pcorr <- p.adjust.wy(cov = cov2, pval = pval, N = N)
+  }else{
+    if(multiplecorr.method %in% p.adjust.methods){
+      pcorr <- p.adjust(pval,method = multiplecorr.method)
     }else{
-      if(multiplecorr.method %in% p.adjust.methods){
-        pcorr <- p.adjust(pval,method = multiplecorr.method)
-      }else{
-        stop("Unknown multiple correction method specified")
-      }
-    }## end multiple testing correction
-
+      stop("Unknown multiple correction method specified")
+    }
+  }## end multiple testing correction
+  
   ## Also return the confidence intervals
   se   <- 1 / scaleb
   myci <- calc.ci(bj = bproj, level = ci.level, se = se)
@@ -148,7 +148,7 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
   ## Function to calculate p-value for groups ##
   ##############################################
   
-  pre <- preprocess.group.testing(N   = N, cov = cov2, alt = FALSE)
+  pre <- preprocess.group.testing(N = N, cov = cov2, alt = FALSE)
   
   group.testing.function <- function(group){
     calculate.pvalue.for.group(brescaled  = bprojrescaled,
