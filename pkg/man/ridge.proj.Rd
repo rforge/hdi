@@ -28,7 +28,7 @@ ridge.proj(x, y, ci.level = 0.95, family = "gaussian", standardize = TRUE,
     parameter.}
   \item{ci}{Confidence intervals calculated for each parameter}
   \item{groupTest}{Function to perform groupwise tests. Groups are
-    indicated using a logical vector.}
+    indicated using an index vector with entries in {1,...,p}.}
   %\item{betahat}{initial estimate by the scaled lasso of \eqn{\beta^0}}
   %\item{bhat}{de-sparsified \eqn{\beta^0} estimate used for p-value calculation}
   \item{sigmahat}{\eqn{\widehat{\sigma}} coming from the scaled lasso.}

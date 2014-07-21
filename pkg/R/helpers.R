@@ -192,10 +192,18 @@ calculate.pvalue.for.group <- function(brescaled, group, individual,
   ## http://arxiv.org/abs/1202.1377 P.Buehlmann
   ## Author: Ruben Dezeure 2 May 2014
 
+  p <- length(brescaled)
+
+  if(!is.logical(group)){
+    stopifnot(all(group <= p) & all(group >= 1))
+    tmp <- logical(length(brescaled))
+    tmp[group] <- TRUE
+    group <- tmp
+  }
+  
   stopifnot(is.logical(group))
   stopifnot(length(group) == length(brescaled))
 
-  p <- length(brescaled)
   
   if(alt){ ## (very) conservative alternative proposed by Nicolai
     pvalue <- min(individual[group])

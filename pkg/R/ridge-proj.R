@@ -177,7 +177,7 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## \hat{\beta}_j
 
   ##############################################
-  ## function to calculate p-value for groups ##
+  ## Function to calculate p-value for groups ##
   ##############################################
   
   pre <- preprocess.group.testing(N = N, cov = cov2, alt = FALSE)
