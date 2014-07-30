@@ -191,50 +191,60 @@ calculate.pvalue.for.group <- function(brescaled, group, individual,
   ## using the maximum as test statistic
   ## http://arxiv.org/abs/1202.1377 P.Buehlmann
   ## Author: Ruben Dezeure 2 May 2014
-  
-  p <- length(brescaled)
-  
-  if(!is.logical(group)){
-    stopifnot(all(group <= p) & all(group >= 1))
-    tmp <- logical(length(brescaled))
-    tmp[group] <- TRUE
-    group <- tmp
-  }
-  
-  stopifnot(is.logical(group))
-  stopifnot(length(group) == length(brescaled))
-
-  
-  if(alt){ ## (very) conservative alternative proposed by Nicolai
-    pvalue <- min(individual[group])
-    ##if(correct){ ## only for alternative method
-    pvalue <- min(1, p * pvalue) ## Bonferroni correction (on group)
-    ##}
-  }else{
-    ## max test statistics according to http://arxiv.org/abs/1202.1377
-    ## P.Buehlmann
-    if(is.null(zz2))
-      stop("you need to preprocess the zz2 by calling preprocess.group.testing")
-    
-    if(sum(group) > 1){
-      group.coefficients <- abs(brescaled[group])
-      max.coefficient    <- max(group.coefficients)
-      group.zz           <- abs(zz2[,group])
-        
-      if(!is.null(Delta)){ ## special case Ridge method
-        group.Delta <- Delta[group]
-        group.zz    <- sweep(group.zz, 2, group.Delta, "+")
+  if(is.list(group))
+    {
+      pvalue <- lapply(group,
+                       calculate.pvalue.for.group,
+                       brescaled=brescaled,
+                       individual=individual,
+                       Delta=Delta,
+                       alt=alt,
+                       zz2=zz2)
+      pvalue <- unlist(pvalue)
+    }else{
+      p <- length(brescaled)
+      
+      if(!is.logical(group)){
+        stopifnot(all(group <= p) & all(group >= 1))
+        tmp <- logical(length(brescaled))
+        tmp[group] <- TRUE
+        group <- tmp
       }
       
-      Gz <- apply(group.zz, 1, max)
-
-      ## determine simulated p-value
-      pvalue <- 1 - ecdf(Gz)(max.coefficient)
-    }else{ ## if group consists of a single variable
-      pvalue <- individual[group]
+      stopifnot(is.logical(group))
+      stopifnot(length(group) == length(brescaled))
+      
+      
+      if(alt){ ## (very) conservative alternative proposed by Nicolai
+        pvalue <- min(individual[group])
+        ##if(correct){ ## only for alternative method
+        pvalue <- min(1, p * pvalue) ## Bonferroni correction (on group)
+        ##}
+      }else{
+        ## max test statistics according to http://arxiv.org/abs/1202.1377
+        ## P.Buehlmann
+        if(is.null(zz2))
+          stop("you need to preprocess the zz2 by calling preprocess.group.testing")
+        
+        if(sum(group) > 1){
+          group.coefficients <- abs(brescaled[group])
+          max.coefficient    <- max(group.coefficients)
+          group.zz           <- abs(zz2[,group])
+          
+          if(!is.null(Delta)){ ## special case Ridge method
+            group.Delta <- Delta[group]
+            group.zz    <- sweep(group.zz, 2, group.Delta, "+")
+          }
+          
+          Gz <- apply(group.zz, 1, max)
+          
+          ## determine simulated p-value
+          pvalue <- 1 - ecdf(Gz)(max.coefficient)
+        }else{ ## if group consists of a single variable
+          pvalue <- individual[group]
+        }
+      }
     }
-  }
-
   return(pvalue)
 }
 

@@ -148,12 +148,12 @@ lasso.proj <- function(x, y, family = "gaussian",
   
   pre <- preprocess.group.testing(N = N, cov = cov2, alt = FALSE)
   
-  group.testing.function <- function(group){
+  group.testing.function <- function(group, alt = FALSE){
     calculate.pvalue.for.group(brescaled  = bprojrescaled,
                                group      = group,
                                individual = pval,
                                ##correct    = TRUE,
-                               alt        = FALSE,
+                               alt        = alt,
                                zz2        = pre)
   }
   
