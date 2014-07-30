@@ -174,7 +174,7 @@ ridge.proj <- function(x, y,
   
   pre <- preprocess.group.testing(N = N, cov = cov2, alt = FALSE)
   
-  group.testing.function <- function(group, alt = FALSE){
+  group.testing.function <- function(group, alt = TRUE){
     calculate.pvalue.for.group(brescaled  = hat.betast,
                                group      = group,
                                individual = res.pval,
