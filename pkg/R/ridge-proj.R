@@ -1,4 +1,4 @@
-ridge.proj <- function(x, y, ci.level = 0.95,
+ridge.proj <- function(x, y,
                        family = "gaussian",
                        standardize = TRUE,
                        lambda = 1,
@@ -12,8 +12,6 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## Arguments:
   ## x: the design matrix
   ## y: the response vector
-  ## ci.level: the significance level to be used for the confidence
-  ##           interval calculation
   ## N: number of simulations for the WY procedure
   ## ----------------------------------------------------------------------
   ## Return values:
@@ -22,7 +20,6 @@ ridge.proj <- function(x, y, ci.level = 0.95,
   ## betahat:    the initial estimate by the scaled lasso of \beta^0
   ## bhat:       the de-sparsified \beta^0 estimate used for p-value calculation
   ## sigmahat:   the \sigma estimate coming from the scaled lasso
-  ## ci:         the confidence intervals calculated for each parameter
   ## ----------------------------------------------------------------------
   ## Author: Peter Buehlmann (initial version),
   ##         adaptations by L. Meier and R. Dezeure
@@ -166,11 +163,6 @@ ridge.proj <- function(x, y, ci.level = 0.95,
 
   scaleb <- 1 / scale.vec
   se     <- 1 / scaleb
-  
-  myci <- calc.ci(bj = hat.betacorr, se = se, level = ci.level)
-  
-  myci$lci <- (myci$lci - Delta * se) 
-  myci$rci <- (myci$rci + Delta * se) 
 
   ## need to multiply Delta with se because it is on the scale of
   ## standard normal dist and we want to bring it to the distribution of
@@ -194,7 +186,6 @@ ridge.proj <- function(x, y, ci.level = 0.95,
 
   out <- list(pval          = res.pval,
               pval.corr     = pcorr,
-              ci            = cbind(myci$lci / sds, myci$rci / sds), 
               groupTest     = group.testing.function,
               sigmahat      = sqrt(hat.sigma2),
               standardize   = standardize,

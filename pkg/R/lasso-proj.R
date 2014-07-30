@@ -1,4 +1,4 @@
-lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
+lasso.proj <- function(x, y, family = "gaussian",
                        standardize = TRUE,
                        multiplecorr.method = "holm",
                        N = 10000,
@@ -19,7 +19,6 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
   ## betahat:    initial estimate by the scaled lasso of \beta^0
   ## bhat:       de-sparsified \beta^0 estimate used for p-value calculation
   ## sigmahat:   \sigma estimate coming from the scaled lasso
-  ## ci:         confidence intervals calculated for each parameter
   ## ----------------------------------------------------------------------
   ## Author: Ruben Dezeure, Date: 18 Oct 2013 (initial version),
   ## in part based on an implementation of the ridge projection method
@@ -141,7 +140,6 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
   
   ## Also return the confidence intervals
   se   <- 1 / scaleb
-  myci <- calc.ci(bj = bproj, level = ci.level, se = se)
 
   
   ##############################################
@@ -165,7 +163,6 @@ lasso.proj <- function(x, y, ci.level = 0.95, family = "gaussian",
   
   out <- list(pval        = as.vector(pval),
               pval.corr   = pcorr,
-              ci          = cbind(myci$lci / sds, myci$rci / sds), 
               groupTest   = group.testing.function,
               sigmahat    = sigmahat,
               standardize = standardize,

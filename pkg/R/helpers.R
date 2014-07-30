@@ -191,9 +191,9 @@ calculate.pvalue.for.group <- function(brescaled, group, individual,
   ## using the maximum as test statistic
   ## http://arxiv.org/abs/1202.1377 P.Buehlmann
   ## Author: Ruben Dezeure 2 May 2014
-
+  
   p <- length(brescaled)
-
+  
   if(!is.logical(group)){
     stopifnot(all(group <= p) & all(group >= 1))
     tmp <- logical(length(brescaled))
