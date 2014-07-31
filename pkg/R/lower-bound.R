@@ -280,7 +280,7 @@ do.splits <- function(splitc,
 }
 
 
-clusterGroupBound <- function(x, y, method = "average", dist = NULL,
+clusterGroupBound <- function(x, y, method = "average", dist = as.dist(1 - abs(cor(x))),
                               alpha = 0.05, nsplit = 11,
                               s = min(10, ncol(x) - 1),
                               silent = FALSE, setseed = TRUE,
@@ -303,9 +303,6 @@ clusterGroupBound <- function(x, y, method = "average", dist = NULL,
     s <- p - 1
     warning("Reduced s to ", ncol(x) - 1, " because s >= ncol(x).")
   }
-  
-  if(is.null(dist))
-    dist <- as.dist(1 - abs(cor(x)))
   
   hcl <- hclust(dist, method = method)
   ord <- hcl$order
