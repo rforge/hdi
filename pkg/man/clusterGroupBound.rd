@@ -7,7 +7,8 @@
  Computes confidence intervals for the l1-norm of groups of regression
  parameters in a hierarchical clustering tree.}
 \usage{
-  clusterGroupBound(x, y, method = "average", dist = NULL, alpha = 0.05,
+  clusterGroupBound(x, y, method = "average", dist = as.dist(1 - abs(cor(x))), alpha = 0.05,
+                    hcloutput,
                     nsplit = 11, s = min(10, ncol(x) - 1),
                     silent = FALSE, setseed = TRUE, lpSolve = TRUE)}
 %- maybe also 'usage' for other objects documented here.
@@ -19,14 +20,21 @@
  The response variable; a numeric vector of length n.}
   \item{method}{
  The method used for constructing the hierarchical clustering tree
- (default is "average" linkage).}
+ (default is "average" linkage). Alternatively, you can provide your own hierarchical clustering
+ through the optional argument hcloutput.}
   \item{dist}{
  A distance matrix can be entered as an argument, on which the
- hierarchical clustering will be based. If \code{NULL}, then the distance
+ hierarchical clustering will be based. The default option is that the distance
  between variables will be calculated as 1 less the absolute correlation
- matrix.}
+ matrix. Alternatively, you can provide your own hierarchical clustering
+through the optional argument hcloutput.}
   \item{alpha}{
- The level in (0, 1) at which the confidence intervals are to be constructed.}
+ The level in (0, 1) at which the confidence intervals are to be
+ constructed.}
+\item{hcloutput}{
+  Optional argument.
+  The output of a call the the hclust function. If it is provided, the arguments dist and method
+  are ignored.}
  \item{nsplit}{
  The number of data splits used.}
   \item{s}{

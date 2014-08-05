@@ -156,7 +156,9 @@ lasso.proj <- function(x, y, family = "gaussian",
                                alt        = alt,
                                zz2        = pre)
   }
-  
+
+  cluster.group.testing.function <- get.clusterGroupTest.function(group.testing.function=group.testing.function,
+                                                                  x=x)
   ############################
   ## Return all information ##
   ############################
@@ -164,6 +166,7 @@ lasso.proj <- function(x, y, family = "gaussian",
   out <- list(pval        = as.vector(pval),
               pval.corr   = pcorr,
               groupTest   = group.testing.function,
+              clusterGroupTest = cluster.group.testing.function,
               sigmahat    = sigmahat,
               standardize = standardize,
               sds         = sds,

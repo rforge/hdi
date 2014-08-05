@@ -416,7 +416,7 @@ find.bisection.bounds.gammamin <- function(shouldcover,
   if(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info))
     {
       if(reset.shouldnotcover)
-        stop("wtf we first reset shouldnotcover and are now resetting shouldcover, this is not supposed to happen")
+        stop("Problem: we first reset shouldnotcover and are now resetting shouldcover, this is not supposed to happen")
       if(verbose)
         print("finding a new shouldcover bound")
       while(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info))

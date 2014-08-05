@@ -4,14 +4,13 @@
 \title{P-values based on ridge projection method}
 \description{P-values based on ridge projection method}
 \usage{
-ridge.proj(x, y, ci.level = 0.95, family = "gaussian", standardize = TRUE,
+ridge.proj(x, y, family = "gaussian", standardize = TRUE,
            lambda = 1, sigma = NULL, multiplecorr.method = "holm", N = 10000)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{Design matrix (without intercept).}
   \item{y}{Response vector.}
-  \item{ci.level}{Coverage level of confidence intervals.}
   \item{family}{family}
   \item{standardize}{Should design matrix be standardized to unit column
     standard deviation (logical)?}
@@ -26,9 +25,12 @@ ridge.proj(x, y, ci.level = 0.95, family = "gaussian", standardize = TRUE,
   \item{pval}{Individual p-values for each parameter.}
   \item{pval.corr}{Multiple testing corrected p-values for each
     parameter.}
-  \item{ci}{Confidence intervals calculated for each parameter}
   \item{groupTest}{Function to perform groupwise tests. Groups are
     indicated using an index vector with entries in {1,...,p}.}
+  \item{clusterGroupTest}{Function to perform groupwise tests based on
+    hierarchical clustering. You can either provide a distance matrix
+    and clustering method or the output of hierarchical clustering from
+    the function hclust as for clusterGroupBound.}
   %\item{betahat}{initial estimate by the scaled lasso of \eqn{\beta^0}}
   %\item{bhat}{de-sparsified \eqn{\beta^0} estimate used for p-value calculation}
   \item{sigmahat}{\eqn{\widehat{\sigma}} coming from the scaled lasso.}

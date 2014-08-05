@@ -183,10 +183,14 @@ ridge.proj <- function(x, y,
                                alt        = alt,
                                zz2        = pre)
   }
+  cluster.group.testing.function <- get.clusterGroupTest.function(group.testing.function=group.testing.function,
+                                                                  x=x)
+  
 
   out <- list(pval          = res.pval,
               pval.corr     = pcorr,
               groupTest     = group.testing.function,
+              clusterGroupTest = cluster.group.testing.function,
               sigmahat      = sqrt(hat.sigma2),
               standardize   = standardize,
               sds           = sds,
