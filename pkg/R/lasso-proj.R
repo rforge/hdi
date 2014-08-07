@@ -157,8 +157,10 @@ lasso.proj <- function(x, y, family = "gaussian",
                                zz2        = pre)
   }
 
-  cluster.group.testing.function <- get.clusterGroupTest.function(group.testing.function=group.testing.function,
-                                                                  x=x)
+  cluster.group.testing.function <-
+    get.clusterGroupTest.function(group.testing.function =
+                                  group.testing.function, x = x)
+  
   ############################
   ## Return all information ##
   ############################

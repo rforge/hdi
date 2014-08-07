@@ -33,7 +33,7 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
   \item{clusterGroupTest}{Function to perform groupwise tests based on
     hierarchical clustering. You can either provide a distance matrix
     and clustering method or the output of hierarchical clustering from
-    the function hclust as for clusterGroupBound.}
+    the function \code{\link{hclust}} as for \code{\link{clusterGroupBound}}.}
   %\item{betahat}{initial estimate by the scaled lasso of \eqn{\beta^0}}
   %\item{bhat}{de-sparsified \eqn{\beta^0} estimate used for p-value calculation}
   \item{sigmahat}{\eqn{\widehat{\sigma}} coming from the scaled lasso.}

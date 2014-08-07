@@ -54,7 +54,7 @@ print.hdi <- function(x, ...)
     cat("\n lower bound on l1-norm of all regression coefficients:",
         signif(max(x$lowerBound),4))
     
-    if(sum(x$isLeaf & x$lowerBound>0)==1){
+    if(sum(x$isLeaf & x$lowerBound > 0)==1){
       tmp <- sum(x$noMembers[which(x$isLeaf & x$lowerBound > 0)])
       cat("\n only 1 significant non-overlapping cluster with", tmp ,
           if(tmp == 1) "member" else "members")
@@ -120,55 +120,62 @@ plot.clusterGroupBound <- function(x, cexfactor = 1, yaxis = "members",
          pch = 20)
 }
 
-plot.clusterGroupTest <- function(x,
-                                  alpha=0.05,
-                                  ...)
+plot.clusterGroupTest <- function(x, alpha = 0.05, ...)
 {
   ## Purpose:
-  ## facilitate the creation of clusterGrouptest based on the group.testing.function
+  ## facilitate the creation of clusterGrouptest based on the
+  ## group.testing.function
   ## Author: Ruben Dezeure, original version 26th of May 2014
   
   p <- length(x$hh$order)
-  ##need to change the ordering for the plot function plot.clusterGroupBound
-  clusters <- x$clusters
-  lowerbound <- ifelse(x$pval<=0.05,1,0)
-  leftChild <- x$leftChild
+  
+  ## need to change the ordering for the plot function plot.clusterGroupBound
+  clusters   <- x$clusters
+  lowerbound <- ifelse(x$pval <= 0.05, 1, 0)
+  leftChild  <- x$leftChild
   rightChild <- x$rightChild
-  hh <- x$hh
+  hh         <- x$hh
   
-  ##order clustering according to increasing sizes
+  ## order clustering according to increasing sizes
   orig.indexing <- 1:length(clusters)
-  sizes <- unlist(lapply(clusters,FUN=length))
-  new.indexing <- sort(sizes,index.return=TRUE)$ix
-  clusters <- clusters[new.indexing]
-  lowerbound <- lowerbound[new.indexing]
+  sizes         <- unlist(lapply(clusters,FUN=length))
+  new.indexing  <- sort(sizes,index.return=TRUE)$ix
+  clusters      <- clusters[new.indexing]
+  lowerbound    <- lowerbound[new.indexing]
   
-  ##need to reorganise this reordering of leftchild rightchild better!
-  w.child <- leftChild[new.indexing] > 0
-  n.leftChild <- rep(-1,length(leftChild))
-  n.leftChild[w.child] <- match(leftChild[new.indexing][w.child],new.indexing)
-  w.child <- rightChild[new.indexing] > 0
-  n.rightChild <- rep(-1,length(rightChild))
-  n.rightChild[w.child] <- match(rightChild[new.indexing][w.child],new.indexing)
+  ## need to reorganise this reordering of leftchild rightchild better!
+  w.child               <- leftChild[new.indexing] > 0
+  n.leftChild           <- rep(-1, length(leftChild))
+  n.leftChild[w.child]  <- match(leftChild[new.indexing][w.child], new.indexing)
+  w.child               <- rightChild[new.indexing] > 0
+  n.rightChild          <- rep(-1, length(rightChild))
+  n.rightChild[w.child] <- match(rightChild[new.indexing][w.child], new.indexing)
   
-  ##get the positioning
-  ord <- hh$order##ordering from the cluster
+  ## get the positioning
+  ord      <- hh$order##ordering from the cluster
   position <- numeric(length(clusters))
-  for(i in 1:length(clusters))
-    {
-      position[i] <- mean(((1:length(ord)))[ord %in% clusters[[i]]] / p)
-    }
-  ##Get left child and right child of each signif node from the clustering
+  for(i in 1:length(clusters)){
+    position[i] <- mean(((1:length(ord)))[ord %in% clusters[[i]]] / p)
+  }
+  ## Get left child and right child of each signif node from the clustering
   
-  input <- list("noMembers"=unlist(lapply(clusters,FUN=length)),#A vector containing the number of members in each group
-                "lowerBound"=lowerbound,#The lower bound on the l1-norm in each group
-                "position"=position,#The position on the x-axis of each group (used for plotting)
-                "leftChild"=n.leftChild,#Gives the index of the group that corresponds to the left child node in the tested tree (negative values correspond to leaf nodes)
-                "rightChild"=n.rightChild)#Same as leftChild for the right child of each node
+  input <- list("noMembers"  = unlist(lapply(clusters,FUN=length)),
+                ## A vector containing the number of members in each group
+                "lowerBound" = lowerbound,
+                ## The lower bound on the l1-norm in each group
+                "position"   = position,
+                ## The position on the x-axis of each group (used for plotting)
+
+
+                "leftChild"  = n.leftChild,
+                ## Gives the index of the group that corresponds to the left
+                ## child node in the tested tree (negative values correspond
+                ## to leaf nodes)
+                "rightChild" = n.rightChild)
+                ## Same as leftChild for the right child of each node
 
   plot.clusterGroupBound(input,...)
 }
-
 
 confint.hdi <- function(object, parm, level = 0.95, ...)
 {
