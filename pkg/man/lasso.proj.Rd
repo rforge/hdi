@@ -53,6 +53,7 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
 x <- matrix(rnorm(100*20), nrow = 100, ncol = 20)
 y <- x[,1] * 2 + x[,2] * 2.5 + rnorm(100)
 fit.lasso <- lasso.proj(x, y)
+which(fit.lasso$pval.corr < 0.05)
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

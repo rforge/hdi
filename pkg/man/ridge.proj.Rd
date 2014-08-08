@@ -45,9 +45,10 @@ ridge.proj(x, y, family = "gaussian", standardize = TRUE,
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \examples{
-x <- matrix(rnorm(100*1000), nrow = 100, ncol = 1000)
+x <- matrix(rnorm(100*100), nrow = 100, ncol = 100)
 y <- x[,1] * 2 + x[,2] * 2.5 + rnorm(100)
 fit.ridge <- ridge.proj(x, y)
+which(fit.ridge$pval.corr < 0.05)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
