@@ -120,7 +120,7 @@ plot.clusterGroupBound <- function(x, cexfactor = 1, yaxis = "members",
          pch = 20)
 }
 
-plot.clusterGroupTest <- function(x, alpha = 0.05, ...)
+plot.clusterGroupTest <- function(x, ...)
 {
   ## Purpose:
   ## facilitate the creation of clusterGrouptest based on the
@@ -131,7 +131,7 @@ plot.clusterGroupTest <- function(x, alpha = 0.05, ...)
   
   ## need to change the ordering for the plot function plot.clusterGroupBound
   clusters   <- x$clusters
-  lowerbound <- ifelse(x$pval <= 0.05, 1, 0)
+  lowerbound <- ifelse(x$pval <= x$alpha, 1, 0)
   leftChild  <- x$leftChild
   rightChild <- x$rightChild
   hh         <- x$hh

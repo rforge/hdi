@@ -248,6 +248,7 @@ calculate.pvalue.for.group <- function(brescaled, group, individual,
 
 calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
                                          clusterextractfunction,
+                                         alpha,
                                          verbose = FALSE)
 {##Remark: not the cleanest code yet
   ## Purpose:
@@ -368,7 +369,7 @@ calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
         upper.clust <- upper.clust[!has.children]
         upper.clust.ind <- upper.clust.ind[!has.children]
         tmp.iter <- length(upper.clust)+1
-        for(i in which(pvals <= 0.05)){
+        for(i in which(pvals <= alpha)){
           upper.clust[[tmp.iter]] <- which(clusters.to.test[,i])
           upper.clust.ind[[tmp.iter]] <- iter - sum(are.children) + (i-1)
           ##index in clusters[[]]
@@ -396,6 +397,7 @@ calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
   out$pval       <- unlist(pvalue)
   out$leftChild  <- unlist(leftChild)
   out$rightChild <- unlist(rightChild)
+  out$alpha <- alpha
   out$hh <- hh
   return(out)
 }
@@ -410,6 +412,7 @@ get.clusterGroupTest.function <- function(group.testing.function,
  
   clusterGroupTest <- function(hcloutput,
                                dist = as.dist(1 - abs(cor(x))),
+                               alpha = 0.05,
                                method = "average",
                                alt = TRUE){
     ##optional argument: hcloutput = the result from a hclust call
@@ -434,6 +437,7 @@ get.clusterGroupTest.function <- function(group.testing.function,
     out <- calculate.pvalue.for.cluster(hh = hh,
                                         p = ncol(x),
                                         pvalfunction = pvalfunction,
+                                        alpha = alpha,
                                         clusterextractfunction = 
                                         clusterextractfunction)
       out$method <- "clusterGroupTest"
