@@ -54,7 +54,7 @@ print.hdi <- function(x, ...)
     cat("\n lower bound on l1-norm of all regression coefficients:",
         signif(max(x$lowerBound),4))
     
-    if(sum(x$isLeaf & x$lowerBound > 0)==1){
+    if(sum(x$isLeaf & x$lowerBound > 0) == 1){
       tmp <- sum(x$noMembers[which(x$isLeaf & x$lowerBound > 0)])
       cat("\n only 1 significant non-overlapping cluster with", tmp ,
           if(tmp == 1) "member" else "members")

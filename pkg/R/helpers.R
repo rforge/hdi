@@ -168,9 +168,9 @@ p.adjust.wy <- function(cov, pval, N = 10000)
   return(pcorr)
 }
 
-preprocess.group.testing <- function(N, cov, alt)
+preprocess.group.testing <- function(N, cov, conservative)
 {
-  if(alt){
+  if(conservative){
     ## No preprocessing to perform
     zz2 <- NULL
   }
@@ -184,7 +184,7 @@ preprocess.group.testing <- function(N, cov, alt)
 }
 
 calculate.pvalue.for.group <- function(brescaled, group, individual,
-                                       Delta = NULL, alt = TRUE, zz2)
+                                       Delta = NULL, conservative = TRUE, zz2)
 {
   ## Purpose:
   ## calculation of p-values for groups
@@ -197,7 +197,7 @@ calculate.pvalue.for.group <- function(brescaled, group, individual,
                      brescaled = brescaled,
                      individual = individual,
                      Delta = Delta,
-                     alt = alt,
+                     conservative = conservative,
                      zz2 = zz2)
     pvalue <- unlist(pvalue)
   }else{
@@ -213,17 +213,16 @@ calculate.pvalue.for.group <- function(brescaled, group, individual,
     stopifnot(is.logical(group))
     stopifnot(length(group) == length(brescaled))
     
-    if(alt){ ## (very) conservative alternative proposed by Nicolai
+    if(conservative){ ## (very) conservative alternative proposed by Nicolai
       pvalue <- min(individual[group])
       ##if(correct){ ## only for alternative method
-      pvalue <- min(1, p * pvalue) ## Bonferroni correction (on group)
+      pvalue <- min(1, p * pvalue) ## Bonferroni correction
       ##}
     }else{
-      ## max test statistics according to http://arxiv.org/abs/1202.1377
+      ## Max test statistics according to http://arxiv.org/abs/1202.1377
       ## P.Buehlmann
       if(is.null(zz2))
-        stop("you need to preprocess the zz2 by calling preprocess.group.testing")
-
+        stop("you need to preprocess zz2 by calling preprocess.group.testing")
       if(sum(group) > 1){
         group.coefficients <- abs(brescaled[group])
         max.coefficient    <- max(group.coefficients)
@@ -236,7 +235,7 @@ calculate.pvalue.for.group <- function(brescaled, group, individual,
         
         Gz <- apply(group.zz, 1, max)
           
-        ## determine simulated p-value
+        ## Determine simulated p-value
         pvalue <- 1 - ecdf(Gz)(max.coefficient)
       }else{ ## if group consists of a single variable
         pvalue <- individual[group]
@@ -248,8 +247,7 @@ calculate.pvalue.for.group <- function(brescaled, group, individual,
 
 calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
                                          clusterextractfunction,
-                                         alpha,
-                                         verbose = FALSE)
+                                         alpha, verbose = FALSE)
 {##Remark: not the cleanest code yet
   ## Purpose:
   ## calculation of p-values hierarchically for a cluster as input
@@ -402,8 +400,7 @@ calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
   return(out)
 }
 
-get.clusterGroupTest.function <- function(group.testing.function,
-                                          x)
+get.clusterGroupTest.function <- function(group.testing.function, x)
 {
   ## Purpose:
   ## facilitate the creation of clusterGrouptest based on the
@@ -414,7 +411,7 @@ get.clusterGroupTest.function <- function(group.testing.function,
                                dist = as.dist(1 - abs(cor(x))),
                                alpha = 0.05,
                                method = "average",
-                               alt = TRUE){
+                               conservative = TRUE){
     ##optional argument: hcloutput = the result from a hclust call
     if(missing(hcloutput)){
       hh <- hclust(dist, method = method)
@@ -431,7 +428,7 @@ get.clusterGroupTest.function <- function(group.testing.function,
     pvalfunction <- function(clusters.to.test, nclust){
       ##function to calculate the p-value for certain clusters
       mapply(group.testing.function,
-             alt   = alt,
+             conservative = conservative,
              group = split(clusters.to.test,col(clusters.to.test)))
     }
     out <- calculate.pvalue.for.cluster(hh = hh,

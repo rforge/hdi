@@ -146,15 +146,15 @@ lasso.proj <- function(x, y, family = "gaussian",
   ## Function to calculate p-value for groups ##
   ##############################################
   
-  pre <- preprocess.group.testing(N = N, cov = cov2, alt = FALSE)
+  pre <- preprocess.group.testing(N = N, cov = cov2, conservative = FALSE)
   
-  group.testing.function <- function(group, alt = TRUE){
-    calculate.pvalue.for.group(brescaled  = bprojrescaled,
-                               group      = group,
-                               individual = pval,
+  group.testing.function <- function(group, conservative = TRUE){
+    calculate.pvalue.for.group(brescaled    = bprojrescaled,
+                               group        = group,
+                               individual   = pval,
                                ##correct    = TRUE,
-                               alt        = alt,
-                               zz2        = pre)
+                               conservative = conservative,
+                               zz2          = pre)
   }
 
   cluster.group.testing.function <-
