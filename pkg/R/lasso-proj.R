@@ -75,7 +75,7 @@ lasso.proj <- function(x, y, family = "gaussian",
     Z <- nodewiselasso.out$out
   }else{
     ## Check if normalization is fulfilled
-    if(!all.equal(rep(1, p), colSums(Z * x) / n, tolerance = 10^-8)){
+    if(!isTRUE(all.equal(rep(1, p), colSums(Z * x) / n, tolerance = 10^-8))){
       print("Z not properly normalized...")
       print("...we assume all(colSums(Z * x) / n == rep(1, p))")
       print("...rescaling Z ourselves.")
