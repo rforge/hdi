@@ -11,7 +11,8 @@ score.nodewiselasso <- function(x,
                                 parallel = FALSE,
                                 ncores = 8,
                                 oldschool = FALSE,
-                                lambdatuningfactor = 1)
+                                lambdatuningfactor = 1,
+                                cv.verbose = FALSE)
 {
   ## Purpose:
   ## This function calculates the score vectors Z OR the matrix of nodewise
@@ -42,7 +43,8 @@ score.nodewiselasso <- function(x,
   ## for the different lambda
   cvlambdas <- cv.nodewise.bestlambda(lambdas = lambdas, x = x,
                                       parallel = parallel, ncores = ncores,
-                                      oldschool = oldschool)
+                                      oldschool = oldschool,
+                                      verbose = cv.verbose)
   if(verbose){
     print(paste("lambda.min is", cvlambdas$lambda.min))
     print(paste("lambda.1se is", cvlambdas$lambda.1se))
@@ -231,7 +233,9 @@ nodewise.getlambdasequence <- function(x)
   return(lambdas)
 }
 
-cv.nodewise.err.unitfunction <- function(c, K, dataselects, x, lambdas)
+cv.nodewise.err.unitfunction <- function(c, K, dataselects, x, lambdas,
+                                         verbose,
+                                         p)
 {
   ## Purpose:
   ## this method returns the K-fold cv error made by the nodewise regression
@@ -241,6 +245,19 @@ cv.nodewise.err.unitfunction <- function(c, K, dataselects, x, lambdas)
   ## Arguments:
   ## ----------------------------------------------------------------------
   ## Author: Ruben Dezeure, Date: 27 Nov 2012 (initial version),
+  
+  if(verbose)
+    {##print some information out about the progress
+      ##report every 25%
+      interesting.points <- round(c(1/4,2/4,3/4,4/4)*p)
+      names(interesting.points) <- c("25%","50%","75%","100%")
+      if(c %in% interesting.points)
+        {
+          print(paste("The expensive computation is now",
+                      names(interesting.points)[c == interesting.points],
+                      "done"))
+        }
+    }
   
   totalerr <- cv.nodewise.totalerr(c = c,
                                    K = K,
@@ -317,7 +334,8 @@ cv.nodewise.totalerr <- function(c, K, dataselects, x, lambdas)
 
 
 cv.nodewise.bestlambda <- function(lambdas, x, K = 10, parallel = FALSE,
-                                   ncores = 8, oldschool = FALSE)
+                                   ncores = 8, oldschool = FALSE,
+                                   verbose = FALSE)
 {
   ## Purpose:
   ## this function finds the optimal tuning parameter value for minimizing
@@ -367,7 +385,9 @@ cv.nodewise.bestlambda <- function(lambdas, x, K = 10, parallel = FALSE,
                            x = list(x = x),
                            lambdas = list(lambdas = lambdas),
                            mc.cores = ncores,
-                           SIMPLIFY = FALSE)
+                           SIMPLIFY = FALSE,
+                           verbose = verbose,
+                           p=p)
     }else{
       totalerr <- mapply(cv.nodewise.err.unitfunction,
                          c = 1:p,
@@ -375,7 +395,9 @@ cv.nodewise.bestlambda <- function(lambdas, x, K = 10, parallel = FALSE,
                          dataselects = list(dataselects = dataselects),
                          x = list(x = x),
                          lambdas = list(lambdas = lambdas),
-                         SIMPLIFY = FALSE)
+                         SIMPLIFY = FALSE,
+                         verbose = verbose,
+                         p = p)
     }
     ## Convert into suitable array (lambda, cv-fold, predictor)
     err.array  <- array(unlist(totalerr), dim = c(length(lambdas), K, p))

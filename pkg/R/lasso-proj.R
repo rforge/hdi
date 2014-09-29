@@ -4,7 +4,8 @@ lasso.proj <- function(x, y, family = "gaussian",
                        N = 10000,
                        parallel = FALSE, ncores = 4,
                        sigma = NULL, ## sigma estimate provided by the user
-                       Z = NULL)     ## Z or Thetahat provided by the user
+                       Z = NULL,     ## Z or Thetahat provided by the user
+                       verbose = FALSE)
 {
   ## Purpose:
   ## An implementation of the LDPE method http://arxiv.org/abs/1110.2563
@@ -27,7 +28,6 @@ lasso.proj <- function(x, y, family = "gaussian",
   ####################
   ## Get data ready ##
   ####################
-  
   n <- nrow(x)
   p <- ncol(x)
 
@@ -61,6 +61,7 @@ lasso.proj <- function(x, y, family = "gaussian",
   if(family == "binomial")
     sigma <- 1
 
+  scaledlassofit <- scalreg(X = x, y = y, lam0 = "univ")
   ######################################
   ## Calculate Z using nodewise lasso ##
   ######################################
@@ -69,7 +70,8 @@ lasso.proj <- function(x, y, family = "gaussian",
     nodewiselasso.out <- score.nodewiselasso(x = x,
                                              wantTheta = FALSE,
                                              parallel = parallel,
-                                             ncores = ncores)
+                                             ncores = ncores,
+                                             cv.verbose=verbose)
     Z <- nodewiselasso.out$out
   }else{
     ## Check if normalization is fulfilled

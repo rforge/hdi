@@ -83,7 +83,7 @@ print.hdi <- function(x, ...)
 }
 
 plot.clusterGroupBound <- function(x, cexfactor = 1, yaxis = "members",
-                                   col = NULL, ...){
+                                    col = NULL, ...){
   hh <- x$noMembers
   hh2 <- sqrt(x$lowerBound)
   
@@ -99,7 +99,8 @@ plot.clusterGroupBound <- function(x, cexfactor = 1, yaxis = "members",
 
   plot(xvec, hh, cex = 1, axes = FALSE, xlab = "",
        ylab = if(yaxis == "members") "cluster size" else "lower l1-norm bound",
-       pch = 20, col = "white", log = if(yaxis == "members") "y" else "")
+       pch = 20, col = "white", log = if(yaxis == "members") "y" else "",
+       ...)
     
   axis(2)
   coll <- rgb(0.1, 0.1, 0.1, 0.7)
