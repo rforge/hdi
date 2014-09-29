@@ -7,7 +7,7 @@
 lasso.proj(x, y, family = "gaussian", standardize = TRUE,
            multiplecorr.method = "holm", N = 10000,
            parallel = FALSE, ncores = 4,
-           sigma = NULL, Z = NULL)
+           sigma = NULL, Z = NULL, verbose = FALSE)
 }
 \arguments{
   \item{x}{Design matrix (without intercept).}
@@ -23,6 +23,9 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
   \item{ncores}{Number of cores used for parallelization.}
   \item{sigma}{Estimate of standard deviation of error term.}
   \item{Z}{user input}
+  \item{verbose}{A boolean to enable reporting on the progress of the
+    computations. (Only prints out information when Z is not provided by
+    the user)}
 }
 \value{
   \item{pval}{Individual p-values for each parameter.}
