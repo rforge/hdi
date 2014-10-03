@@ -7,7 +7,7 @@
 lasso.proj(x, y, family = "gaussian", standardize = TRUE,
            multiplecorr.method = "holm", N = 10000,
            parallel = FALSE, ncores = 4,
-           sigma = NULL, Z = NULL, verbose = FALSE)
+           sigma = NULL, Z = NULL, verbose = FALSE, return.Z = FALSE)
 }
 \arguments{
   \item{x}{Design matrix (without intercept).}
@@ -26,6 +26,10 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
   \item{verbose}{A boolean to enable reporting on the progress of the
     computations. (Only prints out information when Z is not provided by
     the user)}
+  \item{return.Z}{An option to return the intermediate result which only
+    depends on the design matrix x. This intermediate results
+    can be used when calling the function again and the design matrix
+    is the same as before.}
 }
 \value{
   \item{pval}{Individual p-values for each parameter.}
@@ -41,6 +45,9 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
   %\item{betahat}{initial estimate by the scaled lasso of \eqn{\beta^0}}
   %\item{bhat}{de-sparsified \eqn{\beta^0} estimate used for p-value calculation}
   \item{sigmahat}{\eqn{\widehat{\sigma}} coming from the scaled lasso.}
+  \item{Z}{Only different from NULL if the option return.Z is on. This
+    is an intermediate result from the computation which only depends on
+    the design matrix x. These are the residuals of the nodewise regressions.}
 }
 \references{van de Geer, S., B\"uhlmann, P., Ritov, Y. and Dezeure,
   R. (2013). On asymptotically optimal confidence regions and tests for

@@ -5,7 +5,8 @@ lasso.proj <- function(x, y, family = "gaussian",
                        parallel = FALSE, ncores = 4,
                        sigma = NULL, ## sigma estimate provided by the user
                        Z = NULL,     ## Z or Thetahat provided by the user
-                       verbose = FALSE)
+                       verbose = FALSE,
+                       return.Z = FALSE)
 {
   ## Purpose:
   ## An implementation of the LDPE method http://arxiv.org/abs/1110.2563
@@ -72,12 +73,15 @@ lasso.proj <- function(x, y, family = "gaussian",
                                              parallel = parallel,
                                              ncores = ncores,
                                              cv.verbose=verbose)
-    Z <- nodewiselasso.out$out
+    Z <- nodewiselasso.out$out$Z
+    scaleZ <- nodewiselasso.out$out$scaleZ
   }else{
     ## Check if normalization is fulfilled
     if(!isTRUE(all.equal(rep(1, p), colSums(Z * x) / n, tolerance = 10^-8))){
       ##no need to print stuff to the user, this is only an internal detail
-      Z <- score.rescale(Z = Z, x = x)
+      rescale.out <- score.rescale(Z = Z, x = x)
+      Z <- rescale.out$Z
+      scaleZ <- rescale.out$scaleZ
     }
   }
   
@@ -85,7 +89,6 @@ lasso.proj <- function(x, y, family = "gaussian",
   ###################################
   ## Projection estimator and bias ##
   ###################################
-  
   bproj <- t(Z) %*% y / n
   
   ## Bias estimate based on lasso estimate
@@ -178,11 +181,14 @@ lasso.proj <- function(x, y, family = "gaussian",
               family      = family,
               method      = "lasso.proj",
               call        = match.call())
-
+  if(return.Z)
+    out <- c(out,
+             list(Z = scale(Z,center=FALSE,scale=1/scaleZ)))##unrescale the Zs
+  
   names(out$pval) <- names(out$pval.corr) <- names(out$bhat) <-
     names(out$sds) <- names(out$se) <- names(out$betahat) <-
       colnames(x)
-
+  
   class(out) <- "hdi"
   return(out)
 }

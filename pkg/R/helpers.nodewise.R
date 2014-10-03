@@ -175,7 +175,6 @@ score.getZforlambda <- function(x, lambda, parallel = FALSE, ncores = 8,
                   lambda = lambda)
     }
   }
-  
   ## rescale Z such that t(Zj) Xj/n = 1 \-/ j
   Z <- score.rescale(Z,x)
   return(Z)
@@ -205,7 +204,7 @@ score.rescale <- function(Z, x)
   ## Author: Ruben Dezeure, Date: 27 Nov 2012 (initial version),
   scaleZ <- diag(crossprod(Z,x)) / nrow(x)
   Z      <- scale(Z, center = FALSE, scale = scaleZ)
-  return(Z)
+  return(list(Z=Z,scaleZ=scaleZ))
 }
 
 nodewise.getlambdasequence <- function(x)
