@@ -176,7 +176,6 @@ preprocess.group.testing <- function(N, cov, conservative)
   }
   else{
     ## Simulate distribution
-    set.seed(3) ## always give the same result
     zz  <- mvrnorm(N, rep(0, ncol(cov)), cov)
     zz2 <- scale(zz, center = FALSE, scale = sqrt(diag(cov)))
   }
