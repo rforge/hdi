@@ -6,7 +6,8 @@ lasso.proj <- function(x, y, family = "gaussian",
                        sigma = NULL, ## sigma estimate provided by the user
                        Z = NULL,     ## Z or Thetahat provided by the user
                        verbose = FALSE,
-                       return.Z = FALSE)
+                       return.Z = FALSE,
+                       robust = FALSE)
 {
   ## Purpose:
   ## An implementation of the LDPE method http://arxiv.org/abs/1110.2563
@@ -113,8 +114,12 @@ lasso.proj <- function(x, y, family = "gaussian",
   ## p-Value calculation ##
   #########################
 
-  ## Determine normalization factor
-  scaleb        <- n / (sigmahat * sqrt(colSums(Z^2))) ##sqrt(diag(crossprod(Z)))
+  if(robust){
+    scaleb <- 1/sandwich.var.est.stderr(x=x,y=y,betainit=betalasso,Z=Z)
+  }else{
+    ## Determine normalization factor
+    scaleb        <- n / (sigmahat * sqrt(colSums(Z^2))) ##sqrt(diag(crossprod(Z)))
+  }
   bprojrescaled <- bproj * scaleb
   
   ## Calculate p-value

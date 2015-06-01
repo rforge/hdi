@@ -7,7 +7,8 @@
 lasso.proj(x, y, family = "gaussian", standardize = TRUE,
            multiplecorr.method = "holm", N = 10000,
            parallel = FALSE, ncores = 4,
-           sigma = NULL, Z = NULL, verbose = FALSE, return.Z = FALSE)
+           sigma = NULL, Z = NULL, verbose = FALSE, return.Z = FALSE,
+           robust = FALSE)
 }
 \arguments{
   \item{x}{Design matrix (without intercept).}
@@ -30,6 +31,8 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     depends on the design matrix x. This intermediate results
     can be used when calling the function again and the design matrix
     is the same as before.}
+  \item{robust}{Uses a robust variance estimation procedure to be able
+    to deal with model misspecification.}
 }
 \value{
   \item{pval}{Individual p-values for each parameter.}
@@ -55,7 +58,11 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
 
   Zhang, C.,  Zhang, S. (2014), Confidence intervals for low dimensional
   parameters in high dimensional linear models, Journal of the Royal
-  Statistical Society: Series B (Statistical Methodology).}
+  Statistical Society: Series B (Statistical Methodology).
+  
+  B\"uhlmann, P. and van de Geer, S. (2015). High-dimensional
+  inference in misspecified linear models. Preprint arXiv:1503.06426.
+}
 \author{Ruben Dezeure}
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
@@ -65,6 +72,9 @@ x <- matrix(rnorm(100*20), nrow = 100, ncol = 20)
 y <- x[,1] + x[,2] + rnorm(100)
 fit.lasso <- lasso.proj(x, y)
 which(fit.lasso$pval.corr < 0.05)
+
+fit.lasso.robust <- lasso.proj(x, y, robust = TRUE)
+which(fit.lasso.robust$pval.corr < 0.05)
 
 ## Group-wise testing of the first two coefficients
 fit.lasso$groupTest(1:2)

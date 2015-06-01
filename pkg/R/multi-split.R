@@ -127,7 +127,8 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                 ses           = ses.v,
                 df.res        = df.res,
                 lci           = lci.v,
-                uci           = uci.v))
+                uci           = uci.v,
+                split         = split))
   }
 
   ######################
@@ -137,7 +138,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
   if(parallel){
     if(trace)
       cat("...starting parallelization of sample-splits\n")
- 
+    
     split.out <- mclapply(1:B, oneSplit, mc.cores = ncores)
   }
   else{
@@ -149,6 +150,35 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
       split.out[[b]] <- oneSplit()
     }
   }
+  ############################
+  ##Do hierarchical testing ##                
+  ############################
+  cluster.group.testing.function <- function(hcloutput,
+                                             dist = as.dist(1 - abs(cor(x))),
+                                             alpha = 0.05,
+                                             method = "average",
+                                             conservative = TRUE){
+    if(missing(hcloutput)){
+      hh <- hclust(dist, method = method)
+    }else{
+      hh <- hcloutput
+    }
+    
+    hh <- hclust(as.dist(1-abs(cor(x))),method="average")
+    
+    tree <- createtree.from.hclust(hh,verbose=TRUE)##we calculate a tree structure
+    
+    out <- mssplit.hierarch.testing(tree=tree,
+                                    hh=hh,
+                                    x=x,
+                                    y=y,
+                                    gamma=gamma,
+                                    split.out=split.out)##TODO need to add classical fitting option?
+    out$method <- "clusterGroupTest"
+    class(out) <- c("clusterGroupTest", "hdi")
+    return(out)
+  }
+  
 
   #####################
   ## Deparse objects ##
@@ -246,7 +276,8 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
               sel.models    = sel.model.all,
               ci.level      = ifelse(ci, ci.level, NA),
               method        = "multi.split",
-              call          = match.call())
+              call          = match.call(),
+              clusterGroupTest = cluster.group.testing.function)
   
   class(out) <- "hdi"
   

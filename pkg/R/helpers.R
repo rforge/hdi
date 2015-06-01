@@ -474,3 +474,51 @@ switch.family <- function(x, y, family)
   return(list(x = xw, y = yw))
 }
                                        
+
+sandwich.var.est.stderr <- function(x,y,betainit,Z){
+  ## Purpose:
+  ## an implementation of the calculation of the robust standard error
+  ## based on the sandwich variance estimator from
+  ## http://arxiv.org/abs/1503.06426
+  ## ----------------------------------------------------------------------
+  ## Arguments:
+  ## ----------------------------------------------------------------------
+  ## Return values:
+  ## x: the design matrix
+  ## y: the response vector
+  ## betainit: the initial estimate
+  ## Z:       the residuals of the nodewis regressions
+  ## ----------------------------------------------------------------------
+  ## Author: Ruben Dezeure, Date: 18 Mai 2015 (initial version)
+  
+  n <- nrow(x)
+  p <- ncol(x)
+  
+  ## Check if normalization is fulfilled
+  if(!isTRUE(all.equal(rep(1, p), colSums(Z * x) / n, tolerance = 10^-8))){
+    ##no need to print stuff to the user, this is only an internal detail
+    rescale.out <- score.rescale(Z = Z, x = x)
+    Z <- rescale.out$Z
+    scaleZ <- rescale.out$scaleZ
+  }
+
+  if(length(betainit) > ncol(x)){
+    x <- cbind(rep(1,nrow(x)),x)
+  }else{
+    if(all(x[,1]==1)){
+      ##ok, we have included the intercept
+    }else{
+      ##hmm, should we substract the mean from y?
+    }
+  }
+  eps.tmp <- as.vector(y - x%*%betainit)
+
+  ##should these esp.tmp be forced to have mean 0?
+  
+  sigmahatZ.direct <- sqrt(apply(sweep(eps.tmp*Z,MARGIN=2,STATS=crossprod(eps.tmp,Z)/n,FUN="-")^2,2,sum))
+  ##rm(eps.tmp)
+  se.robust <- sigmahatZ.direct/n##this is the s.e. of bproj from pval.score,
+  ##if we multiply bproj with 1/this, we get on the N(0,1) scale
+
+  return(se.robust)
+}
