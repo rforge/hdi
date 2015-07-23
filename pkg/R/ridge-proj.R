@@ -96,7 +96,7 @@ ridge.proj <- function(x, y,
   diag.cov2 <- diag(cov2)
 
   ## Estimate regression parameters (initial estimator) and noise level sigma
-  fit.scaleL <- scalreg(X = x, y = y, lam0 = "univ")
+  fit.scaleL <- scalreg(X = x, y = y)##, lam0 = "univ")
 
   beta.lasso <- fit.scaleL$coefficients
   

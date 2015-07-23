@@ -63,7 +63,6 @@ lasso.proj <- function(x, y, family = "gaussian",
   if(family == "binomial")
     sigma <- 1
 
-  scaledlassofit <- scalreg(X = x, y = y, lam0 = "univ")
   ######################################
   ## Calculate Z using nodewise lasso ##
   ######################################
@@ -93,7 +92,7 @@ lasso.proj <- function(x, y, family = "gaussian",
   bproj <- t(Z) %*% y / n
   
   ## Bias estimate based on lasso estimate
-  scaledlassofit <- scalreg(X = x, y = y, lam0 = "univ")
+  scaledlassofit <- scalreg(X = x, y = y)##, lam0 = "univ")
   betalasso      <- scaledlassofit$coefficients
 
   ## Get estimated standard deviation
