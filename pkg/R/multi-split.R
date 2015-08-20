@@ -158,13 +158,13 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                                              alpha = 0.05,
                                              method = "average",
                                              conservative = TRUE){
+    if(!return.selmodels)
+      stop("Cluster group testing cannot be done if the original function was not run with return.selmodels=TRUE.")
     if(missing(hcloutput)){
       hh <- hclust(dist, method = method)
     }else{
       hh <- hcloutput
     }
-    
-    hh <- hclust(as.dist(1-abs(cor(x))),method="average")
     
     tree <- createtree.from.hclust(hh,verbose=TRUE)##we calculate a tree structure
     
@@ -173,7 +173,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                                     x=x,
                                     y=y,
                                     gamma=gamma,
-                                    split.out=split.out)##TODO need to add classical fitting option?
+                                    split.out=split.out)
     out$method <- "clusterGroupTest"
     class(out) <- c("clusterGroupTest", "hdi")
     return(out)

@@ -59,9 +59,10 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
   Zhang, C.,  Zhang, S. (2014), Confidence intervals for low dimensional
   parameters in high dimensional linear models, Journal of the Royal
   Statistical Society: Series B (Statistical Methodology).
-  
-  B\"uhlmann, P. and van de Geer, S. (2015). High-dimensional
-  inference in misspecified linear models. Preprint arXiv:1503.06426.
+
+  B\"uhlmann, P. and van de Geer, S. (2015). High-dimensional inference in
+  misspecified linear models. Electronic Journal of Statistics 9,
+  1449-1473
 }
 \author{Ruben Dezeure}
 

@@ -64,11 +64,19 @@ multi.split(x, y, B = 100, fraction = 0.5, ci = TRUE, ci.level = 0.95,
 \value{
   \item{pval.corr}{Vector of multiple testing corrected p-values.}
   \item{gamma.min}{Value of gamma where minimal p-values was attained.}
+  \item{clusterGroupTest}{Function to perform groupwise tests based on
+    hierarchical clustering. You can either provide a distance matrix
+    and clustering method or the output of hierarchical clustering from
+    the function \code{\link{hclust}} as for
+    \code{\link{clusterGroupBound}}. P-values are adjusted for multiple
+    testing.}
 }
 \references{
   Meinshausen, N., Meier, L. and B\"uhlmann, P. (2009),
   \emph{P-values for high-dimensional regression}, Journal of the
   American Statistical Association 104, 1671-1681.
+
+  %%TODO Jacopo erwaehnen
 }
 \author{Lukas Meier}
 

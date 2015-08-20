@@ -157,6 +157,7 @@ mssplit.hierarch.testing <- function(tree,
                                      alpha = 0.05,
                                      verbose=FALSE)
 {
+  
   ##signif.cluster##this is implicitly known since we only go through the cluster points
   ##of which the parents were possible to reject
 
