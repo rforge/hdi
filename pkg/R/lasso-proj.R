@@ -50,7 +50,7 @@ lasso.proj <- function(x, y, family = "gaussian",
                                     family = family)
                     })
 
-  ## center the columns the response to get rid of the intercept
+  ## center the columns and the response to get rid of the intercept
   x <- scale(dataset$x, center = TRUE, scale = FALSE)
   y <- scale(dataset$y, scale = FALSE)
   y <- as.numeric(y)
@@ -143,10 +143,10 @@ lasso.proj <- function(x, y, family = "gaussian",
     }else{
       stop("Unknown multiple correction method specified")
     }
-  }## end multiple testing correction
+  } ## end multiple testing correction
   
   ## Also return the confidence intervals
-  se   <- 1 / scaleb
+  se <- 1 / scaleb
 
   
   ##############################################

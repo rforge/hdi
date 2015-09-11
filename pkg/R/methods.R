@@ -17,9 +17,9 @@ print.hdi <- function(x, ...)
   
   if(method == "multi.split"){
     cat("alpha = 0.01:")
-    cat(" Selected predictors:", which(x$pval <= 0.01), "\n")
+    cat(" Selected predictors:", which(x$pval.corr <= 0.01), "\n")
     cat("alpha = 0.05:")
-    cat(" Selected predictors:", which(x$pval <= 0.05), "\n")
+    cat(" Selected predictors:", which(x$pval.corr <= 0.05), "\n")
     cat("------\n")
     cat("Familywise error rate controlled at level alpha.\n")
   }

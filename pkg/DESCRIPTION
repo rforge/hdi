@@ -1,11 +1,11 @@
 Package: hdi
 Type: Package
 Title: High-Dimensional Inference
-Version: 0.1-4
-Date: 2014-09-08
+Version: 0.1-5
+Date: 2015-09-11
 Author: Lukas Meier, Nicolai Meinshausen, Ruben Dezeure
 Maintainer: Lukas Meier <meier@stat.math.ethz.ch>
 Description: Implementation of multiple approaches to perform inference in
-	     high-dimensional models
+	     high-dimensional models.
 Depends: glmnet,linprog,parallel,MASS,scalreg
 License: GPL
