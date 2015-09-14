@@ -3,23 +3,24 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Lower bound on the l1-norm of groups of regression variables}
 
-\description{In a (high-dimensional) regression, the function returns a
- lower bound that forms a one-sided confidence interval for the group
- l1-norm of a specified group of regression parameters.  It is assumed
- that errors have a Gaussian distribution with unknown noise level. The
- underlying vector that inference is made about is the l1-sparsest
- approximation to the noiseless data. Under a weak compatbility
- condition, this is identical to inference about the l1-sparsest
- approximation to the noiseless data.}
+\description{The function returns a lower bound that forms a one-sided
+ confidence interval for the group l1-norm of a specified group of
+ regression parameters. It is assumed that errors have a Gaussian
+ distribution with unknown noise level. The underlying vector that
+ inference is made about is the l1-sparsest approximation to the
+ noiseless data.}
+ %Under a weak compatibility condition, this is identical
+ %to inference about the l1-sparsest approximation to the noiseless
+ %data.}
 
 \usage{
 groupBound(x, y, group, alpha = 0.05, nsplit = 11,
-                s = min(10, ncol(x) - 1), setseed = TRUE,
-                silent = FALSE, lpSolve = TRUE,
-                parallel = FALSE, ncores = 4)}
+           s = min(10, ncol(x) - 1), setseed = TRUE,
+           silent = FALSE, lpSolve = TRUE,
+           parallel = FALSE, ncores = 4)}
 \arguments{
-  \item{x}{The design matrix of the regression with p columns for p predictor
-    variables and n rows that correspond to n observations.}
+  \item{x}{The design matrix of the regression problem with p columns
+    for p predictor variables and n rows that correspond to n observations.}
   \item{y}{The response variable; a numeric vector of length n.}
   \item{group}{Either a numeric vector with entries in {1,...,p} or a
     list with such numeric vectors. If \code{group} is just a numeric
@@ -34,7 +35,7 @@ groupBound(x, y, group, alpha = 0.05, nsplit = 11,
     if left unspecified to avoid lengthy computations.}
   \item{setseed}{If \code{setseed} is true (recommended), then the same
     random seeds are used for all groups, which makes the confidence
-    intervals simulatenously valid over all groups of variables tested.}
+    intervals simultaenously valid over all groups of variables tested.}
   \item{silent}{Output is supressed if this option is set to true.}
   \item{lpSolve}{Only set to false if lpSolve is not working on the
     current machine (setting it to false will results in much slower
@@ -54,12 +55,12 @@ groupBound(x, y, group, alpha = 0.05, nsplit = 11,
  list, a numeric vector is retuned where each entry corresponds to the
  group of variables defined in the same order in \code{group}.}
 
-\references{Nicolai Meinshausen (2013) 
- Assumption-free confidence intervals for groups of variables in sparse
- high-dimensional regression. http://arxiv.org/abs/1309.3489}
-\author{Nicolai Meinshausen meinshausen@stat.math.ethz.ch}
-%\note{
-%}
+\references{Meinshausen, N. (2013),
+  \emph{Group-bound: confidence intervals for groups of variables in sparse
+  high-dimensional regression without assumptions on the design}. Journal
+  of the Royal Statistical Society, Series B. To appear.}
+
+\author{Nicolai Meinshausen}
 
 \seealso{Use \code{clusterGroupBound} to test all groups in a hierarchical
  clustering tree.}

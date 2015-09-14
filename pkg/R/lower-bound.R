@@ -280,7 +280,8 @@ do.splits <- function(splitc,
 }
 
 
-clusterGroupBound <- function(x, y, method = "average", dist = as.dist(1 - abs(cor(x))), alpha = 0.05,
+clusterGroupBound <- function(x, y, method = "average",
+                              dist = as.dist(1 - abs(cor(x))), alpha = 0.05, 
                               hcloutput,
                               nsplit = 11,
                               s = min(10, ncol(x) - 1),

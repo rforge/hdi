@@ -71,15 +71,13 @@ Returns a list with components
   node in the tested tree or if both child nodes have a zero lower bound
   on their group l1-norm} 
 }
-\references{
- Nicolai Meinshausen (2013) 
- Assumption-free confidence intervals for groups of variables in sparse
- high-dimensional regression. 
- http://arxiv.org/abs/1309.3489
-}
-\author{
- Nicolai Meinshausen meinshausen@stat.math.ethz.ch
-}
+
+\references{Meinshausen, N. (2013),
+  \emph{Group-bound: confidence intervals for groups of variables in sparse
+  high-dimensional regression without assumptions on the design}. Journal
+of the Royal Statistical Society, Series B. To appear.}
+
+\author{Nicolai Meinshausen}
 %\note{
 %}
 

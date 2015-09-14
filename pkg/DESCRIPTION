@@ -7,5 +7,7 @@ Author: Lukas Meier, Nicolai Meinshausen, Ruben Dezeure
 Maintainer: Lukas Meier <meier@stat.math.ethz.ch>
 Description: Implementation of multiple approaches to perform inference in
 	     high-dimensional models.
-Depends: glmnet,linprog,parallel,MASS,scalreg
+Depends: scalreg
+DependsNote: scalreg does not correctly import lars etc, so we need to depend on it
+Imports: grDevices, graphics, stats, parallel, MASS, glmnet, linprog
 License: GPL
