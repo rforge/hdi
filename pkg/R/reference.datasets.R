@@ -55,7 +55,7 @@ generate.reference.x <- function(n,
                   "equi.corr"={
                     cov <- matrix(rep(0.8,p*p),p)
                     diag(cov) <- 1
-                    solve(solve(cov))
+                    solve(solve(cov))##This looks really stupid but the tiny numerical differences make it identical to the datasets used in the paper
                   },
                   "exp.decay"={
                     indices <- toeplitz(0:(p-1))
