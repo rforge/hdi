@@ -2,7 +2,7 @@
 \alias{generate.reference.dataset}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Generate reference datasets}
-\description{The functions generates a design matrix and coefficient vector corresponding to the reference linear model datasets of the hdi paper.} 
+\description{This function generates a design matrix and coefficient vector corresponding to the reference linear model datasets of the hdi paper.} 
 \usage{
 generate.reference.dataset(n = 100, p = 500, s0 = 3,
                            xtype, btype,
