@@ -3,6 +3,7 @@ lasso.proj <- function(x, y, family = "gaussian",
                        multiplecorr.method = "holm",
                        N = 10000,
                        parallel = FALSE, ncores = 4,
+                       betainit="cv lasso",
                        sigma = NULL, ## sigma estimate provided by the user
                        Z = NULL,     ## Z or Thetahat provided by the user
                        verbose = FALSE,
@@ -92,15 +93,11 @@ lasso.proj <- function(x, y, family = "gaussian",
   bproj <- t(Z) %*% y / n
   
   ## Bias estimate based on lasso estimate
-  scaledlassofit <- scalreg(X = x, y = y)##, lam0 = "univ")
-  betalasso      <- scaledlassofit$coefficients
-
-  ## Get estimated standard deviation
-  if(is.null(sigma))
-    sigmahat <- scaledlassofit$hsigma
-  else
-    sigmahat <- sigma
-
+  initial.estimate <- initial.estimator(betainit = betainit,sigma = sigma,
+                                        x = x,y = y)
+  betalasso <- initial.estimate$beta.lasso
+  sigmahat <- initial.estimate$sigmahat
+  
   ## Subtract bias
   bias <- numeric(p)
   for(j in 1:p){ ## replace loop?

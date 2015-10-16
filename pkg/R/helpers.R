@@ -482,12 +482,13 @@ sandwich.var.est.stderr <- function(x,y,betainit,Z){
   ## http://arxiv.org/abs/1503.06426
   ## ----------------------------------------------------------------------
   ## Arguments:
-  ## ----------------------------------------------------------------------
-  ## Return values:
   ## x: the design matrix
   ## y: the response vector
   ## betainit: the initial estimate
   ## Z:       the residuals of the nodewis regressions
+  ## ----------------------------------------------------------------------
+  ## Return values:
+  ## se.robust: the robust estimate for the standard error of the corresponding de-sparsified lasso fit
   ## ----------------------------------------------------------------------
   ## Author: Ruben Dezeure, Date: 18 Mai 2015 (initial version)
   
@@ -521,4 +522,133 @@ sandwich.var.est.stderr <- function(x,y,betainit,Z){
   ##if we multiply bproj with 1/this, we get on the N(0,1) scale
 
   return(se.robust)
+}
+
+do.initial.fit <- function(x,y,
+                           initial.lasso.method = c("scaled lasso","cv lasso"),
+                           lambda,
+                           verbose = FALSE)
+{
+  ## Purpose:
+  ## This function performs the initial fit of the high dimensional linear model
+  ## used in ridge.proj and lasso.rpoj
+  ## ----------------------------------------------------------------------
+  ## Arguments:
+  ## x: the design matrix
+  ## y: the response vector
+  ## initial.lasso.method: the method to use to tune the lasso
+  ## lambda: OPTIONAL, the tuning parameter for the lasso. If this is provided,
+  ##         it overrides initial.lasso.method
+  ## verbose: let's you know if the user is overriding initial.lasso.method with a value for lambda
+  ## ----------------------------------------------------------------------
+  ## Return values:
+  ## betalasso: the lasso coefficients, excluding the intercept
+  ## sigmahat: estimate for the noise standard  deviation
+  ## intercept: intercept, in case the lasso was fitted with it
+  ## lambda: the tuning parameter for the lasso that was used, not available for the scaled lasso
+  ## ----------------------------------------------------------------------
+  ## Author: Ruben Dezeure, Date: 16 Oct 2015 (initial modified version for the package)
+
+  no.lambda.given <- missing(lambda) || is.null(lambda)
+  if(!no.lambda.given && verbose)
+    {
+      print("A value for lambda was provided to the do.initial.fit function,")
+      print("the initial.lasso.method option was therefore ignored.")
+      print("One now does a lasso with the tuning parameter instead of a self-tuning procedure.")
+    }
+  
+  if(no.lambda.given){
+    ##tune the lasso
+    switch(initial.lasso.method,
+           "scaled lasso"={
+             scaledlassofit <- scalreg(X=x,y=y)
+             lambda <- NULL##no way to extract lambda for this ?
+           },
+           "cv lasso"={
+             glmnetfit <- cv.glmnet(x=x,y=y)
+             lambda <- glmnetfit$lambda.1se
+           },
+           {
+             stop("Not sure what lasso.method you want me to use for the initial fit. The only options for the moment are: 1)scaled lasso 2)cvlasso")
+           })
+  }else{
+    ##fit for a range of lambda
+    glmnetfit <- glmnet(x=x,y=y)
+  }
+
+  if(no.lambda.given && identical(initial.lasso.method,"scaled lasso")){
+    intercept <- 0
+    betalasso      <- scaledlassofit$coefficients
+    sigmahat <- scaledlassofit$hsigma
+    residual.vector <- y-x%*%betalasso
+  }else{
+    if((nrow(x)-sum(as.vector(coef(glmnetfit,s=lambda))!=0)) <= 0){
+      ##Problem: when the fixed lambda you chose sets n==p, you've used all your degrees of freedom
+      ##--> refit
+      ##This only occurs if the user provides a lambda to use
+      print("Refitting using cross validation: your lambda used all degrees of freedom")
+      glmnetfit <- cv.glmnet(x=x,y=y)
+      ##setting a lambda here would interpolate solutions, :/
+      lambda <- glmnetfit$lambda.1se      
+    }
+    
+    intercept <- coef(glmnetfit,s=lambda)[1]
+    betalasso <- as.vector(coef(glmnetfit,s=lambda))[-1]##leaving out the intercept
+    residual.vector <- y-predict(glmnetfit,newx=x,s=lambda)
+    sigmahat <- sqrt(sum((residual.vector)^2)/
+                     (nrow(x)-sum(as.vector(coef(glmnetfit,s=lambda))!=0)))
+  }      
+  out <- list(betalasso=betalasso,
+              sigmahat=sigmahat,
+              intercept=intercept,
+              lambda=lambda)
+  return(out)
+}
+
+initial.estimator <- function(betainit,x,y,sigma)
+{
+  ##check if betainit is correctly provided
+  if(!((is.numeric(betainit) && length(betainit) == ncol(x)) ||
+       (betainit %in% c("scaled lasso","cv lasso"))))
+  {
+    stop("The betainit argument needs to be either a vector of length ncol(x) or one of 'scaled lasso' or 'cv lasso'")
+  }
+
+  warning.sigma.message <- function()
+  {
+    print("Warning: overriding the error variance estimate with your own value.")
+    print("The initial estimate implies an error variance estimate and if they don't correspond the testing might not be correct anymore.")
+  }
+  
+  if(is.numeric(betainit))
+  {
+    beta.lasso <- betainit
+    
+    if(is.null(sigma))
+    {
+      stop("Not sure what variance estimate to use here")
+      ##if betainit comes from the lasso, the below should be good
+      residual.vector <- y- x%*%betainit
+      sigmahat <- sqrt(sum((residual.vector)^2)/
+                       (nrow(x)-sum(betainit!=0)))      
+    }else{
+      warning.sigma.message()
+      sigmahat <- sigma
+    }
+  }else{
+    initial.fit <- do.initial.fit(x=x,y=y,
+                                  initial.lasso.method=betainit)
+    beta.lasso <- initial.fit$betalasso
+    
+    if(is.null(sigma))
+    {
+      sigmahat <- initial.fit$sigmahat
+    }else{
+      warning.sigma.message()
+      sigmahat <- sigma
+    }
+  }
+  out <- list(beta.lasso = beta.lasso,
+              sigmahat = sigmahat)
+  return(out)
 }

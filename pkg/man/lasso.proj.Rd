@@ -7,6 +7,7 @@
 lasso.proj(x, y, family = "gaussian", standardize = TRUE,
            multiplecorr.method = "holm", N = 10000,
            parallel = FALSE, ncores = 4,
+           betainit = "cv lasso",
            sigma = NULL, Z = NULL, verbose = FALSE, return.Z = FALSE,
            robust = FALSE)
 }
@@ -19,10 +20,15 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
   \item{multiplecorr.method}{Either "WY" or any of
     \code{\link{p.adjust.methods}}.}
   \item{N}{Number of empirical samples (only used if multiplecorr.method
-  == "WY")}
+    == "WY")}
   \item{parallel}{Should parallelization be used? (logical)}
   \item{ncores}{Number of cores used for parallelization.}
-  \item{sigma}{Estimate of standard deviation of error term.}
+  \item{betainit}{Either a numeric vector, corresponding to a sparse
+    estimate of the coefficient vector, or the method to be used for the
+    initial estimation, "scaled lasso" or "cv lasso".}
+  \item{sigma}{Estimate of the standard deviation of the error term. This
+    estimate needs to be compatible with the initial
+    estimate (see betainit) provided or calculated. Otherwise, results won't be correct.}
   \item{Z}{user input}
   \item{verbose}{A boolean to enable reporting on the progress of the
     computations. (Only prints out information when Z is not provided by
@@ -74,6 +80,11 @@ y <- x[,1] + x[,2] + rnorm(100)
 fit.lasso <- lasso.proj(x, y)
 which(fit.lasso$pval.corr < 0.05)
 
+## Use the scaled lasso for the initial estimate
+fit.lasso.scaled <- lasso.proj(x, y, betainit = "scaled lasso")
+which(fit.lasso.scaled$pval.corr < 0.05)
+
+## Use a robust estimate for the standard error
 fit.lasso.robust <- lasso.proj(x, y, robust = TRUE)
 which(fit.lasso.robust$pval.corr < 0.05)
 

@@ -2,6 +2,7 @@ ridge.proj <- function(x, y,
                        family = "gaussian",
                        standardize = TRUE,
                        lambda = 1,
+                       betainit="cv lasso",
                        sigma = NULL,
                        multiplecorr.method = "holm", N = 10000)
 {
@@ -96,15 +97,11 @@ ridge.proj <- function(x, y,
   diag.cov2 <- diag(cov2)
 
   ## Estimate regression parameters (initial estimator) and noise level sigma
-  fit.scaleL <- scalreg(X = x, y = y)##, lam0 = "univ")
-
-  beta.lasso <- fit.scaleL$coefficients
+  initial.estimate <- initial.estimator(betainit = betainit, sigma = sigma,
+                                        x = x,y = y)
+  beta.lasso <- initial.estimate$beta.lasso
+  hat.sigma2 <- initial.estimate$sigmahat^2
   
-  if(is.null(sigma))
-    hat.sigma2 <- fit.scaleL$hsigma^2 ## added ^2 to fix bug!
-  else
-    hat.sigma2 <- sigma^2
-
   ## bias correction
   biascorr <- crossprod(Px.offdiag, beta.lasso)
 

@@ -4,8 +4,8 @@
 \title{P-values based on ridge projection method}
 \description{P-values based on ridge projection method}
 \usage{
-ridge.proj(x, y, family = "gaussian", standardize = TRUE,
-           lambda = 1, sigma = NULL, multiplecorr.method = "holm",
+ridge.proj(x, y, family = "gaussian", standardize = TRUE,           
+           lambda = 1, betainit = "cv lasso",sigma = NULL, multiplecorr.method = "holm",
            N = 10000)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -16,7 +16,12 @@ ridge.proj(x, y, family = "gaussian", standardize = TRUE,
   \item{standardize}{Should design matrix be standardized to unit column
     standard deviation (logical)?}
   \item{lambda}{Value of penalty parameter lambda (ridge regression).}
-  \item{sigma}{Estimate of error standard deviation}
+  \item{betainit}{Either a numeric vector, corresponding to a sparse
+    estimate of the coefficient vector, or the method to be used for the
+    initial estimation, "scaled lasso" or "cv lasso".}
+  \item{sigma}{Estimate of the standard deviation of the error term. This
+    estimate needs to be compatible with the initial
+    estimate (see betainit) provided or calculated. Otherwise, results won't be correct.}
   \item{multiplecorr.method}{Either "WY" or any of
     \code{\link{p.adjust.methods}}.}
   \item{N}{Number of empirical samples (only used if multiplecorr.method
@@ -51,6 +56,11 @@ x <- matrix(rnorm(100 * 100), nrow = 100, ncol = 100)
 y <- x[,1] + x[,2] + rnorm(100)
 fit.ridge <- ridge.proj(x, y)
 which(fit.ridge$pval.corr < 0.05)
+
+## Use the scaeld lasso for the initial estimate
+fit.ridge.scaled  <- ridge.proj(x, y, betainit = "scaled lasso")
+which(fit.ridge.scaled$pval.corr < 0.05)
+
 
 ## Group-wise testing of the first two coefficients
 fit.ridge$groupTest(1:2)
