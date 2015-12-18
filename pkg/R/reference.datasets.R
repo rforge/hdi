@@ -2,14 +2,18 @@ generate.reference.dataset <-
     function(n, p, s0,
              xtype = c("toeplitz", "exp.decay", "equi.corr"),
              btype = "U[-2,2]", permuted = FALSE,
-             iteration = 1, do2S = TRUE)
+             iteration = 1, do2S = TRUE,
+             x.par = switch(xtype,
+                            "toeplitz"  = 0.9,
+                            "equi.corr" = 0.8,
+                            "exp.decay" = c(0.4, 5)))
 {
   ## Purpose: generate the reference datasets used in the paper accompanying
   ##          this R package
   ## ----------------------------------------------------------------------
   ## Arguments:
   ## ----------------------------------------------------------------------
-  ## Author: Ruben Dezeure, Date: 6 Oct 2015; 'do2S' and tweaks: Martin Maechler
+  ## Author: Ruben Dezeure, Date: 6 Oct 2015; 'do2S', 'x.par' and tweaks: Martin Maechler
 
   ## Checking arguments
   xtype <- match.arg(xtype)
@@ -19,7 +23,7 @@ generate.reference.dataset <-
             n == as.integer(n), length(n) == 1, n >= 1,
             p == as.integer(p), length(p) == 1, p >= 1,
             s0== as.integer(s0),length(s0)== 1, 0 <= s0, s0 <= p)
-  do.seed <- !is.na(iteration)
+  do.seed <- is.numeric(iteration) && !is.na(iteration)
   if(do.seed)
       stopifnot(iteration > 0  && iteration <= 50) ## only 50 versions of each were created
   if(do.seed) {
@@ -27,41 +31,49 @@ generate.reference.dataset <-
       set.seed(seed)
   }
   x <- generate.reference.x(n = n, p = p, xtype = xtype,
-                            permuted = permuted, do2S = do2S)
+                            permuted = permuted, do2S = do2S, par = x.par)
   if(do.seed) set.seed(seed)
   beta <- generate.reference.beta(p = p, s0 = s0, btype = btype)
   list(x=x, beta=beta)
 }
 
-generate.reference.x <- function(n, p, xtype, permuted, do2S = TRUE)
+generate.reference.x <-
+    function(n, p, xtype, permuted, do2S = TRUE,
+             par = switch(xtype,
+                          "toeplitz"  = 0.9,
+                          "equi.corr" = 0.8,
+                          "exp.decay" = c(0.4, 5)))
 {
   ## Purpose: generate the reference design matrix used in the paper accompanying
   ##          this R package
   ## ----------------------------------------------------------------------
-  ## Arguments:
-  ## ----------------------------------------------------------------------
-  ## Author: Ruben Dezeure, Date: 6 Oct 2015, 16:27
+  ## Author: Ruben Dezeure, Date: 6 Oct 2015; 'par': Martin Maechler, 17 Dec 2015
 
-  Sigma <- switch(tolower(xtype),##in case capitalization was used
+  xtype <- tolower(xtype)## in case capitalization was used
+  stopifnot(is.numeric(par), is.finite(par))
+  Sigma <- switch(xtype,
                   "toeplitz" = {
                     indices <- toeplitz(0:(p-1))
-                    cov <- (0.9)^abs(indices)
+                    stopifnot(length(par) == 1)
+                    cov <- par ^ abs(indices)
                     if(do2S) ## This looks really stupid but the tiny numerical differences
                              ## make it identical to the datasets used in the paper
-                    solve(solve(cov))
+                        solve(solve(cov))
+                    else cov
                   },
                   "equi.corr" = {
-                    cov <- matrix(rep(0.8,p*p),p)
+                    stopifnot(length(par) == 1)
+                    cov <- matrix(par, p,p)
                     diag(cov) <- 1
-                    if(do2S) ## see remark above
-                      solve(solve(cov))
+                    if(do2S) solve(solve(cov)) else cov
                   },
                   "exp.decay" = {
+                    stopifnot(length(par) == 2)
                     indices <- toeplitz(0:(p-1))
-                    icov <- 0.4^(abs(indices)/5)
-                    solve(icov)
+                    solve(par[1]^ (abs(indices)/par[2]))
                   },
-                    stop("Invalid xtype: Please provide any of the following xtypes 'toeplitz', 'equi.corr' or 'exp.decay'"))
+
+                  stop("Invalid 'xtype': Must be one of 'toeplitz', 'equi.corr' or 'exp.decay'"))
 
   x <- mvrnorm(n, rep(0,p), Sigma)
 

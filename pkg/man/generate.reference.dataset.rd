@@ -1,16 +1,22 @@
 \name{generate.reference.dataset}
-\title{Generate reference datasets}
+\title{Generate Reference Datasets (\eqn{X} matrix and \eqn{\beta} vector}
 \alias{generate.reference.dataset}
 \concept{reference datasets}
 \description{
-  This function generates a design matrix and coefficient vector
-  corresponding to the reference linear model datasets of the hdi paper.
+  Generate a random design matrix \eqn{X} and coefficient vector \eqn{\beta}
+  useful for simulations of (high dimensional) linear models.
+  In particular, the function can be used to exactly recreate the
+  reference linear model datasets of the hdi paper.
 }
 \usage{
 generate.reference.dataset(n, p, s0,
                            xtype = c("toeplitz", "exp.decay", "equi.corr"),
                            btype = "U[-2,2]",
-			   permuted = FALSE, iteration = 1, do2S = TRUE)
+                           permuted = FALSE, iteration = 1, do2S = TRUE,
+                           x.par = switch(xtype,
+                                          "toeplitz"  = 0.9,
+                                          "equi.corr" = 0.8,
+                                          "exp.decay" = c(0.4, 5)))
 }
 \arguments{
   \item{n}{integer; the sample size \eqn{n} (paper had always \code{n = 100}).}
@@ -39,16 +45,34 @@ generate.reference.dataset(n, p, s0,
     covariance matrix should be inverted twice.  Must be true, to
     regenerate the \eqn{X} matrices from the hdi paper exactly
     \dQuote{to the last bit}.}
+  \item{x.par}{the parameters to be used for the design matrix.  Must be
+    a numeric vector of length one or two.  The default uses the
+    parameters also used in the hdi paper.}
 }
-%\details{}
+\details{
+  \bold{Generation of the design matrix \eqn{X}:}
+  \cr
+  For all \code{xtype}'s, the \eqn{X} matrix will be multivariate
+  normal, with mean zero and (co)variance matrix \eqn{\Sigma = }\code{C}
+  determined from \code{xtype}, \code{x.par} and \eqn{p} as follows:
+  \describe{
+    \item{\code{xtype = "toeplitz"}:}{\code{C <- par ^ abs(toeplitz(0:(p-1)))}}
+    \item{\code{xtype = "equi.corr"}:}{\eqn{\Sigma_{i,j} = \code{par}}
+      for \eqn{i \ne j}{i != j}, and \eqn{= 1}
+      for \eqn{i = j}, i.e., on the diagonal.}
+    \item{\code{xtype = "exp.decay"}:}{\code{C <- solve(par[1] ^
+	abs(toeplitz(0:(p-1)) / par[2]))}}
+  }
+}
 \value{
   A \code{\link{list}} with components
   \item{x}{the generated \eqn{n \times p}{n * p} design matrix \eqn{X}.}
   \item{beta}{the generated coefficient vector \eqn{\beta} (\sQuote{beta}).}
 }
-%\references{
-%  hdi paper ?
-%}
+\references{
+  \dQuote{The} hdi paper:\cr
+
+}
 \author{Ruben Dezeure \email{dezeure@stat.math.ethz.ch}}
 \examples{
 ## Generate the first realization of the linear model with design matrix type Toeplitz and
