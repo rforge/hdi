@@ -4,7 +4,8 @@ importFrom("graphics", axis, lines, plot, points)
 importFrom("stats", anova, approxfun, as.dist, coef, confint,
            cor, cutree, ecdf, glm, hclust, lm, median,
            p.adjust, p.adjust.methods, pnorm, predict, pt,
-           qnorm, qt, quantile, rnorm, runif, sd, vcov)
+           qnorm, qt, quantile, rnorm, runif, sd, setNames,
+           toeplitz, vcov)
 importFrom("parallel", mclapply, mcmapply)
 
 ## Imports from Recommended R packages

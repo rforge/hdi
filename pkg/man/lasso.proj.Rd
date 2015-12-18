@@ -78,7 +78,7 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
 x <- matrix(rnorm(100*20), nrow = 100, ncol = 20)
 y <- x[,1] + x[,2] + rnorm(100)
 fit.lasso <- lasso.proj(x, y)
-which(fit.lasso$pval.corr < 0.05)
+which(fit.lasso$pval.corr < 0.05) # typically: '1' and '2' and no other
 
 ## Use the scaled lasso for the initial estimate
 fit.lasso.scaled <- lasso.proj(x, y, betainit = "scaled lasso")

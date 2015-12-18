@@ -1,3 +1,4 @@
+## [Currently unused completely]
 get.signif.clusters <- function(tree,
                                 c.test,
                                 extinct)
@@ -6,48 +7,49 @@ get.signif.clusters <- function(tree,
   ##if(length(extinct)>0)##check if the excting numbers are truly the leafs of extinct branches
   ##  stopifnot(all(unlist(lapply(tree[extinct],function(node) is.na(node$child1) && is.na(node$child2)))))
   signif.clusters <- extinct
-  for(i in c.test)
+  for(i in c.test) ## TODO w/o for()
     {
       signif.clusters <- c(signif.clusters,tree[[i]]$parent)
     }
-  signif.clusters <- unique(signif.clusters)
-  return(signif.clusters)
+
+  ## return
+  unique(signif.clusters)
 }
 
+##' Only called from mssplit.hierarch.testing() :
 signif.partialFtest <- function(tree,
                                 c,##current cluster to test
                                 x,
                                 y,
                                 split.out)
 {
-  pvalue <- numeric(length(split.out))
-  for(i in 1:length(split.out))
-    {
-      yt <- y[-split.out[[i]]$split]
-      xt <- x[-split.out[[i]]$split,]
+  stopifnot((ns <- length(split.out)) >= 1)
+  pvalue <- numeric(ns)
+  for(i in 1:ns) {
       sel.model <- which(split.out[[i]]$sel.model.all)
-      intersection <- intersect(tree[[c]]$vars,sel.model)
-      
-      if(length(intersection)==0)
-        {
-          pvalue[i] <- 1
-        }else{
-          if(length(intersection)==length(sel.model))##the intersection equals the screened set
-            {
-              pvalue[i] <- anova(lm(yt~1),
-                                 lm(yt~xt[,sel.model,drop=FALSE]),##RIGHT? we should onlylook at what 
-                                 test="F")$P[2]              
-              
-            }else{
-              Shat.withoutc <- setdiff(sel.model,
-                                       tree[[c]]$vars)
-              pvalue[i] <- anova(lm(yt~xt[,Shat.withoutc,drop=FALSE]),
-                                 lm(yt~xt[,sel.model,drop=FALSE]),##RIGHT? we should onlylook at what 
-                                 test="F")$P[2]
-            }
+      intersection <- intersect(tree[[c]]$vars, sel.model)
+      if((hasI <- length(intersection) > 0)) {
+          yt <- y[-split.out[[i]]$split ]
+          xt <- x[-split.out[[i]]$split,]
+      }
+      pvalue[i] <-
+        ## MM speed FIXME: use lm.fit() and  pf() {for p-val of F test}
+        if(!hasI) {
+            1
+        } else if(length(intersection)==length(sel.model)) {
+            ## the intersection equals the screened set
+            anova(lm(yt~1),
+                  lm(yt~xt[,sel.model,drop=FALSE]),##RIGHT? we should only look at what
+                  test="F")$P[2]
+        } else {
+              Shat.withoutc <- setdiff(sel.model, tree[[c]]$vars)
+              anova(lm(yt~xt[, Shat.withoutc, drop=FALSE]),
+                    lm(yt~xt[, sel.model, drop=FALSE]),##RIGHT? we should only look at what
+                    test="F")$P[2]
         }
     }
-  return(pvalue)
+  ## return
+  pvalue
 }
 
 find.onesidedparents <- function(c,
@@ -63,7 +65,7 @@ find.onesidedparents <- function(c,
       currentnode <- tree[[currentnode]]$parent
       if(is.na(currentnode)){
         ##we reached the top
-        ##no more one sidied parents to be found
+        ##no more one sided parents to be found
         break
       }
       if((tree[[currentnode]]$child1 == oldnode || tree[[currentnode]]$child1 %in% extinct) &&
@@ -88,7 +90,7 @@ getmultadj.fortree <- function(tree,
   one.sided.parents <- find.onesidedparents(c=c,
                                             tree=tree,
                                             extinct=extinct)##find the ancestor nodes where the other branch side is extinct
-  
+
   mC <- numeric(length(split.out))
   for(i in 1:length(split.out))
     {
@@ -100,11 +102,11 @@ getmultadj.fortree <- function(tree,
           for(p in one.sided.parents){
             notextinct.child <- setdiff(c(tree[[p]]$child1,
                                           tree[[p]]$child2),
-                                        extinct)                                          
+                                        extinct)
             mC[i] <- mC[i] * length(intersect(tree[[notextinct.child]]$vars,sel.model))/
               length(intersect(tree[[p]]$vars,sel.model))
           }
-          
+
           ##Shaeffer improvement
           if(!is.na(tree[[c]]$parent)){
             sibling <- setdiff(c(tree[[tree[[c]]$parent]]$child1,
@@ -118,24 +120,26 @@ getmultadj.fortree <- function(tree,
           }
         }else{
           mC[i] <- 1
-        }               
+        }
     }
-  return(mC)
+  mC
 }
 
 update.extinct <- function(nowextinct,
                            tree,
                            c.test,
-                           oldextinct){
-  ##with the new extinct cluster, update all parts of the tree that are now extinct
+                           oldextinct)
+{
+  ## with the new extinct cluster, update all parts of the tree that are now extinct
 
   newextinct <- c(nowextinct,oldextinct)
-  
+
   current.node <- nowextinct
   while(TRUE){
     ##go up in the tree till you find a node with a second child that is not extinct yet
-    current.node <- tree[[current.node]]$parent    
-    found.notextinct <- !(tree[[current.node]]$child1 %in% newextinct) || !(tree[[current.node]]$child2 %in% newextinct)
+    current.node <- tree[[current.node]]$parent
+    found.notextinct <- (!tree[[current.node]]$child1 %in% newextinct ||
+                         !tree[[current.node]]$child2 %in% newextinct)
     if(found.notextinct)
       break##stop, this node is not extinct and therefore we are done
     ##else
@@ -143,9 +147,9 @@ update.extinct <- function(nowextinct,
     newextinct <- c(newextinct,current.node)
   }
   if(any(duplicated(newextinct)))
-    print("we have some duplicates in newextinct")  
-  out <- unique(newextinct)
-  return(out)
+    print("we have some duplicates in newextinct")
+  ## return
+  unique(newextinct)
 }
 
 mssplit.hierarch.testing <- function(tree,
@@ -157,7 +161,7 @@ mssplit.hierarch.testing <- function(tree,
                                      alpha = 0.05,
                                      verbose=FALSE)
 {
-  
+
   ##signif.cluster##this is implicitly known since we only go through the cluster points
   ##of which the parents were possible to reject
 
@@ -179,7 +183,7 @@ mssplit.hierarch.testing <- function(tree,
       for(c in c.test)
         {
           if(is.na(tree.pvals[c,1]))
-            {##haven't calculated the p-values yet for this node
+            {## haven't calculated the p-values yet for this node
               pvalues <- signif.partialFtest(tree=tree,
                                              c=c,
                                              y=y,
@@ -200,18 +204,18 @@ mssplit.hierarch.testing <- function(tree,
           ##Then do the aggregation as for multisplit
           ##(Based on multi-split.R code)
           ##(should extract this as a separate function)
-          quant.gamma <- quantile(pvalues.adj, gamma) / gamma          
+          quant.gamma <- quantile(pvalues.adj, gamma) / gamma
           if(length(gamma) > 1)
             penalty <- (1 - log(min(gamma)))
           else
             penalty <- 1
-          
+
           pvals.pre <- min(quant.gamma) * penalty
           agg.pvalue <- pmin(pvals.pre, 1)
 
           ##track the pval
           pvals.tested[match(c,clusters.tested)] <- agg.pvalue
-          
+
           if(agg.pvalue <= alpha)##add the children
             {##depth first search
               if(is.na(tree[[c]]$child1))
@@ -233,7 +237,7 @@ mssplit.hierarch.testing <- function(tree,
                 }
               c.test.new <- setdiff(c.test.new,c)##remove the current tested cluster that was found significant from the to test
               found.signif <- TRUE
-              ##Note: can optimize the c.test further with the 
+              ##Note: can optimize the c.test further with the
             }
         }
       ##never remove clusters you did not found significant from c.test,
@@ -258,13 +262,14 @@ mssplit.hierarch.testing <- function(tree,
   ## out$extinct <- extinct
   ## out$tree <- tree
 
-  ##TODO convert to the lowerbound output thingie and you are done!
-  ##check out the tree plot and verify correctness
-  out <- list()
-  signif.clusters <- get.signif.clusters(tree=tree,
-                                         c.test=c.test,
-                                         extinct=extinct)
-  ##can we also only return the significant clusters?
+  ## TODO convert to the lowerbound output thingie and you are done!
+  ## ---- check out the tree plot and verify correctness
+  ## out <- list()
+  ## signif.clusters <- get.signif.clusters(tree=tree,
+  ##                                        c.test=c.test,
+  ##                                        extinct=extinct)
+  ## can we also only return the significant clusters?
+
   clusters <- list()
   pval <- list()
   leftChild <- list()
@@ -289,10 +294,10 @@ mssplit.hierarch.testing <- function(tree,
       ##   pval[[k]] <- 1
       leftChild[[k]] <- match(tree[[ct]]$child1,clusters.tested)
       rightChild[[k]] <- match(tree[[ct]]$child2,clusters.tested)
-      
+
       ## lc <- leftChild[[k]]
       ## rc <- rightChild[[k]]
-      
+
       ## if(!is.na(lc)){
       ##   k <- k+1
       ##   clusters[[k]] <- tree[[lc]]$vars
@@ -300,7 +305,7 @@ mssplit.hierarch.testing <- function(tree,
       ##   leftChild[[k]] <- tree[[lc]]$child1
       ##   rightChild[[k]] <- tree[[lc]]$child2
       ## }
-      
+
       ## if(!is.na(rc)){
       ##   k <- k+1
       ##   clusters[[k]] <- tree[[rc]]$vars
@@ -309,25 +314,25 @@ mssplit.hierarch.testing <- function(tree,
       ##   rightChild[[k]] <- tree[[rc]]$child2
       ## }
     }
-  out <- list()
-  out$clusters <- clusters
-  out$pval <- unlist(pval)
-  out$leftChild <- unlist(leftChild)
-  out$rightChild <- unlist(rightChild)
-  out$leftChild[is.na(out$leftChild)] <- -1
-  out$rightChild[is.na(out$rightChild)] <- -1
-  out$alpha <- alpha
-  out$hh <- hh
+  lCh <- unlist( leftChild); lCh[is.na(lCh)] <- -1
+  rCh <- unlist(rightChild); rCh[is.na(rCh)] <- -1
+  ## return
+  list(
+    clusters = clusters,
+    pval = unlist(pval),
+    leftChild  = lCh,
+    rightChild = rCh,
+    alpha = alpha,
+    hh = hh)
   ##TODO next steps are doing 4.2.1 inheritance procedure
   ##TODO afterwards try 4.1 exploiting logical relationships Shaffer improvements
-  return(out)
 }
 
 createtree.from.hclust <- function(hh,
                                    verbose=TRUE)
 {##Note: an object oriented approach probably has better performance
   p <- length(hh$order)
-  
+
   ##the root node
   tree <- list()##the implicit numbering is the node number
   tree[[1]] <- list(child1=NA,
@@ -338,10 +343,8 @@ createtree.from.hclust <- function(hh,
   parent <- rep(1,p)
 
   if(verbose)
-    {
-      print("Converting the hclust output to a tree data structure")
-      print(paste("building the tree is ",0,"% done.",sep=""))
-    }
+      cat("Converting the hclust output to a tree data structure\n",
+          paste0("building the tree is ",0,"% done.\n"))
   nn <- 2 ##this is the running node number to add to the tree
   for(i in 2:nrow(hh$merge))
     {
@@ -357,11 +360,11 @@ createtree.from.hclust <- function(hh,
       ##find out what cluster has been split up FAST WAY
       tparent <- parent[min(which(old.cut!=new.cut))]
       c <- (parent==tparent)
-      
+
       ## ##Identification approach, clusters themselves
       ## old.clusters <- split(1:p,old.cut)
       ## new.clusters <- split(1:p,new.cut)
-      
+
       ## ##I actually only have to do this for the clusters of cluster size that is
       ## ##not in the new clusters :)
       ## old.table <- table(old.cut)##table(parent)
@@ -380,10 +383,10 @@ createtree.from.hclust <- function(hh,
       ##         {
       ##           old.disappeared <- which(old.table==d)
       ##           break
-      ##         }              
+      ##         }
       ##       }
       ##   }
-      ## 
+      ##
       ## if(length(old.disappeared)==1)
       ##   {
       ##     c <- old.clusters[[old.disappeared]]
@@ -402,17 +405,17 @@ createtree.from.hclust <- function(hh,
       ##         }
       ##       }
       ##   }
-      
+
       browser(expr=is.na(tparent))
       browser(expr=(length(tparent)>1))
       stopifnot(!is.na(tparent))
-      
+
       ##update the parent
       stopifnot(is.na(tree[[tparent]]$child1) && is.na(tree[[tparent]]$child2))
       tree[[tparent]]$child1 <- nn
       tree[[tparent]]$child2 <- nn+1
 
-      
+
       ##create child 1
       child1.c <- which(new.cut == unique(new.cut[c])[1])
       tree[[nn]] <- list(child1=NA,
