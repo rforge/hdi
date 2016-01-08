@@ -9,26 +9,31 @@ getMembers <- function(me, sel, members = numeric(0)) {
 }
 
 getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
-                              s = 10, nsplit = 11, silent = FALSE,
+                              eps = 0.1, s = 10, nsplit = 11, silent = FALSE,
                               setseed = TRUE, lpSolve = TRUE) {
+
   group <- getMembers(me, sel)
   if(!silent)
     cat("\n ", sel, "  ", length(group), "members")
-  res <- groupBound(x, y, group = group, alpha = alpha, s = s,
-                    nsplit = nsplit, silent = TRUE,
+  
+  res <- groupBound(x, y, group = group, alpha = alpha, eps = eps,
+                    s = s, nsplit = nsplit, silent = TRUE,
                     setseed = setseed, lpSolve = lpSolve)
-  resmat[sel, 2]  <- res
-  resmat[sel, 1]  <- length(group)
+  
+  resmat[sel, 2] <- res
+  resmat[sel, 1] <- length(group)
   groupsl[[sel]] <- group
+  
   if(!silent)
     cat("\t lower bound", res)
 
-  if(res > 0 & length(group)>1) {
+  if(res > 0 & length(group) > 1) {
     if(all(me[sel,] > 0)) {
       for (kk in 1:2) {
         tmp <- getLowerBoundNode(x, y, me, me[sel,kk], resmat, groupsl,
-                                 alpha = alpha, s = s, nsplit = nsplit,
-                                 silent = silent, lpSolve = lpSolve)
+                                 alpha = alpha, eps = eps, s = s,
+                                 nsplit = nsplit, silent = silent,
+                                 lpSolve = lpSolve)
         resmat  <- tmp$resmat
         groupsl <- tmp$groupsl
       }
@@ -42,7 +47,6 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
 groupBoundWithPrediction <- function(x, y, group, mfact, pred,
                                      intercept = TRUE, useseed = NULL,
                                      lpSolve = TRUE, tol = 1e-3) {
-  ## not to be called by user (?)
   Resid  <- y - pred
   mustar <- 3 * sqrt(sum(Resid^2))
   n      <- nrow(x)
@@ -76,7 +80,7 @@ groupBoundWithPrediction <- function(x, y, group, mfact, pred,
   if(!is.null(useseed))
     set.seed(oldseed)
 
-  Z <- Z*mustar
+  Z <- Z * mustar
 
   cvec <- penalty
   tol  <- tol * sd(y)
@@ -111,15 +115,18 @@ groupBoundWithPrediction <- function(x, y, group, mfact, pred,
 }
 
 ## FIXME: 90% quantile is  hard-coded (!)
-groupBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
-                       s = min(10, ncol(x) - 1),
-                       setseed = TRUE,
-                       silent = FALSE, lpSolve = TRUE,
-                       parallel = FALSE, ncores = 4)
-{
+## --> added option eps (as in original paper; code was correct)
+
+groupBound <- function(x, y, group, alpha = 0.05, eps = 0.1,
+                       nsplit = 11, s = min(10, ncol(x) - 1),
+                       setseed = TRUE, silent = FALSE, lpSolve = TRUE,
+                       parallel = FALSE, ncores = 4) {
   if(alpha > 0.5 || alpha < 0.005) ## warn even if(silent)
     warning("level alpha outside supported range [0.005, 0.5]")
 
+  if(eps > 0.5 || eps <= 0)
+    stop("eps outside of suppored range (0, 0.5]")
+  
   listg <- is.list(group)
 
   n    <- nrow(x)
@@ -131,62 +138,65 @@ groupBound <- function(x, y, group, alpha = 0.05, nsplit = 11,
             " taking too long, reducing to s = ", s.new, " projections.")
     s <- s.new
   }
+
   if(s > ncol(x)) {
     s <- ncol(x) - 1
     warning("Reduced s to ", ncol(x) - 1, " because s >= ncol(x).")
   }
 
   oldseed <- if(setseed) round(10000 * runif(1)) # <- MM: "nonsense"
-  ## probsel <- rep(0, ncol(x))
 
   if(parallel) {
     TGsplit.out <- mclapply(split(1:nsplit,1:nsplit),
                             do.splits,
-                            nsplit=nsplit,
-                            n=n,
-                            x=x,
-                            y=y,
-                            s=s,
-                            setseed=setseed, oldseed=oldseed,
-                            silent=silent,
-                            alpha=alpha,
-                            lpSolve=lpSolve,
-                            group=group,
-                            mc.cores=ncores)
+                            nsplit = nsplit,
+                            n = n,
+                            x = x,
+                            y = y,
+                            s = s,
+                            setseed  = setseed,
+                            oldseed  = oldseed,
+                            silent   = silent,
+                            alpha    = alpha,
+                            eps      = eps,
+                            lpSolve  = lpSolve,
+                            group    = group,
+                            mc.cores = ncores)
     ## FIXME: do we assume 'listg (== TRUE)' here ?
     TG <- do.call(cbind, TGsplit.out)
-    ##print("after parallel")
-    ##print(TG)
   }else{
     TG <- if(listg)
             matrix(0, nrow = length(group), ncol = nsplit)
-          else rep(0, nsplit)
+          else
+            rep(0, nsplit)
+    
     for(splitc in 1:nsplit) {
-      TGsplit <- do.splits(splitc=splitc,
-                           nsplit=nsplit,
-                           n=n,
-                           x=x,
-                           y=y,
-                           s=s,
-                           setseed=setseed, oldseed=oldseed,
-                           silent=silent,
-                           alpha=alpha,
-                           lpSolve=lpSolve,
-                           group=group)
+      TGsplit <- do.splits(splitc = splitc,
+                           nsplit = nsplit,
+                           n = n,
+                           x = x,
+                           y = y,
+                           s = s,
+                           setseed = setseed,
+                           oldseed = oldseed,
+                           silent  = silent,
+                           alpha   = alpha,
+                           eps     = eps,
+                           lpSolve = lpSolve,
+                           group   = group)
       if(!listg)
         TG[splitc] <- TGsplit
       else
         TG[,splitc] <- TGsplit
     }
-    ##print("after single core")
-    ##print(TG)
   }
 
   ## FIXME ?? should '0.9' really be  1 - 2*alpha  ????
+  ## Yes, this is correct, added an option (lme)
   TG <- if(!listg)
-    quantile(TG, probs = 0.9, type = 5)
+    quantile(TG, probs = 1 - eps, type = 5)
   else
-    apply(TG, 1, quantile, probs = 0.9, type = 5)
+    apply(TG, 1, quantile, probs = 1 - eps, type = 5)
 
   ## return
   structure(TG, class = c("lowerBound", "hdi"))
@@ -202,14 +212,15 @@ do.splits <- function(splitc,
                       setseed, oldseed,
                       silent,
                       alpha,
+                      eps,
                       lpSolve,
                       group,
-                      r.lambda = 0.00001)
-{
+                      r.lambda = 0.00001) {
   if(setseed) {
     set.seed(useseed <- splitc + 201) ## useful???
     on.exit( set.seed(oldseed) )
   }
+  
   insam  <- sort(sample(1:n, round(n / 2)))
   outsam <- (1:n)[-insam]
   cvg    <- cv.glmnet(x[insam,], y[insam], nfolds = 10, grouped = FALSE)
@@ -237,8 +248,9 @@ do.splits <- function(splitc,
 
       A[,sc] <- tmp / sqrt(sum(tmp^2))
     }
+    
     A <- t(A)
-    mfact <- getmfact(s, 1 - alpha / 10)# why  " / 10 "  ??? -- argument ?? (FIXME!)
+    mfact <- getmfact(s, 1 - alpha * eps)
 
     TGsplit <- groupBoundWithPrediction(A %*% x[outsam,],
                                         as.numeric(A %*% y[outsam]),
@@ -248,7 +260,7 @@ do.splits <- function(splitc,
                                         useseed = if(setseed) useseed,# else NULL
                                         lpSolve = lpSolve)
   }else{ ## s = NULL
-    mfact   <- getmfact(nrow(x), 1 - alpha / 10)
+    mfact   <- getmfact(nrow(x), 1 - alpha * eps)
     TGsplit <- groupBoundWithPrediction(x[outsam,], y[outsam], group,
                                         mfact, pred,
                                         intercept = TRUE,
@@ -261,17 +273,21 @@ do.splits <- function(splitc,
   TGsplit
 }
 
-
 clusterGroupBound <- function(x, y, method = "average",
-                              dist = as.dist(1 - abs(cor(x))), alpha = 0.05,
+                              dist = as.dist(1 - abs(cor(x))),
+                              alpha = 0.05,
+                              eps = 0.1,
                               hcloutput,
                               nsplit = 11,
                               s = min(10, ncol(x) - 1),
                               silent = FALSE, setseed = TRUE,
-                              lpSolve = TRUE)
-{
-    if(alpha > 0.5 || alpha < 0.0005)
-        warning("level alpha outside supported range [0.0005, 0.5]")
+                              lpSolve = TRUE) {
+  
+  if(alpha > 0.5 || alpha < 0.0005)
+    warning("level alpha outside supported range [0.0005, 0.5]")
+
+  if(eps > 0.5 || eps <= 0)
+    stop("eps outside of suppored range (0, 0.5]")
 
   ## n <- nrow(x)
   p <- ncol(x)
@@ -288,17 +304,19 @@ clusterGroupBound <- function(x, y, method = "average",
     s <- p - 1
     warning("Reduced s to ", ncol(x) - 1, " because s >= ncol(x).")
   }
+  
   hcl <- if(missing(hcloutput))
            hclust(dist, method = method)
          else
            hcloutput
-  ord <- hcl$order
+  
+  ord   <- hcl$order
   merge <- hcl$merge
   merge[merge > 0] <- merge[merge > 0] + p
   merge[merge < 0] <- abs(merge[merge < 0])
 
-  mergeext   <- rbind(cbind(1:p, 0), merge)
-  ncl        <- nrow(mergeext)
+  mergeext <- rbind(cbind(1:p, 0), merge)
+  ncl      <- nrow(mergeext)
 
   lb <- matrix(0, nrow = ncl, ncol = 2)
   groupsl <- list()
@@ -306,7 +324,8 @@ clusterGroupBound <- function(x, y, method = "average",
     groupsl[[kc]] <- numeric(0)
 
   lb <- getLowerBoundNode(x, y, mergeext, nrow(mergeext), lb, groupsl,
-                          alpha = alpha, s = s, nsplit = nsplit,
+                          alpha = alpha, eps = eps,
+                          s = s, nsplit = nsplit,
                           silent = silent, setseed = setseed,
                           lpSolve = lpSolve)
 
@@ -329,13 +348,6 @@ clusterGroupBound <- function(x, y, method = "average",
     out$position[k] <- mean(((1:length(ord)))[ord %in% out$members[[k]]] / p)
   }
 
-  ##out$isLeaf <- (out$leftChild < 0 & out$rightChild < 0)
-
-  ##zeroChilds <- (out$lowerBound[ pmax(1,out$leftChild)] == 0) &
-  ##    (out$lowerBound[pmax(1,out$rightChild)] == 0)
-
-  ##out$isLeaf <- out$isLeaf | zeroChilds
-
   leafLeft  <- (out$leftChild < 0  |
                 out$lowerBound[pmax(1, out$leftChild)] == 0)
 
@@ -343,23 +355,11 @@ clusterGroupBound <- function(x, y, method = "average",
                 out$lowerBound[pmax(1, out$rightChild)] == 0)
 
   out$isLeaf  <- leafLeft & leafRight
-  out$method <- "clusterGroupBound"
+  out$method  <- "clusterGroupBound"
+  
   structure(out, class = c("clusterGroupBound", "hdi"))
 }
 
-## no longer used
-getmfactold <- function(n,conf) {
-  x <- c(5, 10, 15, 20, 25, 30, 40, 50)
-
-  if(conf > 0.9501) {
-    mfactvec <- c(3.4, 3.9, 5.2, 7.1, 9.7, 13.2, 25.8, 42.9)
-  }else{
-    mfactvec <- c(3.4, 3.9, 5.2, 7.1, 9.7, 13.2, 25.8, 42.9)
-  }
-
-  func <- approxfun(x, mfactvec, method = "linear", rule = 2)
-  return(func(n))
-}
 
 ## FIXME (MM): this is *UTTERLY WRONG*  for n > 50 !!
 ## ------
@@ -368,8 +368,8 @@ getmfactold <- function(n,conf) {
 ## 2) extrapolate somewhat along what getmfactold() does above ??
 ##
 ## 1+2 -> 3) use an optional argument determining what to do
- getmfact <- function(n, conf)
-{
+
+getmfact <- function(n, conf) {
   stopifnot(length(n) == 1)
   nvec <- c(3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 17,
             20, 22, 25, 27,
@@ -408,4 +408,18 @@ getmfactold <- function(n,conf) {
   approxfun(c(0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,0.975,0.98,
               0.99,0.995,0.999,0.9995),
             mfactvec, method = "linear", rule = 2)(conf)
+}
+
+## no longer used
+getmfactold <- function(n,conf) {
+  x <- c(5, 10, 15, 20, 25, 30, 40, 50)
+
+  if(conf > 0.9501) {
+    mfactvec <- c(3.4, 3.9, 5.2, 7.1, 9.7, 13.2, 25.8, 42.9)
+  }else{
+    mfactvec <- c(3.4, 3.9, 5.2, 7.1, 9.7, 13.2, 25.8, 42.9)
+  }
+
+  func <- approxfun(x, mfactvec, method = "linear", rule = 2)
+  return(func(n))
 }

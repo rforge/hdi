@@ -14,7 +14,7 @@
 }
 \usage{
 groupBound(x, y, group,
-           alpha = 0.05, nsplit = 11,
+           alpha = 0.05, eps = 0.1, nsplit = 11,
            s = min(10, ncol(x) - 1),
            setseed = TRUE,
            silent = FALSE, lpSolve = TRUE,
@@ -26,12 +26,15 @@ groupBound(x, y, group,
     rows corresponding to \eqn{n} observations.}
   \item{y}{numeric response variable of length \eqn{n}.}
   \item{group}{either a numeric vector with entries in \eqn{\{1,..,p\}}
-    or a \code{\link{list}} with such numeric vectors.  If \code{group}
-    is a numeric vector, this is the group of variables for which a lower bound is
-    computed.  If \code{group} is a list, the lower bound is computed for
-    each group in the list.}
-  \item{alpha}{numeric level in \eqn{(0,1)} at which the test/
+    or a \code{\link{list}} with such numeric vectors. If \code{group}
+    is a numeric vector, this is the group of variables for which a
+    lower bound is computed.  If \code{group} is a list, the lower bound
+    is computed for each group in the list.}
+  \item{alpha}{numeric level in \eqn{(0,1)} at which the test /
     confidence interval is computed.}
+  \item{eps}{a level of eps*alpha is used and the values of different
+    splits are aggregated using the (1-eps) quantile. See reference
+    below for more details.}
   \item{nsplit}{the number of data splits used.}
   \item{s}{the dimensionality of the projection that is used.  Lower
     values lead to faster computation and if \eqn{n > 50}, then \code{s}

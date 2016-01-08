@@ -10,7 +10,7 @@
 \usage{
 clusterGroupBound(x, y, method = "average",
                   dist = as.dist(1 - abs(cor(x))), alpha = 0.05,
-                  hcloutput, nsplit = 11, s = min(10, ncol(x) - 1),
+                  eps = 0.1, hcloutput, nsplit = 11, s = min(10, ncol(x) - 1),
                   silent = FALSE, setseed = TRUE, lpSolve = TRUE)}
 \arguments{
   \item{x}{numeric design matrix of the regression \eqn{n \times p}{n * p}
@@ -29,8 +29,11 @@ clusterGroupBound(x, y, method = "average",
     calculated as 1 less the absolute correlation matrix.
     Alternatively, you can provide your own hierarchical clustering
     through the optional argument \code{hcloutput}.}
-  \item{alpha}{numeric level in \eqn{(0, 1)} at which the confidence
+  \item{alpha}{numeric level in \eqn{(0, 1)} at which the test / confidence
     intervals are to be constructed.}
+  \item{eps}{a level of eps*alpha is used and the values of different
+    splits are aggregated using the (1-eps) quantile. See reference
+    below for more details.}
   \item{hcloutput}{optionally, the value of a \code{\link{hclust}()}
     call.  If it is provided, the arguments \code{dist} and \code{method}
     are ignored.}
