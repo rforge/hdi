@@ -3,7 +3,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                         model.selector = lasso.cv,
                         classical.fit = lm.pval,
                         classical.ci  = lm.ci,
-                        parallel = FALSE, ncores = 4,
+                        parallel = FALSE, ncores = getOption("mc.cores", 2L),
                         gamma = seq(ceiling(0.05 * B) / B, 1 - 1 / B, by = 1/B),
                         args.model.selector = NULL,
                         args.classical.fit = NULL,
@@ -13,10 +13,8 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                         repeat.max = 20,
                         trace = FALSE)
 {
-  ## Purpose:
-  ## ----------------------------------------------------------------------
-  ## Arguments:
-  ## ----------------------------------------------------------------------
+  ## --> ../man/multi.split.Rd
+  ##       ~~~~~~~~~~~~~~~~~~~
   ## Author: Lukas Meier, Date:  2 Apr 2013, 11:52
   ## Updated with confidence interval calculation, Ruben Dezeure (5 Feb 2014)
 
@@ -31,7 +29,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
   ## all variables are taken from the function environment
   oneSplit <- function(b) { # b-th split {e.g. called from *apply()
     pvals.v         <- rep(1, p)
-    sel.model.all.v <- logical(p) ## FALSE by default
+    sel.models <- logical(p) ## FALSE by default
     lci.v           <- rep(-Inf, p)
     uci.v           <- rep(Inf, p)
     centers.v       <- rep(NA, p)
@@ -98,7 +96,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
         } ## end if(ci)
 
         if(return.selmodels)
-          sel.model.all.v[sel.model] <- TRUE
+          sel.models[sel.model] <- TRUE
 
         try.again <- FALSE ## break the loop, continue with next sample-split
       }
@@ -125,16 +123,16 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
     } ## end while(try.again)
 
     ## return
-    list(pvals         = pvals.v,
-         sel.model.all = sel.model.all.v,
-         centers       = centers.v,
-         ses           = ses.v,
-         df.res        = df.res,
-         lci           = lci.v,
-         uci           = uci.v,
-         repeat.count  = repeat.count,
-         split         = split)
-  }
+    list(pvals        = pvals.v,
+         sel.models   = sel.models,
+         centers      = centers.v,
+         ses          = ses.v,
+         df.res       = df.res,
+         lci          = lci.v,
+         uci          = uci.v,
+         repeat.count = repeat.count,
+         split        = split)
+  } ## {oneSplit}
 
   ######################
   ## Sample-splitting ##
@@ -142,6 +140,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
 
   split.out <-
     if(parallel) {
+      stopifnot(isTRUE(is.finite(ncores)), ncores >= 1L)
       if(trace)
         cat("...starting parallelization of sample-splits\n")
       mclapply(1:B, oneSplit, mc.cores = ncores)
@@ -155,32 +154,31 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
       else
         replicate(B, oneSplit(), simplify=FALSE)
     }
-  ############################
-  ##Do hierarchical testing ##
-  ############################
-  cluster.group.testing.function <- function(hcloutput,
-                                             dist = as.dist(1 - abs(cor(x))),
-                                             alpha = 0.05,
-                                             method = "average",
-                                             conservative = TRUE) {
+  ############################################
+  ## Allow hierarchical testing with result ##
+  ############################################
+  clusterGroupTest <-
+    if(return.selmodels)
+      function(hcloutput,
+               dist = as.dist(1 - abs(cor(x))),
+               alpha = 0.05,
+               method = "average",
+               conservative = TRUE, verbose = TRUE)
+  {
+    ## We use "global" variables
+    ## return.selmodels, x, y, gamma, split.out
     if(!return.selmodels)
       stop("Cluster group testing cannot be done if the original function was not run with return.selmodels=TRUE.")
 
     hh <- if(!missing(hcloutput)) hcloutput else hclust(dist, method = method)
 
-    tree <- createtree.from.hclust(hh,verbose=TRUE)##we calculate a tree structure
-
-    out <- mssplit.hierarch.testing(tree=tree,
-                                    hh=hh,
-                                    x=x,
-                                    y=y,
-                                    gamma=gamma,
-                                    split.out=split.out)
+    ## we calculate a tree structure:
+    tree <- createtree.from.hclust(hh,verbose=verbose)
+    out <- mssplit.hierarch.testing(tree=tree, hh=hh, x=x, y=y,
+                                    gamma=gamma, split.out=split.out)
     out$method <- "clusterGroupTest"
-    class(out) <- c("clusterGroupTest", "hdi")
-    return(out)
+    structure(out, class = c("clusterGroupTest", "hdi"))
   }
-
 
   #####################
   ## Extract objects ##
@@ -197,17 +195,17 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
   pvals <- myExtract("pvals"); colnames(pvals) <- colnames(x)
 
   if(return.selmodels) {
-    sel.model.all <- myExtract("sel.model.all")
-    colnames(sel.model.all) <- colnames(x)
+    sel.models <- myExtract("sel.models")
+    colnames(sel.models) <- colnames(x)
   } else { ## safe memory space in case no output is wanted regarding sel. models
-    sel.model.all <- NA
+    sel.models <- NA
   }
 
   lci           <- myExtract("lci")
   uci           <- myExtract("uci")
   centers       <- myExtract("centers")
   ses           <- myExtract("ses")
-  df.res        <- unlist(lapply(split.out, "[[", "df.res"))
+  df.res        <- unlist(lapply(split.out, `[[`, "df.res"))
 
   ##############################
   ## Calculate final p-values ##
@@ -230,8 +228,8 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
 
   if(ci && identical(classical.fit, lm.pval)) {
     vars <- ncol(lci)
-    ##for every separate variable, aggregate the ci
-    s0 <- if(any(is.na(sel.model.all))) NA else apply(sel.model.all, 1, sum)
+    ## for every separate variable, aggregate the ci
+    s0 <- if(any(is.na(sel.models))) NA else apply(sel.models, 1, sum)
     ## calculate single-testing confidence intervals
     new.ci <- mapply(aggregate.ci,
                      lci = split(lci, rep(1:vars, each = B)),
@@ -240,15 +238,15 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                      ses = split(ses, rep(1:ncol(ses), each = B)),
                      df.res = list(df.res = df.res),
                      gamma.min = min(gamma),
-                     ##multi.corr = TRUE,##temporarily trying multiple testing corrected ci
-                     multi.corr = FALSE,##single testing confidence intervals
+                     ## multi.corr = TRUE,## temporarily trying multiple testing corrected ci
+                     multi.corr = FALSE,## single testing confidence intervals
                      verbose = FALSE,
                      s0=list(s0=s0),
                      var=1:vars)#for debug information to have the var of this aggregate call
     lci.current <- t(new.ci)[,1]
     uci.current <- t(new.ci)[,2]
   } else {
-    lci.current <- apply(lci, 2, median)
+    lci.current <- apply(lci, 2, median) ## robustbase :: colMedians() is faster
     uci.current <- apply(uci, 2, median)
   }
 
@@ -256,24 +254,35 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
     pvals <- NA
 
   names(lci.current) <- names(uci.current) <- names(pvals.current)
+  if(return.selmodels) {
+    ## take some care to *not* save the full environment in clusterGroupTest
+    ## remove all variables but those:
+    keep <- c(
+      ## for clusterGroupTest():
+      "return.selmodels", "x", "y", "gamma", "split.out",
+      ## for result below:
+      "pvals", "pvals.current", "ci", "ci.level", "lci.current", "uci.current",
+      "which.gamma", "sel.models", "clusterGroupTest")
+    rm(list = setdiff(names(environment()), keep))
+  }
 
   ## return
   structure(
     list(pval          = NA,
          pval.corr     = pvals.current,
+         pvals.nonaggr = pvals,
+         ci.level      = if (ci) ci.level else NA,
          lci           = if (ci) lci.current else NA,
          uci           = if (ci) uci.current else NA,
          gamma.min     = gamma[which.gamma],
-         pvals.nonaggr = pvals,
-         sel.models    = sel.model.all,
-         ci.level      = if(ci) ci.level else NA,
+         sel.models    = sel.models,
          method        = "multi.split",
          call          = match.call(),
-         clusterGroupTest = cluster.group.testing.function),
+         clusterGroupTest = clusterGroupTest),
   class = "hdi")
 }
 
-##aggregate the ci over multiple splits for one single beta_j
+## aggregate the ci over multiple splits for one single beta_j
 aggregate.ci <- function(lci,rci,centers,
                          ses,
                          df.res,
@@ -282,19 +291,19 @@ aggregate.ci <- function(lci,rci,centers,
                          verbose=FALSE,
                          var,
                          s0) {
-  ##detect the -Inf Inf intervals
+  ## detect the -Inf Inf intervals
   inf.ci <- is.infinite(lci)|is.infinite(rci)
-  no.inf.ci <- sum(inf.ci)##this we will use later on
+  no.inf.ci <- sum(inf.ci)## this we will use later on
   if(verbose)
     {
       print("number of Inf ci")
       print(no.inf.ci)
     }
   if((no.inf.ci == length(lci)) || (no.inf.ci >= (1-gamma.min)*length(lci)))
-    {##we only have infinite ci or more than 1-gamma.min of the splits have an inf ci
+    {## we only have infinite ci or more than 1-gamma.min of the splits have an inf ci
       return(c(-Inf,Inf))
     }
-  ##remove the infinite ci from the input
+  ## remove the infinite ci from the input
   lci <- lci[!inf.ci]
   rci <- rci[!inf.ci]
   centers <- centers[!inf.ci]
@@ -313,15 +322,15 @@ aggregate.ci <- function(lci,rci,centers,
                   df.res=df.res,
                   gamma.min=gamma.min,
                   multi.corr=multi.corr)
-  ##find an inside point: we need to find a point that is definitely in the confidence intervals
+  ## find an inside point: we need to find a point that is definitely in the confidence intervals
   inner <- find.inside.point.gammamin(low=min(centers),
                                       high=max(centers),
                                       ci.info=ci.info,
                                       verbose=verbose)
 
-  ##inner <- max(lci)
+  ## inner <- max(lci)
   outer <- min(lci)
-  ##finding good bounds for our bisection method
+  ## finding good bounds for our bisection method
   new.bounds <- find.bisection.bounds.gammamin(shouldcover=inner,
                                                shouldnotcover=outer,
                                                ci.info=ci.info,
@@ -339,7 +348,7 @@ aggregate.ci <- function(lci,rci,centers,
       print(l.bound)
     }
 
-  ##inner <- min(rci)
+  ## inner <- min(rci)
   outer <- max(rci)
   new.bounds <- find.bisection.bounds.gammamin(shouldcover=inner,
                                                shouldnotcover=outer,
@@ -365,9 +374,9 @@ find.inside.point.gammamin <- function(low,
                                        ci.info,
                                        verbose)
 {
-  ##searching over the range low and high for a point that is inside
-  ##does it cover gammamin
-  ##we increase the granularity up until a certain level and then give up
+  ## searching over the range low and high for a point that is inside
+  ## does it cover gammamin
+  ## we increase the granularity up until a certain level and then give up
   range.length <- 10
   test.range <- seq(low,high,length.out=range.length)
   cover <- mapply(does.it.cover.gammamin,
@@ -417,13 +426,13 @@ find.bisection.bounds.gammamin <- function(shouldcover,
       reset.shouldnotcover <- TRUE
       if(verbose)
         print("finding a new shouldnotcover bound")
-      ##need to find a shouldnotcover further away from this point
-      ##the direction we move in is shouldnotcover-shouldcover
+      ## need to find a shouldnotcover further away from this point
+      ## the direction we move in is shouldnotcover-shouldcover
       while(does.it.cover.gammamin(beta.j=shouldnotcover,ci.info=ci.info))
         {
           old <- shouldnotcover
           shouldnotcover <- shouldnotcover + (shouldnotcover - shouldcover)
-          shouldcover <- old##update the should cover bound too!
+          shouldcover <- old## update the should cover bound too!
         }
       if(verbose)
         {
@@ -434,7 +443,7 @@ find.bisection.bounds.gammamin <- function(shouldcover,
           print(shouldcover)
         }
     }
-  ##Is it possible that these get triggered consecutively?, no :0
+  ## Is it possible that these get triggered consecutively?, no :0
   if(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info))
     {
       if(reset.shouldnotcover)
@@ -442,9 +451,9 @@ find.bisection.bounds.gammamin <- function(shouldcover,
       if(verbose)
         print("finding a new shouldcover bound")
       while(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info))
-        {##Problem, it is possible that there is no coverage!?!?!?
-          ##This could be if we jump over the CI!!
-          ##TODO: fix this, NEED A SMARTER WAY TO FIND AN INSIDE POINT
+        {## Problem, it is possible that there is no coverage!?!?!?
+          ## This could be if we jump over the CI!!
+          ## TODO: fix this, NEED A SMARTER WAY TO FIND AN INSIDE POINT
           old <- shouldcover
           shouldcover <- shouldcover + (shouldcover - shouldnotcover)
           shouldnotcover <- old
@@ -496,12 +505,12 @@ bisection.gammamin.coverage <- function(outer,
                                   shouldnotcover=outer,
                                   ci.info=ci.info,
                                   verbose=verbose)
-  ##do.bisection
+  ## do.bisection
   eps <- 1
 
   while(eps > eps.bound)
     {
-      ##calc on the outer + inner /2 and see if the thing covers in this
+      ## calc on the outer + inner /2 and see if the thing covers in this
       middle <- (outer+inner)/2
       if(does.it.cover.gammamin(beta.j=middle,
                                 ci.info=ci.info))
@@ -528,7 +537,7 @@ does.it.cover.gammamin <- function(beta.j,
 {
   if(missing(ci.info))
     stop("ci.info is missing to the function does.it.cover.gammamin")
-  ##extract ci.info
+  ## extract ci.info
   centers <- ci.info$centers
   ci.lengths <- ci.info$ci.lengths
   no.inf.ci <- ci.info$no.inf.ci
@@ -538,9 +547,9 @@ does.it.cover.gammamin <- function(beta.j,
   multi.corr <- ci.info$multi.corr
   s0 <- ci.info$s0
 
-  ##Warning!: this is also affected by noncentral vs central t dist
-  pval.rank <- rank(-abs(beta.j-centers)/(ci.lengths/2))##the rank of the pvalue in increasing order, - sign to reverse rank
-  nsplit <- length(pval.rank) + no.inf.ci##the number of ci + the inf ci we left out
+  ## Warning!: this is also affected by noncentral vs central t dist
+  pval.rank <- rank(-abs(beta.j-centers)/(ci.lengths/2))## the rank of the pvalue in increasing order, - sign to reverse rank
+  nsplit <- length(pval.rank) + no.inf.ci## the number of ci + the inf ci we left out
 
   gamma.b <- pval.rank/nsplit
   if(multi.corr)
@@ -551,7 +560,7 @@ does.it.cover.gammamin <- function(beta.j,
     } else {
       level <- (1-0.05*gamma.b/(1-log(gamma.min)))
     }
-  ##from the getAnywhere(confint.lm) code
+  ## from the getAnywhere(confint.lm) code
   a <- (1 - level)/2
   a <- 1-a
 
@@ -560,28 +569,28 @@ does.it.cover.gammamin <- function(beta.j,
     ## the fraction of non Inf ci of all splits is smaller than gamma.min
     TRUE
   } else {
-    ##Warning!: this is also affected by noncentral vs central t dist
-    ##if(non.central.t)
+    ## Warning!: this is also affected by noncentral vs central t dist
+    ## if(non.central.t)
     ##  {
-    ##    ##CHECK: is this the correct way of doing things?
-    ##    ##browser()
-    ##    ##non-central t-distribution! --> not symmetric anymore!!!!
+    ##    ## CHECK: is this the correct way of doing things?
+    ##    ## browser()
+    ##    ## non-central t-distribution! --> not symmetric anymore!!!!
     ##    lfac <- qt(1-a,df.res,ncp=(centers-beta.j)/ses)
     ##    ufac <- qt(a,df.res,ncp=(centers-beta.j)/ses)
-    ##    ##Are these the correct non centers to pick? not the point where we want to test!?!?
-    ##    ##TODO DEBUG
+    ##    ## Are these the correct non centers to pick? not the point where we want to test!?!?
+    ##    ## TODO DEBUG
     ##    nlci <- beta.j+lfac*ses
     ##    nrci <- beta.j+ufac*ses
     ##    if(all(gamma.b <= gamma.min))
-    ##      {##the fraction of non Inf ci of all splits is smaller than gamma.min
+    ##      {## the fraction of non Inf ci of all splits is smaller than gamma.min
     ##        beta.is.in <- TRUE
     ##      } else {
-    ##        ##should not check gamma.b < 1 because we already removed the -Inf Inf ci!
-    ##        beta.is.in <- all(nlci[gamma.b > gamma.min ] <= beta.j) && all(nrci[gamma.b > gamma.min ] >= beta.j)##the centers are in the ci around beta.j/c
+    ##        ## should not check gamma.b < 1 because we already removed the -Inf Inf ci!
+    ##        beta.is.in <- all(nlci[gamma.b > gamma.min ] <= beta.j) && all(nrci[gamma.b > gamma.min ] >= beta.j)## the centers are in the ci around beta.j/c
     ##      }
     ##  } else {
 
-    ##central t-distribution, approximations are made! if df big enough this shouldn't be a problem
+    ## central t-distribution, approximations are made! if df big enough this shouldn't be a problem
     fac <- qt(a,df.res)
 
     nlci <- centers - fac*ses

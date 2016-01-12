@@ -185,7 +185,7 @@ confint.hdi <- function(object, parm, level = 0.95, ...)
   obj <- switch(meth,
                 "lasso.proj"  = object$bhat,
                 "ridge.proj"  = object$bhat,
-                "multi.split" = object$pval,
+                "multi.split" = object$pval.corr,
                 ## otherwise :
                 stop("Not supported object type ", meth))
 
