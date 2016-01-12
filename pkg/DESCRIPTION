@@ -2,7 +2,7 @@ Package: hdi
 Type: Package
 Title: High-Dimensional Inference
 Version: 0.1-5
-Date: 2015-12-18
+Date: 2016-01-12
 Author: Lukas Meier, Nicolai Meinshausen, Ruben Dezeure
 Maintainer: Lukas Meier <meier@stat.math.ethz.ch>
 Description: Implementation of multiple approaches to perform inference in
@@ -12,4 +12,5 @@ DependsNote: scalreg does not correctly import lars etc, so we need to depend on
 Imports: grDevices, graphics, stats, parallel, MASS, glmnet, linprog
 Suggests: Matrix
 SuggestsNote: for tests only
+Encoding: UTF-8
 License: GPL
