@@ -21,7 +21,8 @@ signif.partialFtest <- function(tree,
                                 c,## current cluster to test
                                 x,
                                 y,
-                                split.out)
+                                split.out,
+                                family)
 {
   stopifnot((ns <- length(split.out)) >= 1)
   pvalue <- numeric(ns)
@@ -157,6 +158,7 @@ mssplit.hierarch.testing <- function(tree,
                                      gamma,
                                      split.out,
                                      alpha = 0.05,
+                                     family,
                                      verbose=FALSE)
 {
 
@@ -186,7 +188,8 @@ mssplit.hierarch.testing <- function(tree,
                                              c=c,
                                              y=y,
                                              x=x,
-                                             split.out=split.out)
+                                             split.out=split.out,
+                                             family=family)
               tree.pvals[c,] <- pvalues## save them for later, if we get back to the same nodes
             }else{
               pvalues <- tree.pvals[c,]
