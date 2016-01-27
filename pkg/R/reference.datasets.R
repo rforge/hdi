@@ -83,10 +83,9 @@ generate.reference.x <-
     x
 }
 
-generate.reference.beta <- function(p, s0, btype)
-{
-  ## Purpose: generate the reference coefficient vector used in the paper accompanying
-  ##          this R package
+generate.reference.beta <- function(p, s0, btype) {
+  ## Purpose: generate the reference coefficient vector used in the paper
+  ##          accompanying this R package
   ## ----------------------------------------------------------------------
   ## Arguments:
   ## ----------------------------------------------------------------------
@@ -94,7 +93,7 @@ generate.reference.beta <- function(p, s0, btype)
 
   stopifnot(s0 <= p, p >= 0, length(s0) == 1, length(p) == 1,
             is.character(btype), length(btype) == 1)
-  invalid.btype.txt <- "Invalid btype: Please provide a btype of the form 'bfix*' for a fixed value or 'U[*,*]', where * are two numbers, the lower and upper bounds."
+  invalid.btype.txt <- "Invalid btype: Please provide a btype of the form 'bfix*' for a fixed value or 'U[*,*]', where * are two numbers, the lower and upper bounds." 
 
   if(grepl("^U\\[",btype) &&
      grepl("\\]$", btype) &&
@@ -111,12 +110,12 @@ generate.reference.beta <- function(p, s0, btype)
       ## if there were any errors in the extraction
       stop(invalid.btype.txt)
 
-    b <- runif(s0,lower,upper)
+    b <- runif(s0, lower, upper)
 
   } else if(grepl("^bfix", btype)) {
 
-    b <- as.numeric(sub("^bfix","", btype)) ## extract the bfix number
-    if(is.na(b))##if there were any errors in the extraction
+    b <- as.numeric(sub("^bfix", "", btype)) ## extract the bfix number
+    if(is.na(b)) ## if there were any errors in the extraction
       stop(invalid.btype.txt)
 
     b <- rep(b, s0)
@@ -124,5 +123,5 @@ generate.reference.beta <- function(p, s0, btype)
   else
     stop(invalid.btype.txt)
 
-  c(b, rep(0, p-s0))
+  c(b, rep(0, p - s0))
 }
