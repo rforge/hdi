@@ -2,8 +2,8 @@ lasso.proj <- function(x, y, family = "gaussian",
                        standardize = TRUE,
                        multiplecorr.method = "holm",
                        N = 10000,
-                       parallel = FALSE, ncores = 4,
-                       betainit="cv lasso",
+                       parallel = FALSE, ncores = getOption("mc.cores", 2L),
+                       betainit = "cv lasso",
                        sigma = NULL, ## sigma estimate provided by the user
                        Z = NULL,     ## Z or Thetahat provided by the user
                        verbose = FALSE,

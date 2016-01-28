@@ -2,7 +2,7 @@ ridge.proj <- function(x, y,
                        family = "gaussian",
                        standardize = TRUE,
                        lambda = 1,
-                       betainit="cv lasso",
+                       betainit = "cv lasso",
                        sigma = NULL,
                        multiplecorr.method = "holm", N = 10000)
 {

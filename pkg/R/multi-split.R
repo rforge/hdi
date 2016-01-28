@@ -63,7 +63,9 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
       if(p.sel > 0 && p.sel < nrow(x.right) - 1) {
         sel.pval <- do.call(classical.fit,
                             args = c(list(x = x.right[,sel.model],
-                              y = y.right), args.classical.fit))
+                                          y = y.right), args.classical.fit))
+        
+        
         ## Bonferroni on small model
         pvals.v[sel.model] <- pmin(sel.pval * p.sel, 1) ## new
 

@@ -18,7 +18,7 @@ groupBound(x, y, group,
            s = min(10, ncol(x) - 1),
            setseed = TRUE,
            silent = FALSE, lpSolve = TRUE,
-           parallel = FALSE, ncores = 4)
+           parallel = FALSE, ncores = getOption("mc.cores", 2L))
 }
 \arguments{
   \item{x}{numeric design matrix of the regression \eqn{n \times p}{n * p}

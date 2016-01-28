@@ -6,7 +6,7 @@
 \usage{
 lasso.proj(x, y, family = "gaussian", standardize = TRUE,
            multiplecorr.method = "holm", N = 10000,
-           parallel = FALSE, ncores = 4,
+           parallel = FALSE, ncores = getOption("mc.cores", 2L),
            betainit = "cv lasso",
            sigma = NULL, Z = NULL, verbose = FALSE, return.Z = FALSE,
            robust = FALSE)

@@ -6,7 +6,8 @@
 \usage{
 stability(x, y, EV, threshold = 0.75, B = 100, fraction = 0.5,
           model.selector = lasso.firstq, args.model.selector = NULL,
-          parallel = FALSE, ncores = 4, trace = FALSE)
+          parallel = FALSE, ncores = getOption("mc.cores", 2L),
+          trace = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

@@ -120,7 +120,7 @@ groupBoundWithPrediction <- function(x, y, group, mfact, pred,
 groupBound <- function(x, y, group, alpha = 0.05, eps = 0.1,
                        nsplit = 11, s = min(10, ncol(x) - 1),
                        setseed = TRUE, silent = FALSE, lpSolve = TRUE,
-                       parallel = FALSE, ncores = 4) {
+                       parallel = FALSE, ncores = getOption("mc.cores", 2L)) {
   if(alpha > 0.5 || alpha < 0.005) ## warn even if(silent)
     warning("level alpha outside supported range [0.005, 0.5]")
 
