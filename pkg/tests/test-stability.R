@@ -13,7 +13,7 @@ fit.stab <- stability(x, y, EV = 1)
 fit.stab
 fit.stab$freq[1:10] ## selection frequency of the first 10 predictors
 
-fit.stab2 <- stability(x, y, EV = 1, parallel = TRUE, trace = TRUE)
+fit.stab2 <- stability(x, y, EV = 1, parallel = TRUE, verbose = TRUE)
 fit.stab2
 fit.stab2$freq[1:10]
  

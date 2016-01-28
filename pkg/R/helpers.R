@@ -66,7 +66,7 @@ lm.ci <- function(x, y, level = 0.95, ...)
   confint(fit.lm, level = level)[-1,, drop = FALSE]
 }
 
-glm.pval <- function(x, y, family = "binomial", trace = FALSE, ...)
+glm.pval <- function(x, y, family = "binomial", verbose = FALSE, ...)
 {
     ## Purpose:
     ## ----------------------------------------------------------------------
@@ -77,7 +77,7 @@ glm.pval <- function(x, y, family = "binomial", trace = FALSE, ...)
     fit.glm <- glm(y ~ x, family = family, ...) ## Intercept??? Exceptions???
     fit.summary <- summary(fit.glm)
 
-    if(!fit.glm$converged & trace){ ## should be consistent with lm.pval?
+    if(!fit.glm$converged & verbose){ ## should be consistent with lm.pval?
       print(fit.summary)
     }
 

@@ -9,7 +9,7 @@ hdi(x, y, method = "multi.split", B = NULL, fraction = 0.5,
     gamma = seq(0.05, 0.99, by = 0.01),
     classical.fit = NULL,
     args.model.selector = NULL, args.classical.fit = NULL,
-    trace = FALSE, ...)
+    verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -45,7 +45,7 @@ hdi(x, y, method = "multi.split", B = NULL, fraction = 0.5,
     function \code{model.selector}.} 
   \item{args.classical.fit}{Named list of further arguments for function
     \code{classical.fit}.}
-  \item{trace}{Should information be printed out while computing
+  \item{verbose}{Should information be printed out while computing
     (logical).}
   \item{...}{Other arguments to be passed to the underlying functions.}
 }

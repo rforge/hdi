@@ -17,7 +17,7 @@ groupBound(x, y, group,
            alpha = 0.05, eps = 0.1, nsplit = 11,
            s = min(10, ncol(x) - 1),
            setseed = TRUE,
-           silent = FALSE, lpSolve = TRUE,
+           verbose = TRUE, lpSolve = TRUE,
            parallel = FALSE, ncores = getOption("mc.cores", 2L))
 }
 \arguments{
@@ -42,7 +42,7 @@ groupBound(x, y, group,
   \item{setseed}{a logical; if this is true (recommended), then the same
     random seeds are used for all groups, which makes the confidence
     intervals simultaneously valid over all groups of variables tested.}
-  \item{silent}{logical specifying to suppress progress output.}
+  \item{verbose}{logical enabling progress output.}
   \item{lpSolve}{logical; only set it to false if \code{lpSolve()} is not
     working on the current machine: setting it to false will result in
     much slower computations; only use on small problems.}

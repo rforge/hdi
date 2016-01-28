@@ -11,7 +11,7 @@
 clusterGroupBound(x, y, method = "average",
                   dist = as.dist(1 - abs(cor(x))), alpha = 0.05,
                   eps = 0.1, hcloutput, nsplit = 11, s = min(10, ncol(x) - 1),
-                  silent = FALSE, setseed = TRUE, lpSolve = TRUE)}
+                  verbose = TRUE, setseed = TRUE, lpSolve = TRUE)}
 \arguments{
   \item{x}{numeric design matrix of the regression \eqn{n \times p}{n * p}
     with \eqn{p} columns for \eqn{p} predictor variables and \eqn{n}
@@ -41,7 +41,7 @@ clusterGroupBound(x, y, method = "average",
   \item{s}{the dimensionality of the projection that is used.  Lower
     values lead to faster computation and if \eqn{n > 50}, then \code{s}
     is set to 50 if left unspecified, to avoid lengthy computations.}
-  \item{silent}{logical specifying to suppress progress output.}
+  \item{verbose}{logical enabling progress output.}
   \item{setseed}{a logical; if this is true (recommended), then the same
     random seeds are used for all groups, which makes the confidence
     intervals simultaneously valid over all groups of variables tested.}

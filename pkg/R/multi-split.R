@@ -11,7 +11,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                         return.nonaggr = FALSE,
                         return.selmodels = FALSE,
                         repeat.max = 20,
-                        trace = FALSE)
+                        verbose = FALSE)
 {
   ## --> ../man/multi.split.Rd
   ##       ~~~~~~~~~~~~~~~~~~~
@@ -106,7 +106,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
       ## Do nothing in that case. Matrix already filled with 0's.
       ## Print out information for the sake of completeness
       if(p.sel == 0) {
-        if(trace)
+        if(verbose)
           cat("......Empty model selected. That's ok...\n")
 
         try.again <- FALSE ## break the loop, continue with next sample-split
@@ -143,19 +143,20 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
   split.out <-
     if(parallel) {
       stopifnot(isTRUE(is.finite(ncores)), ncores >= 1L)
-      if(trace)
+      if(verbose)
         cat("...starting parallelization of sample-splits\n")
       mclapply(1:B, oneSplit, mc.cores = ncores)
     }
     else {
-      if(trace)
+      if(verbose)
         lapply(1:B, function(b) {
           cat("...Split", b, "\n")
           oneSplit()
         })
       else
-        replicate(B, oneSplit(), simplify=FALSE)
+        replicate(B, oneSplit(), simplify = FALSE)
     }
+  
   ############################################
   ## Allow hierarchical testing with result ##
   ############################################

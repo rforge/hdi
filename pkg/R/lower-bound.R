@@ -17,7 +17,7 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
     cat("\n ", sel, "  ", length(group), "members")
   
   res <- groupBound(x, y, group = group, alpha = alpha, eps = eps,
-                    s = s, nsplit = nsplit, silent = TRUE,
+                    s = s, nsplit = nsplit, verbose = FALSE,
                     setseed = setseed, lpSolve = lpSolve)
   
   resmat[sel, 2] <- res
@@ -119,8 +119,11 @@ groupBoundWithPrediction <- function(x, y, group, mfact, pred,
 
 groupBound <- function(x, y, group, alpha = 0.05, eps = 0.1,
                        nsplit = 11, s = min(10, ncol(x) - 1),
-                       setseed = TRUE, silent = FALSE, lpSolve = TRUE,
+                       setseed = TRUE, verbose = TRUE, lpSolve = TRUE,
                        parallel = FALSE, ncores = getOption("mc.cores", 2L)) {
+
+  silent <- !verbose
+  
   if(alpha > 0.5 || alpha < 0.005) ## warn even if(silent)
     warning("level alpha outside supported range [0.005, 0.5]")
 
@@ -280,8 +283,10 @@ clusterGroupBound <- function(x, y, method = "average",
                               hcloutput,
                               nsplit = 11,
                               s = min(10, ncol(x) - 1),
-                              silent = FALSE, setseed = TRUE,
+                              verbose = TRUE, setseed = TRUE,
                               lpSolve = TRUE) {
+
+  silent <- !verbose
   
   if(alpha > 0.5 || alpha < 0.0005)
     warning("level alpha outside supported range [0.0005, 0.5]")

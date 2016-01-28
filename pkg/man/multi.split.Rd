@@ -15,7 +15,7 @@ multi.split(x, y, B = 100, fraction = 0.5, ci = TRUE, ci.level = 0.95,
             args.classical.ci = NULL,
             return.nonaggr = FALSE, return.selmodels = FALSE,
             repeat.max = 20,
-            trace = FALSE)
+            verbose = FALSE)
 }
 \arguments{
   \item{x}{numeric design matrix (without intercept).}
@@ -69,7 +69,7 @@ multi.split(x, y, B = 100, fraction = 0.5, ci = TRUE, ci.level = 0.95,
   \item{repeat.max}{positive integer indicating the maximal number of
     split trials.   Should not matter in regular cases, but necessary to
     prevent infinite loops in borderline cases.}
-  \item{trace}{should information be printed out while computing? (logical).}
+  \item{verbose}{should information be printed out while computing? (logical).}
 }
 %%\details{...}%% FIXME!
 \value{
