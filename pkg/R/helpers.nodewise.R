@@ -98,14 +98,14 @@ score.getThetaforlambda <- function(x, lambda, parallel = FALSE, ncores = 8,
   ## Arguments:
   ## ----------------------------------------------------------------------
   ## Author: Ruben Dezeure, Date: 27 Nov 2012 (initial version),
-  print("Calculating Thetahat by doing nodewise regressions and dropping the unpenalized intercept")
+  message("Calculating Thetahat by doing nodewise regressions and dropping the unpenalized intercept")
   n <- nrow(x)
   p <- ncol(x)
   C <- diag(rep(1,p))
   T2 <- numeric(p)
   
   if(oldschool){
-    print("doing getThetaforlambda oldschool")
+    message("doing getThetaforlambda oldschool")
     for(i in 1:p){
       glmnetfit <- glmnet(x[,-i], x[,i])
       coeffs <- as.vector(predict(glmnetfit,x[,-i], type = "coefficients",
@@ -158,7 +158,7 @@ score.getZforlambda <- function(x, lambda, parallel = FALSE, ncores = 8,
   Z <- matrix(numeric(n*p),n)
   
   if(oldschool){
-    print("doing getZforlambda oldschool")
+    message("doing getZforlambda oldschool")
     for(i in 1:p){
       glmnetfit <- glmnet(x[,-i],x[,i])
       prediction <- predict(glmnetfit,x[,-i],s=lambda)
@@ -356,7 +356,7 @@ cv.nodewise.bestlambda <- function(lambdas, x, K = 10, parallel = FALSE,
   dataselects <- sample(rep(1:K, length = n))
   
   if(oldschool){
-    print("doing cv.nodewise.error oldschool")
+    message("doing cv.nodewise.error oldschool")
     totalerr <- numeric(l)
     for(c in 1:p){ ## loop over the nodewise regressions
       for(i in 1:K){ ## loop over the test sets

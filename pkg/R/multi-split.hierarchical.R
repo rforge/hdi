@@ -146,7 +146,7 @@ update.extinct <- function(nowextinct,
     newextinct <- c(newextinct,current.node)
   }
   if(any(duplicated(newextinct)))
-    print("we have some duplicates in newextinct")
+    message("we have some duplicates in newextinct")
   ## return
   unique(newextinct)
 }
@@ -255,7 +255,7 @@ mssplit.hierarch.testing <- function(tree,
       if(!found.signif)
         break
     }
-  print("doing final post processing")
+  message("doing final post processing")
   ## will still have to transform the output to be able to match the one from lowerbound etc.
 
   ## out <- list()

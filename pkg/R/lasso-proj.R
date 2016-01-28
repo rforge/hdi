@@ -73,7 +73,7 @@ lasso.proj <- function(x, y, family = "gaussian",
                                              wantTheta = FALSE,
                                              parallel = parallel,
                                              ncores = ncores,
-                                             cv.verbose=verbose)
+                                             cv.verbose = verbose)
     Z <- nodewiselasso.out$out$Z
     scaleZ <- nodewiselasso.out$out$scaleZ
   }else{

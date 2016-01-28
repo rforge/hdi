@@ -296,15 +296,15 @@ aggregate.ci <- function(lci,rci,centers,
   ## detect the -Inf Inf intervals
   inf.ci <- is.infinite(lci)|is.infinite(rci)
   no.inf.ci <- sum(inf.ci)## this we will use later on
-  if(verbose)
-    {
-      print("number of Inf ci")
-      print(no.inf.ci)
-    }
-  if((no.inf.ci == length(lci)) || (no.inf.ci >= (1-gamma.min)*length(lci)))
-    {## we only have infinite ci or more than 1-gamma.min of the splits have an inf ci
-      return(c(-Inf,Inf))
-    }
+  if(verbose) {
+    print("number of Inf ci")
+    print(no.inf.ci)
+  }
+  if((no.inf.ci == length(lci)) || (no.inf.ci >= (1-gamma.min)*length(lci))) {
+    ## we only have infinite ci or more than 1-gamma.min of the splits have an
+    ## inf ci
+    return(c(-Inf,Inf))
+  }
   ## remove the infinite ci from the input
   lci <- lci[!inf.ci]
   rci <- rci[!inf.ci]
@@ -344,11 +344,10 @@ aggregate.ci <- function(lci,rci,centers,
                                          inner=inner,
                                          ci.info=ci.info,
                                          verbose=verbose)
-  if(verbose)
-    {
-      print("lower bound ci aggregated is")
-      print(l.bound)
-    }
+  if(verbose){
+    print("lower bound ci aggregated is")
+    print(l.bound)
+  }
 
   ## inner <- min(rci)
   outer <- max(rci)
@@ -363,19 +362,17 @@ aggregate.ci <- function(lci,rci,centers,
                                          outer=outer,
                                          ci.info=ci.info,
                                          verbose=verbose)
-  if(verbose)
-    {
+  if(verbose) {
       print("upper bound ci aggregated is")
       print(u.bound)
-    }
+  }
   return(c(l.bound,u.bound))
 }
 
 find.inside.point.gammamin <- function(low,
                                        high,
                                        ci.info,
-                                       verbose)
-{
+                                       verbose) {
   ## searching over the range low and high for a point that is inside
   ## does it cover gammamin
   ## we increase the granularity up until a certain level and then give up
@@ -384,36 +381,34 @@ find.inside.point.gammamin <- function(low,
   cover <- mapply(does.it.cover.gammamin,
                   beta.j=test.range,
                   ci.info=list(ci.info=ci.info))
-  while(!any(cover))
-    {
-      range.length <- 10*range.length
-      test.range <- seq(low,high,length.out=range.length)
-      cover <- mapply(does.it.cover.gammamin,
-                      beta.j=test.range,
-                      ci.info=list(ci.info=ci.info))
-      if(range.length>10^3)
-        {
-          print("FOUND NO INSIDE POINT")
-          print("number of splits")
-          print(length(ci.info$centers))
-          print("centers")
-          print(ci.info$centers)
-          print("ses")
-          print(ci.info$ses)
-          print("df.res")
-          print(ci.info$df.res)
-
-          stop("couldn't find an inside point between low and high. The confidence interval doesn't exist!")
-        }
+  while(!any(cover)) {
+    range.length <- 10*range.length
+    test.range <- seq(low,high,length.out=range.length)
+    cover <- mapply(does.it.cover.gammamin,
+                    beta.j=test.range,
+                    ci.info=list(ci.info=ci.info))
+    if(range.length>10^3) {
+      message("FOUND NO INSIDE POINT")
+      message("number of splits")
+      message(length(ci.info$centers))
+      message("centers")
+      message(ci.info$centers)
+      message("ses")
+      message(ci.info$ses)
+      message("df.res")
+      message(ci.info$df.res)
+      
+      stop("couldn't find an inside point between low and high. The confidence interval doesn't exist!")
     }
-  if(verbose)
-    {
-      print("Found an inside point at granularity of ")
-      print(range.length)
-    }
+  }
+  if(verbose) {
+    print("Found an inside point at granularity of ")
+    print(range.length)
+  }
 
   ## return inside.point :
-  ## take the smallest value that was covered, which value we take is not of importance actually
+  ## take the smallest value that was covered, which value we take is not of
+  ## importance actually
   min(test.range[cover])
 }
 
@@ -423,52 +418,47 @@ find.bisection.bounds.gammamin <- function(shouldcover,
                                            verbose)
 {
   reset.shouldnotcover <- FALSE
-  if(does.it.cover.gammamin(beta.j=shouldnotcover,ci.info=ci.info))
-    {
-      reset.shouldnotcover <- TRUE
-      if(verbose)
-        print("finding a new shouldnotcover bound")
-      ## need to find a shouldnotcover further away from this point
-      ## the direction we move in is shouldnotcover-shouldcover
-      while(does.it.cover.gammamin(beta.j=shouldnotcover,ci.info=ci.info))
-        {
-          old <- shouldnotcover
-          shouldnotcover <- shouldnotcover + (shouldnotcover - shouldcover)
-          shouldcover <- old## update the should cover bound too!
-        }
-      if(verbose)
-        {
-          print("new")
-          print("shouldnotcover")
-          print(shouldnotcover)
-          print("shouldcover")
-          print(shouldcover)
-        }
+  if(does.it.cover.gammamin(beta.j=shouldnotcover,ci.info=ci.info)) {
+    reset.shouldnotcover <- TRUE
+    if(verbose)
+      print("finding a new shouldnotcover bound")
+    ## need to find a shouldnotcover further away from this point
+    ## the direction we move in is shouldnotcover-shouldcover
+    while(does.it.cover.gammamin(beta.j=shouldnotcover,ci.info=ci.info)) {
+      old <- shouldnotcover
+      shouldnotcover <- shouldnotcover + (shouldnotcover - shouldcover)
+      shouldcover <- old## update the should cover bound too!
     }
+    if(verbose){
+      print("new")
+      print("shouldnotcover")
+      print(shouldnotcover)
+      print("shouldcover")
+      print(shouldcover)
+    }
+  }
   ## Is it possible that these get triggered consecutively?, no :0
-  if(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info))
-    {
-      if(reset.shouldnotcover)
-        stop("Problem: we first reset shouldnotcover and are now resetting shouldcover, this is not supposed to happen")
-      if(verbose)
-        print("finding a new shouldcover bound")
-      while(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info))
-        {## Problem, it is possible that there is no coverage!?!?!?
-          ## This could be if we jump over the CI!!
-          ## TODO: fix this, NEED A SMARTER WAY TO FIND AN INSIDE POINT
-          old <- shouldcover
-          shouldcover <- shouldcover + (shouldcover - shouldnotcover)
-          shouldnotcover <- old
-        }
-      if(verbose)
-        {
-          print("new")
-          print("shouldnotcover")
-          print(shouldnotcover)
-          print("shouldcover")
-          print(shouldcover)
-        }
+  if(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info)) {
+    if(reset.shouldnotcover)
+      stop("Problem: we first reset shouldnotcover and are now resetting shouldcover, this is not supposed to happen")
+    if(verbose)
+      print("finding a new shouldcover bound")
+    while(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info)){
+      ## Problem, it is possible that there is no coverage!?!?!?
+      ## This could be if we jump over the CI!!
+      ## TODO: fix this, NEED A SMARTER WAY TO FIND AN INSIDE POINT
+      old <- shouldcover
+      shouldcover <- shouldcover + (shouldcover - shouldnotcover)
+      shouldnotcover <- old
     }
+    if(verbose){
+      print("new")
+      print("shouldnotcover")
+      print(shouldnotcover)
+      print("shouldcover")
+      print(shouldcover)
+    }
+  }
   return(list(shouldcover=shouldcover,
               shouldnotcover=shouldnotcover))
 }
@@ -476,33 +466,29 @@ find.bisection.bounds.gammamin <- function(shouldcover,
 check.bisection.bounds.gammamin <- function(shouldcover,
                                             shouldnotcover,
                                             ci.info,
-                                            verbose)
-{
+                                            verbose) {
   if(does.it.cover.gammamin(beta.j=shouldnotcover,
-                            ci.info=ci.info))
-    {
-      stop("shouldnotcover bound is covered! we need to decrease it even more! (PLZ implement)")
-    } else {
-      if(verbose)
-        print("shouldnotcover bound is not covered, this is good")
-    }
+                            ci.info=ci.info)){
+    stop("shouldnotcover bound is covered! we need to decrease it even more! (PLZ implement)")
+  } else {
+    if(verbose)
+      print("shouldnotcover bound is not covered, this is good")
+  }
 
   if(does.it.cover.gammamin(beta.j=shouldcover,
-                            ci.info=ci.info))
-    {
-      if(verbose)
-        print("shouldcover is covered!, It is a good covered bound")
-    } else {
-      stop("shouldcover is a bad covered bound, it is not covered!")
-    }
+                            ci.info=ci.info)){
+    if(verbose)
+      print("shouldcover is covered!, It is a good covered bound")
+  } else {
+    stop("shouldcover is a bad covered bound, it is not covered!")
+  }
 }
 
 bisection.gammamin.coverage <- function(outer,
                                         inner,
                                         ci.info,
                                         verbose,
-                                        eps.bound=10^(-7))
-{
+                                        eps.bound=10^(-7)){
   check.bisection.bounds.gammamin(shouldcover=inner,
                                   shouldnotcover=outer,
                                   ci.info=ci.info,
@@ -510,26 +496,23 @@ bisection.gammamin.coverage <- function(outer,
   ## do.bisection
   eps <- 1
 
-  while(eps > eps.bound)
-    {
-      ## calc on the outer + inner /2 and see if the thing covers in this
-      middle <- (outer+inner)/2
-      if(does.it.cover.gammamin(beta.j=middle,
-                                ci.info=ci.info))
-        {
-          inner <- middle
-        } else {
-          outer <- middle
-        }
-      eps <- abs(inner-outer)
+  while(eps > eps.bound){
+    ## calc on the outer + inner /2 and see if the thing covers in this
+    middle <- (outer+inner)/2
+    if(does.it.cover.gammamin(beta.j=middle,
+                              ci.info=ci.info)){
+      inner <- middle
+    } else {
+      outer <- middle
     }
+    eps <- abs(inner-outer)
+  }
   solution <- (inner+outer)/2
-  if(verbose)
-    {
-      print("finished bisection")
-      print("eps is")
-      print(eps)
-    }
+  if(verbose){
+    print("finished bisection")
+    print("eps is")
+    print(eps)
+  }
   return(solution)
 }
 
@@ -554,18 +537,17 @@ does.it.cover.gammamin <- function(beta.j,
   nsplit <- length(pval.rank) + no.inf.ci## the number of ci + the inf ci we left out
 
   gamma.b <- pval.rank/nsplit
-  if(multi.corr)
-    {
-      if(any(is.na(s0)))
-        stop("need s0 information to be able to create multiple testing corrected pvalues")
-      level <- (1-0.05*gamma.b/(1-log(gamma.min)*s0))
-    } else {
-      level <- (1-0.05*gamma.b/(1-log(gamma.min)))
-    }
+  if(multi.corr){
+    if(any(is.na(s0)))
+      stop("need s0 information to be able to create multiple testing corrected pvalues")
+    level <- (1-0.05*gamma.b/(1-log(gamma.min)*s0))
+  } else {
+    level <- (1-0.05*gamma.b/(1-log(gamma.min)))
+  }
   ## from the getAnywhere(confint.lm) code
   a <- (1 - level)/2
   a <- 1-a
-
+  
   ## return 'beta.is.in' :
   if(all(gamma.b <= gamma.min)) {
     ## the fraction of non Inf ci of all splits is smaller than gamma.min
