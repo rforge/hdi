@@ -117,7 +117,7 @@ showSys.time(
 )
 showSys.time(
   gb2g <- groupBound(x = d2xy$x, y = d2xy$y, group = pvec2grp(d2B$p.vec),
-                     verbose = FALSE)
+                     silent = TRUE)
 )
 stopifnot(
     as.vector(gb1) == 0
@@ -145,7 +145,7 @@ stopifnot(
 set.seed(19)# for random splits
 showSys.time(
     gb3g <- groupBound(x = d3xy$x, y = d3xy$y, group = pvec2grp(d3B$p.vec),
-                       verbose = FALSE)
+                       silent = TRUE)
 )
 stopifnot(
     all.equal(as.vector(gb3g),
@@ -159,11 +159,11 @@ set.seed(37)# also for random splits
 d4xy <- rXy(d4B, sigma = 1/16)
 showSys.time(
     gb4  <- groupBound(x = d4xy$x, y = d4xy$y, group = 1:ncol(d4xy$x),
-                       verbose = FALSE)
+                       silent = TRUE)
 )
 showSys.time(
     gb4g <- groupBound(x = d4xy$x, y = d4xy$y, group = pvec2grp(d4B$p.vec),
-                       verbose = FALSE)
+                       silent = TRUE)
 )
 stopifnot(
     all.equal(as.vector(gb4), if(b64) 5.230821 else 5.3752713,  tol = 2e-7)

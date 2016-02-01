@@ -21,5 +21,5 @@
 *** DONE *lukas* [message] replace everywhere cat and print with message if not within verbose
 *** DONE *lukas* [DESCRIPTION] change to new author system, see Markus pcalg
 *** TODO *ruben* [calc.ci function] return a calculate ci function everywhere s.t. no need to recalc whole fit to get different ci level
-*** TODO *lukas* use everywhere the same name for verbose / trace etc. Keep silent!
+*** DONE *lukas* use everywhere the same name for verbose / trace etc. Keep silent!
 
