@@ -16,8 +16,9 @@
 ** lowerbound
 *** TODO *lukas* [] lower bound Fehler n > 50
 ** everywhere
+*** TODO *lukas* add more dput comparisons to test files
 *** DONE *lukas* [parallel default] ncores default change to default of multisplit, as in mcmapply
-*** TODO *lukas* replace print("abc") etc. with cat("abc")
+*** DONE *lukas* replace print("abc") etc. with cat("abc")
 *** DONE *lukas* [message] replace everywhere cat and print with message if not within verbose
 *** DONE *lukas* [DESCRIPTION] change to new author system, see Markus pcalg
 *** TODO *ruben* [calc.ci function] return a calculate ci function everywhere s.t. no need to recalc whole fit to get different ci level
