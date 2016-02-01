@@ -298,8 +298,7 @@ aggregate.ci <- function(lci,rci,centers,
   inf.ci <- is.infinite(lci)|is.infinite(rci)
   no.inf.ci <- sum(inf.ci)## this we will use later on
   if(verbose) {
-    print("number of Inf ci")
-    print(no.inf.ci)
+    cat("number of Inf ci:", no.inf.ci, "\n")
   }
   if((no.inf.ci == length(lci)) || (no.inf.ci >= (1-gamma.min)*length(lci))) {
     ## we only have infinite ci or more than 1-gamma.min of the splits have an
@@ -346,8 +345,7 @@ aggregate.ci <- function(lci,rci,centers,
                                          ci.info=ci.info,
                                          verbose=verbose)
   if(verbose){
-    print("lower bound ci aggregated is")
-    print(l.bound)
+    cat("lower bound ci aggregated is", l.bound, "\n")
   }
 
   ## inner <- min(rci)
@@ -364,10 +362,10 @@ aggregate.ci <- function(lci,rci,centers,
                                          ci.info=ci.info,
                                          verbose=verbose)
   if(verbose) {
-      print("upper bound ci aggregated is")
-      print(u.bound)
+    cat("upper bound ci aggregated is", u.bound, "\n")
   }
-  return(c(l.bound,u.bound))
+  
+  return(c(l.bound, u.bound))
 }
 
 find.inside.point.gammamin <- function(low,
@@ -403,8 +401,7 @@ find.inside.point.gammamin <- function(low,
     }
   }
   if(verbose) {
-    print("Found an inside point at granularity of ")
-    print(range.length)
+    cat("Found an inside point at granularity of", range.length, "\n")
   }
 
   ## return inside.point :
@@ -422,7 +419,7 @@ find.bisection.bounds.gammamin <- function(shouldcover,
   if(does.it.cover.gammamin(beta.j=shouldnotcover,ci.info=ci.info)) {
     reset.shouldnotcover <- TRUE
     if(verbose)
-      print("finding a new shouldnotcover bound")
+      cat("finding a new shouldnotcover bound\n")
     ## need to find a shouldnotcover further away from this point
     ## the direction we move in is shouldnotcover-shouldcover
     while(does.it.cover.gammamin(beta.j=shouldnotcover,ci.info=ci.info)) {
@@ -431,11 +428,9 @@ find.bisection.bounds.gammamin <- function(shouldcover,
       shouldcover <- old## update the should cover bound too!
     }
     if(verbose){
-      print("new")
-      print("shouldnotcover")
-      print(shouldnotcover)
-      print("shouldcover")
-      print(shouldcover)
+      cat("new\n")
+      cat("shouldnotcover", shouldnotcover, "\n")
+      cat("shouldcover", shouldcover, "\n")
     }
   }
   ## Is it possible that these get triggered consecutively?, no :0
@@ -443,7 +438,7 @@ find.bisection.bounds.gammamin <- function(shouldcover,
     if(reset.shouldnotcover)
       stop("Problem: we first reset shouldnotcover and are now resetting shouldcover, this is not supposed to happen")
     if(verbose)
-      print("finding a new shouldcover bound")
+      cat("finding a new shouldcover bound\n")
     while(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info)){
       ## Problem, it is possible that there is no coverage!?!?!?
       ## This could be if we jump over the CI!!
@@ -453,11 +448,9 @@ find.bisection.bounds.gammamin <- function(shouldcover,
       shouldnotcover <- old
     }
     if(verbose){
-      print("new")
-      print("shouldnotcover")
-      print(shouldnotcover)
-      print("shouldcover")
-      print(shouldcover)
+      cat("new\n")
+      cat("shouldnotcover", shouldnotcover, "\n")
+      cat("shouldcover", shouldcover, "\n")
     }
   }
   return(list(shouldcover=shouldcover,
@@ -473,13 +466,13 @@ check.bisection.bounds.gammamin <- function(shouldcover,
     stop("shouldnotcover bound is covered! we need to decrease it even more! (PLZ implement)")
   } else {
     if(verbose)
-      print("shouldnotcover bound is not covered, this is good")
+      cat("shouldnotcover bound is not covered, this is good")
   }
 
   if(does.it.cover.gammamin(beta.j=shouldcover,
                             ci.info=ci.info)){
     if(verbose)
-      print("shouldcover is covered!, It is a good covered bound")
+      cat("shouldcover is covered!, It is a good covered bound")
   } else {
     stop("shouldcover is a bad covered bound, it is not covered!")
   }
@@ -510,9 +503,7 @@ bisection.gammamin.coverage <- function(outer,
   }
   solution <- (inner+outer)/2
   if(verbose){
-    print("finished bisection")
-    print("eps is")
-    print(eps)
+    cat("finished bisection...eps is", eps, "\n")
   }
   return(solution)
 }

@@ -53,6 +53,7 @@ ci.ridge2 <- confint(fit.ridge2, level = 0.95)
 stopifnot(all.equal(ci.ridge, ci.ridge2 * 4))
 
 
+
 #########
 ## GLM ##
 #########

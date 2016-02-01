@@ -259,7 +259,8 @@ calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
   start <- TRUE
   for(nclust in 1:p){ ## test the subclusters of the significant current clusters
     if(verbose)
-      print(paste("cutting tree into ",nclust ," groups",sep=""))
+      cat("cutting tree into", nclust, "groups\n")
+
     cut.level <- clusterextractfunction(nclust)## TODO clusterextractfunction
     ## cutree(hh,k=nclust)
 
@@ -276,10 +277,10 @@ calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
       ## we went down the tree one level for those clusters we are interested in
       old.cluster.lengths <- cluster.lengths
       if(verbose)
-        print(paste("total number of clusters at this level = " ,
-                    ncol(clusters.this.level),sep=""))
+        cat("total number of clusters at this level =",
+            ncol(clusters.this.level), "\n")
 
-      stopifnot(ncol(clusters.this.level)>0)
+      stopifnot(ncol(clusters.this.level) > 0)
 
       current.clusts <- list()
       for(j in 1:ncol(clusters.this.level)){
@@ -296,11 +297,11 @@ calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
                          length(upper.clust[[i]]))))
             { ## current cluster is a child of above
               if(verbose){
-                print("the subcluster of length")
-                print(length(current.clusts[[j]]))
-                print("fits in the cluster of length")
-                print(length(upper.clust[[i]]))
-                print("saving the child for testing")
+                cat("the subcluster of length\n")
+                cat(length(current.clusts[[j]]), "\n")
+                cat("fits in the cluster of length\n")
+                cat(length(upper.clust[[i]]), "\n")
+                cat("saving the child for testing\n")
               }
               are.children[j] <- TRUE
               has.children[i] <- TRUE
@@ -308,10 +309,9 @@ calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
         }
       }
       if(verbose)
-        print(paste("there are ",sum(are.children),
-                    " children that we will test.",sep=""))
+        cat("there are", sum(are.children), "children that we will test.\n")
 
-      if(sum(are.children)>0){ ## else: we have not encountered children in
+      if(sum(are.children) > 0){ ## else: we have not encountered children in
                                ##       this level of tree
 
         ## if there are children it is only possible that there are two
@@ -367,9 +367,9 @@ calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
         if(length(upper.clust) == 0){
           ## there are no more upper significant clusters
           if(verbose){
-            print("reached an end to the cluster tree")
-            print("the lowest clusters have sizes:")
-            print(apply(clusters.to.test,2,sum))
+            cat("reached an end to the cluster tree\n")
+            cat("the lowest clusters have sizes:\n")
+            cat(apply(clusters.to.test,2,sum), "\n")
           }
           break
         }
@@ -539,12 +539,11 @@ do.initial.fit <- function(x,y,
   ## Author: Ruben Dezeure, Date: 16 Oct 2015 (initial modified version for the package)
 
   no.lambda.given <- missing(lambda) || is.null(lambda)
-  if(!no.lambda.given && verbose)
-    {
-      print("A value for lambda was provided to the do.initial.fit function,")
-      print("the initial.lasso.method option was therefore ignored.")
-      print("One now does a lasso with the tuning parameter instead of a self-tuning procedure.")
-    }
+  if(!no.lambda.given && verbose) {
+    cat("A value for lambda was provided to the do.initial.fit function,\n")
+    cat("the initial.lasso.method option was therefore ignored.\n")
+    cat("We now do a lasso with the tuning parameter instead of a self-tuning procedure.\n") 
+  }
 
   if(no.lambda.given){
     ## tune the lasso
@@ -571,11 +570,12 @@ do.initial.fit <- function(x,y,
     sigmahat  <- scaledlassofit$hsigma
     residual.vector <- y-x%*%betalasso
   }else{
-    if((nrow(x)-sum(as.vector(coef(glmnetfit,s=lambda))!=0)) <= 0){
-      ## Problem: when the fixed lambda you chose sets n==p, you've used all your degrees of freedom
-      ##--> refit
+    if((nrow(x) - sum(as.vector(coef(glmnetfit, s = lambda)) != 0)) <= 0){
+      ## Problem: when the fixed lambda you chose sets n==p, you've used all
+      ## your degrees of freedom 
+      ##- -> refit
       ## This only occurs if the user provides a lambda to use
-      print("Refitting using cross validation: your lambda used all degrees of freedom")
+      message("Refitting using cross validation: your lambda used all degrees of freedom")
       glmnetfit <- cv.glmnet(x=x,y=y)
       ## setting a lambda here would interpolate solutions, :/
       lambda <- glmnetfit$lambda.1se
@@ -603,10 +603,8 @@ initial.estimator <- function(betainit,x,y,sigma)
     stop("The betainit argument needs to be either a vector of length ncol(x) or one of 'scaled lasso' or 'cv lasso'")
   }
 
-  warning.sigma.message <- function()
-  {
-    print("Warning: overriding the error variance estimate with your own value.")
-    print("The initial estimate implies an error variance estimate and if they don't correspond the testing might not be correct anymore.")
+  warning.sigma.message <- function() {
+    warning("Overriding the error variance estimate with your own value. The initial estimate implies an error variance estimate and if they don't correspond the testing might not be correct anymore.") 
   }
 
   if(is.numeric(betainit))

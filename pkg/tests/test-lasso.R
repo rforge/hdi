@@ -47,6 +47,11 @@ set.seed(3) ; fit.lasso  <- lasso.proj(x = x.use, y = y)
 ## Check standardization, i.e., equivariance :
 set.seed(3) ; fit.lasso2 <- lasso.proj(x = 2 + 4 * x.use, y = y)
 
+## verbose
+set.seed(3) ; fit.tmp  <- lasso.proj(x = x.use, y = y, verbose = TRUE)
+set.seed(3) ; fit.tmp2 <- lasso.proj(x = x.use, y = y,
+                                     parallel = TRUE, verbose = TRUE)
+
 ## confidence intervals
 ci.lasso  <- confint(fit.lasso,  level = 0.95)
 ci.lasso2 <- confint(fit.lasso2, level = 0.95)

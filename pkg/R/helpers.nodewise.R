@@ -35,8 +35,7 @@ score.nodewiselasso <- function(x,
   }
   
   if(verbose){
-    print("Using the following lambda values")
-    print(lambdas)
+    cat("Using the following lambda values:", lambdas, "\n")
   }
 
   ## 10-fold cv is done over all nodewise regressions to calculate the error
@@ -46,25 +45,24 @@ score.nodewiselasso <- function(x,
                                       oldschool = oldschool,
                                       verbose = cv.verbose)
   if(verbose){
-    print(paste("lambda.min is", cvlambdas$lambda.min))
-    print(paste("lambda.1se is", cvlambdas$lambda.1se))
+    cat(paste("lambda.min is", cvlambdas$lambda.min), "\n")
+    cat(paste("lambda.1se is", cvlambdas$lambda.1se), "\n")
   }
   
   if(lambdatuningfactor == "lambda.1se"){
     if(verbose)
-      print("lambda.1se used for nodewise tuning")
+      cat("lambda.1se used for nodewise tuning\n")
     ## We use lambda.1se for bestlambda now!!!
     bestlambda <- cvlambdas$lambda.1se
     }else{
       if(verbose)
-        print(paste("lambdatuningfactor used is ", lambdatuningfactor, sep = ""))
+        cat("lambdatuningfactor used is", lambdatuningfactor, "\n")
       
       bestlambda <- cvlambdas$lambda.min * lambdatuningfactor
     }
   
   if(verbose){
-    print("Picked the best lambda")
-    print(bestlambda)
+    cat("Picked the best lambda:", bestlambda, "\n")
     ##print("with the error ")
     ##print(min(err))
   }
@@ -129,15 +127,14 @@ score.getThetaforlambda <- function(x, lambda, parallel = FALSE, ncores = 8,
   }
   thetahat <- C %*% solve(diag(T2))
   if(verbose){
-    print("1/tau_j^2")
-    print(solve(diag(T2)))
+    cat("1/tau_j^2:", solve(diag(T2)), "\n")
   }
   ##this is thetahat ^ T!!
   thetahat <- t(thetahat)
   
   if(all(thetahat[lower.tri(thetahat)] == 0,
          thetahat[upper.tri(thetahat)] == 0) && verbose)
-    print("Thetahat is a diagonal matrix!!!! ")
+    cat("Thetahat is a diagonal matrix!\n")
   
   return(thetahat)
 }
@@ -233,9 +230,7 @@ nodewise.getlambdasequence <- function(x)
 }
 
 cv.nodewise.err.unitfunction <- function(c, K, dataselects, x, lambdas,
-                                         verbose,
-                                         p)
-{
+                                         verbose, p) {
   ## Purpose:
   ## this method returns the K-fold cv error made by the nodewise regression
   ## of the single column c of x vs the other columns for all values of the
@@ -245,18 +240,16 @@ cv.nodewise.err.unitfunction <- function(c, K, dataselects, x, lambdas,
   ## ----------------------------------------------------------------------
   ## Author: Ruben Dezeure, Date: 27 Nov 2012 (initial version),
   
-  if(verbose)
-    {##print some information out about the progress
+  if(verbose){ ##print some information out about the progress
       ##report every 25%
-      interesting.points <- round(c(1/4,2/4,3/4,4/4)*p)
-      names(interesting.points) <- c("25%","50%","75%","100%")
-      if(c %in% interesting.points)
-        {
-          print(paste("The expensive computation is now",
-                      names(interesting.points)[c == interesting.points],
-                      "done"))
-        }
+    interesting.points <- round(c(1/4,2/4,3/4,4/4)*p)
+    names(interesting.points) <- c("25%","50%","75%","100%")
+    if(c %in% interesting.points){
+      cat("The expensive computation is now",
+          names(interesting.points)[c == interesting.points],
+          "done\n")
     }
+  }
   
   totalerr <- cv.nodewise.totalerr(c = c,
                                    K = K,
@@ -447,17 +440,16 @@ nodewise.getlambdasequence.old <- function(x,verbose=FALSE)
     
       ##DEBUG
     if(verbose || is.nan(max(lambdas))){
-      print(paste("c ",c,sep=""))
-      print("lambdas")
-      print(lambdas)
-      print("max(lambdas) max(lambdas,na.rm=TRUE) maxlambda")
-      print(paste(max(lambdas),max(lambdas,na.rm=TRUE),maxlambda,sep=""))
+      cat(paste("c:", c, "\n"))
+      cat("lambdas:", lambdas, "\n")
+      cat("max(lambdas) max(lambdas,na.rm=TRUE) maxlambda: ",
+          max(lambdas), max(lambdas,na.rm=TRUE), maxlambda, "\n")
     }
     if(max(lambdas,na.rm=TRUE) > maxlambda){
       maxlambda <- max(lambdas,na.rm=TRUE)
     }
     if(min(lambdas,na.rm=TRUE) < minlambda){
-      minlambda <- min(lambdas,na.rm=TRUE)
+      minlambda <- min(lambdas, na.rm = TRUE)
     }
   }
   

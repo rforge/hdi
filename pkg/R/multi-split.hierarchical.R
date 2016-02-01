@@ -247,10 +247,8 @@ mssplit.hierarch.testing <- function(tree,
       ## stop looping through the c.test if we have looped once through c.test and nothing was found significant
       c.test <- c.test.new
       if(verbose) {
-        print("length of c.test")
-        print(length(c.test))
-        print("c.test itself")
-        print(c.test)
+        cat("length of c.test:", length(c.test), "\n")
+        cat("c.test itself:", c.test, "\n")
       }
       if(!found.signif)
         break
