@@ -2,17 +2,24 @@
 \alias{lasso.cv}
 \title{Select Predictors via (10-fold) Cross-Validation of the Lasso}
 \description{
-  Performs (10-fold) cross-validation of the lasso (via
+  Performs (n-fold) cross-validation of the lasso (via
   \code{\link[glmnet]{cv.glmnet}}) and determines the prediction
   optimal set of parameters.
 }
 \usage{
-lasso.cv(x, y, \dots)
+lasso.cv(x, y,
+         nfolds = 10,
+         grouped = nrow(x) > 3*nfolds,
+         \dots)
 }
 \arguments{
   \item{x}{numeric design matrix (without intercept) of dimension \eqn{n
       \times p}{n * p}.}
   \item{y}{response vector of length \eqn{n}.}
+  \item{nfolds}{the number of folds to be used in the cross-validation}
+  \item{grouped}{corresponds to the \code{grouped} argument to \code{\link{cv.glmnet}}. This has
+  a smart default such that glmnet does not give a warning about too
+  small sample size.}
   \item{\dots}{further arguments to be passed to
     \code{\link{cv.glmnet}}.}
 }

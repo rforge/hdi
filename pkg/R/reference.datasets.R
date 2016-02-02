@@ -1,12 +1,13 @@
-generate.reference.dataset <-
-    function(n, p, s0,
-             xtype = c("toeplitz", "exp.decay", "equi.corr"),
-             btype = "U[-2,2]", permuted = FALSE,
-             iteration = 1, do2S = TRUE,
-             x.par = switch(xtype,
-                            "toeplitz"  = 0.9,
-                            "equi.corr" = 0.8,
-                            "exp.decay" = c(0.4, 5)))
+rXb <-
+  function(n, p, s0,
+           xtype = c("toeplitz", "exp.decay", "equi.corr"),
+           btype = "U[-2,2]", permuted = FALSE,
+           iteration = NA, do2S = TRUE,
+           x.par = switch(xtype,
+                          "toeplitz"  = 0.9,
+                          "equi.corr" = 0.8,
+                          "exp.decay" = c(0.4, 5)),
+           verbose = TRUE)
 {
   ## Purpose: generate the reference datasets used in the paper accompanying
   ##          this R package
@@ -17,32 +18,45 @@ generate.reference.dataset <-
 
   ## Checking arguments
   xtype <- match.arg(xtype)
-  ## rather let generate.reference.beta() check
-
+  
   stopifnot(is.character(btype), length(btype) == 1,
             n == as.integer(n), length(n) == 1, n >= 1,
             p == as.integer(p), length(p) == 1, p >= 1,
             s0== as.integer(s0),length(s0)== 1, 0 <= s0, s0 <= p)
   do.seed <- is.numeric(iteration) && !is.na(iteration)
-  if(do.seed)
-      stopifnot(iteration > 0  && iteration <= 50) ## only 50 versions of each were created
+
   if(do.seed) {
-      seed <- iteration + 2
-      set.seed(seed)
+    if(verbose)
+    {
+      message("A value for the argument iteration has been specified:")
+      message("The seed will be set for reproducibility, the old RNGstate will be restored after the data generation.")
+    }
+    
+    ## Based on the example of
+    ## stats:::simulate.lm
+    R.seed <- get(".Random.seed", envir = .GlobalEnv)    
+    on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
+
+    ## Set seeds in such a way that iteration 1:50
+    ## correspond to the setups used in the paper
+    seed <- iteration + 2
+    set.seed(seed)
   }
-  x <- generate.reference.x(n = n, p = p, xtype = xtype,
-                            permuted = permuted, do2S = do2S, par = x.par)
-  if(do.seed) set.seed(seed)
-  beta <- generate.reference.beta(p = p, s0 = s0, btype = btype)
+  
+  x <- rX(n = n, p = p, xtype = xtype,
+          permuted = permuted, do2S = do2S, par = x.par)
+  if(do.seed)
+    set.seed(seed)
+  beta <- rb(p = p, s0 = s0, btype = btype)
   list(x=x, beta=beta)
 }
 
-generate.reference.x <-
-    function(n, p, xtype, permuted, do2S = TRUE,
-             par = switch(xtype,
-                          "toeplitz"  = 0.9,
-                          "equi.corr" = 0.8,
-                          "exp.decay" = c(0.4, 5)))
+rX <-
+  function(n, p, xtype, permuted, do2S = TRUE,
+           par = switch(xtype,
+                        "toeplitz"  = 0.9,
+                        "equi.corr" = 0.8,
+                        "exp.decay" = c(0.4, 5)))
 {
   ## Purpose: generate the reference design matrix used in the paper accompanying
   ##          this R package
@@ -57,8 +71,8 @@ generate.reference.x <-
                     stopifnot(length(par) == 1)
                     cov <- par ^ abs(indices)
                     if(do2S) ## This looks really stupid but the tiny numerical differences
-                             ## make it identical to the datasets used in the paper
-                        solve(solve(cov))
+                      ## make it identical to the datasets used in the paper
+                      solve(solve(cov))
                     else cov
                   },
                   "equi.corr" = {
@@ -83,7 +97,7 @@ generate.reference.x <-
     x
 }
 
-generate.reference.beta <- function(p, s0, btype) {
+rb <- function(p, s0, btype) {
   ## Purpose: generate the reference coefficient vector used in the paper
   ##          accompanying this R package
   ## ----------------------------------------------------------------------

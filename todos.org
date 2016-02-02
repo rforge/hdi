@@ -1,26 +1,32 @@
 * cleaning up
 ** multi split
+*** TODO *ruben* [ci investigate] how the ci calculation works, is it critical 1-ci.level %in% gamma? Can we handle ci.level < 0.05 at all if gamma.min = 0.05?
 *** TODO *ruben* [ci] gamma create better default option multisplit
 *** TODO *ruben* [ci] gamma hardcoded 0.05
-*** TODO *ruben* [speed] speed up the lm fits without formula notation, FIXME of martin
-*** TODO *lukas* [lm.pval] catch perfect fit Warning, give user useful message
-*** TODO *ruben* [glmnet sample size] send an example to Lukas (afterwards we can figure out how to handle it)
+*** TODO *ruben* [hierarchical - speed F test] speed up the lm fits without formula notation, FIXME of martin
 *** TODO *ruben* [sanity check output classical.fit] no NA [ ] is length correct [ ] are all p-values >=0 and <=1 [ ]
+*** DONE *ruben* [glmnet sample size] fix warning glmnet too small sample size
+    example: take any design matrix with < 20 samples and apply cv.glmnet
+    
+    it reports that it cannot do grouped=FALSE
+*** TODO *lukas* [lm.pval] catch perfect fit Warning, give user useful message
 ** generate datasets
-*** TODO *ruben* [rename] the functions to rXbeta and rX, Use *etags* in shell and then emacs to rename over all fcts
-*** TODO *ruben* [export rX] also export rX
-*** TODO *ruben* [save restore RNGstate] look at stats:::simulate.lm for good practice
-*** TODO *ruben* [set default iteration=NA]
-*** TODO *ruben* [useful message if iteration != NA] "overriding current RNG state with seed, restoring original RNG state after data generation"
-*** TODO *ruben* [warn iteration !in 1:50] allow the iteration to be outside that range but warn that this is not a design from the paper anymore
+*** DONE *ruben* [save restore RNGstate] look at stats:::simulate.lm for good practice
+*** DONE *ruben* [rename] the functions to rXbeta and rX, Use *etags* in shell and then emacs to rename over all fcts
+*** DONE *ruben* [set default iteration=NA]
+*** DONE *ruben* [useful message if iteration != NA] "overriding current RNG state with seed, restoring original RNG state after data generation"
+*** DONE *ruben* [warn iteration !in 1:50] allow the iteration to be outside that range but warn that this is not a design from the paper anymore
+*** DONE *ruben* [export rX] also export rX
+*** DONE *ruben* [man pages] update the man pages
+*** DONE *ruben* [man page rX] to be added
 ** lowerbound
 *** TODO *lukas* [] lower bound Fehler n > 50
 ** everywhere
 *** TODO *lukas* add more dput comparisons to test files
+*** TODO *ruben* [calc.ci function] return a calculate ci function everywhere s.t. no need to recalc whole fit to get different ci level
 *** DONE *lukas* [parallel default] ncores default change to default of multisplit, as in mcmapply
 *** DONE *lukas* replace print("abc") etc. with cat("abc")
 *** DONE *lukas* [message] replace everywhere cat and print with message if not within verbose
 *** DONE *lukas* [DESCRIPTION] change to new author system, see Markus pcalg
-*** TODO *ruben* [calc.ci function] return a calculate ci function everywhere s.t. no need to recalc whole fit to get different ci level
 *** DONE *lukas* use everywhere the same name for verbose / trace etc. Keep silent!
 

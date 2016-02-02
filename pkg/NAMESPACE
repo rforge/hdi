@@ -22,7 +22,8 @@ export(hdi, fdr.adjust, stability,
        ridge.proj,
        lm.pval, lm.ci, glm.pval,
        multi.split,
-       generate.reference.dataset,
+       rXb,
+       rX,
        clusterGroupBound,
        groupBound)
 
