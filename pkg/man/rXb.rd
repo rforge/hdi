@@ -1,12 +1,13 @@
 \name{rXb}
-\title{Generate Datasets (\eqn{X} matrix and \eqn{\beta} vector}
+\title{Generate Data Design Matrix \eqn{X} and Coefficient Vector \eqn{\beta}}
 \alias{rXb}
+\alias{rX}
 \concept{generate datasets}
 \description{
   Generate a random design matrix \eqn{X} and coefficient vector \eqn{\beta}
   useful for simulations of (high dimensional) linear models.
-  In particular, the function can be used to exactly recreate the
-  reference linear model datasets of the hdi paper.
+  In particular, the function \code{rXb()} can be used to exactly
+  recreate the reference linear model datasets of the hdi paper.
 }
 \usage{
 rXb(n, p, s0,
@@ -18,6 +19,12 @@ rXb(n, p, s0,
                    "equi.corr" = 0.8,
                    "exp.decay" = c(0.4, 5)),
    verbose = TRUE)
+
+rX(n, p, xtype, permuted, do2S = TRUE,
+   par = switch(xtype,
+                "toeplitz"  = 0.9,
+                "equi.corr" = 0.8,
+                "exp.decay" = c(0.4, 5)))
 }
 \arguments{
   \item{n}{integer; the sample size \eqn{n} (paper had always \code{n = 100}).}
@@ -29,7 +36,7 @@ rXb(n, p, s0,
     one wants to generate.  Must be one of \code{"toeplitz"},
     \code{"equi.corr"} or \code{"exp.decay"}.}
   \item{btype}{a \code{\link{character}} string specifying the type of
-    coefficients (\dQuote{beta}) one wants to generate. In the hdi
+    nonzero coefficients (\dQuote{beta}) one wants to generate.  In the hdi
     paper, this has been one of
     "U[-2,2]", "U[0,2]", "U[0,4]", "bfix1", "bfix2" and "bfix10".  In
     general, any string of the form \code{"U[a,b]"} or \code{"bfix<c>"}
@@ -52,7 +59,7 @@ rXb(n, p, s0,
     covariance matrix should be inverted twice.  Must be true, to
     regenerate the \eqn{X} matrices from the hdi paper exactly
     \dQuote{to the last bit}.}
-  \item{x.par}{the parameters to be used for the design matrix.  Must be
+  \item{x.par,par}{the parameters to be used for the design matrix.  Must be
     a numeric vector of length one or two.  The default uses the
     parameters also used in the hdi paper.}
   \item{verbose}{should the function give a message if seeds are being
@@ -74,9 +81,15 @@ rXb(n, p, s0,
   }
 }
 \value{
-  A \code{\link{list}} with components
-  \item{x}{the generated \eqn{n \times p}{n * p} design matrix \eqn{X}.}
-  \item{beta}{the generated coefficient vector \eqn{\beta} (\sQuote{beta}).}
+  \describe{
+    \item{For \code{rXb()}:}{A \code{\link{list}} with components
+      \describe{
+	\item{x}{the generated \eqn{n \times p}{n * p} design matrix \eqn{X}.}
+	\item{beta}{the generated coefficient vector \eqn{\beta} (\sQuote{beta}).}}
+    }
+    \item{For \code{rX()}:}{the generated \eqn{n \times p}{n * p} design
+      matrix \eqn{X}.}
+  }
 }
 \references{
   \dQuote{The} hdi paper:\cr
@@ -98,6 +111,14 @@ y <- as.vector( x \%*\% beta ) + replicate(100, rnorm(nrow(x)))
 ## Use  'beta_min' fulfilling  beta's  (non standard 'btype'):
 str(ds2 <- rXb(n = 50, p = 12, s0 = 3,
                xtype = "exp.decay", btype = "U[0.1, 5]"))
+
+## Generate a design matrix of type "toeplitz"
+set.seed(3) # making it reproducible
+X3 <- rX(n = 800, p = 500, xtype = "toeplitz", permuted = FALSE)
+
+## permute the columns
+set.seed(3)
+Xp <- rX(n = 800, p = 500, xtype = "toeplitz", permuted = TRUE)
 }
 \keyword{datagen}
 \keyword{regression}
