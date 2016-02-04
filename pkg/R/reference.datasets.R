@@ -18,7 +18,7 @@ rXb <-
 
   ## Checking arguments
   xtype <- match.arg(xtype)
-  
+
   stopifnot(is.character(btype), length(btype) == 1,
             n == as.integer(n), length(n) == 1, n >= 1,
             p == as.integer(p), length(p) == 1, p >= 1,
@@ -26,15 +26,14 @@ rXb <-
   do.seed <- is.numeric(iteration) && !is.na(iteration)
 
   if(do.seed) {
-    if(verbose)
-    {
-      message("A value for the argument iteration has been specified:")
-      message("The seed will be set for reproducibility, the old RNGstate will be restored after the data generation.")
+    if(verbose) {
+      cat("A value for the argument iteration has been specified:\n")
+      cat("The seed will be set for reproducibility, the old RNGstate will be restored after the data generation.\n")
     }
-    
+
     ## Based on the example of
     ## stats:::simulate.lm
-    R.seed <- get(".Random.seed", envir = .GlobalEnv)    
+    R.seed <- get(".Random.seed", envir = .GlobalEnv)
     on.exit(assign(".Random.seed", R.seed, envir = .GlobalEnv))
 
     ## Set seeds in such a way that iteration 1:50
@@ -42,10 +41,10 @@ rXb <-
     seed <- iteration + 2
     set.seed(seed)
   }
-  
+
   x <- rX(n = n, p = p, xtype = xtype,
           permuted = permuted, do2S = do2S, par = x.par)
-  if(do.seed)
+  if(do.seed && s0 > 0 && !grepl("^bfix", btype)) # only set if using RNG
     set.seed(seed)
   beta <- rb(p = p, s0 = s0, btype = btype)
   list(x=x, beta=beta)
@@ -107,7 +106,7 @@ rb <- function(p, s0, btype) {
 
   stopifnot(s0 <= p, p >= 0, length(s0) == 1, length(p) == 1,
             is.character(btype), length(btype) == 1)
-  invalid.btype.txt <- "Invalid btype: Please provide a btype of the form 'bfix*' for a fixed value or 'U[*,*]', where * are two numbers, the lower and upper bounds." 
+  invalid.btype.txt <- "Invalid btype: Please provide a btype of the form 'bfix*' for a fixed value or 'U[*,*]', where * are two numbers, the lower and upper bounds."
 
   if(grepl("^U\\[",btype) &&
      grepl("\\]$", btype) &&
