@@ -3,40 +3,41 @@
 \docType{package}
 \title{hdi}
 \description{
-Perform inference in high-dimensional (generalized) linear models using
-various approaches.
+%% MM:  \package*{} macros are fine  *BUT* require a 'R CMD build' *before* R CMD check
+\packageDescription{hdi}
+%% Perform inference in high-dimensional (generalized) linear models using
+%% various approaches.
 }
 \details{
-\tabular{ll}{
-Package: \tab hdi\cr
-Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2013-04-02\cr
-License: \tab GPL \cr}
+The DESCRIPTION file:
+\packageDESCRIPTION{hdi}
+\packageIndices{hdi}
 }
 \author{
-  Lukas Meier, 
-  Ruben Dezeure, 
-  Nicolai Meinshausen, 
-  Peter B\"uhlmann, 
+  Lukas Meier,
+  Ruben Dezeure,
+  Nicolai Meinshausen,
+  Peter \enc{Bühlmann}{Buhlmann},
   Maintainer: Lukas Meier <meier@stat.math.ethz.ch>
 }
 \references{
-  Dezeure, R., B\"uhlmann, P., Meier, L. and Meinshausen,
-  N. (2014). \emph{High-dimensional inference: confidence intervals, p-values
-  and R-software hdi}, Statistical Science. To appear.
-  
-  Meinshausen, N., Meier, L. and B\"uhlmann, P. (2009),
-  \emph{P-values for high-dimensional regression}, Journal of the
-  American Statistical Association 104, 1671-1681.
+  Dezeure, R., \enc{Bühlmann}{Buhlmann}, P., Meier, L. and Meinshausen, N. (2014)
+  High-dimensional inference: confidence intervals, p-values and
+  R-software hdi.
+  \emph{Statistical Science}, To appear. %% <- FIXME
 
-  Meinshausen, N. (2013), \emph{Group-bound: confidence intervals for
-  groups of variables in sparse high-dimensional regression without
-  assumptions on the design}. Journal of the Royal Statistical Society,
-  Series B. To appear.
+  Meinshausen, N., Meier, L. and \enc{Bühlmann}{Buhlmann}, P. (2009)
+  P-values for high-dimensional regression.
+  \emph{Journal of the American Statistical Association} \bold{104}, 1671--1681.
 
-  Meinshausen, N. and B\"uhlmann, P. (2010), \emph{Stability selection
-  (with discussion)}, Journal of the Royal Statistical Society: Series B,
-  72, 417-473.}
+  Meinshausen, N. (2013)
+  Group-bound: confidence intervals for groups of variables in sparse
+  high-dimensional regression without assumptions on the design.
+  \emph{Journal of the Royal Statistical Society, Series B}, To appear.%%% FIXME
+
+  Meinshausen, N. and \enc{Bühlmann}{Buhlmann}, P. (2010)
+  Stability selection (with discussion).
+  \emph{Journal of the Royal Statistical Society: Series B} \bold{72}, 417--473.
+}
 \keyword{ package }
 

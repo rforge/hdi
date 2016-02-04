@@ -1,8 +1,10 @@
 \name{lasso.proj}
-\alias{lasso.proj}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{P-values based on lasso projection method}
-\description{P-values based on lasso projection method}
+\alias{lasso.proj}
+\description{
+  Compute p-values based on the lasso projection method.
+  %% write more
+}
 \usage{
 lasso.proj(x, y, family = "gaussian", standardize = TRUE,
            multiplecorr.method = "holm", N = 10000,
@@ -58,21 +60,20 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     is an intermediate result from the computation which only depends on
     the design matrix x. These are the residuals of the nodewise regressions.}
 }
-\references{van de Geer, S., B\"uhlmann, P., Ritov, Y. and Dezeure,
-  R. (2013). On asymptotically optimal confidence regions and tests for
-  high-dimensional models. Preprint.
+\references{
+  van de Geer, S., \enc{Bühlmann}{Buhlmann}, P., Ritov, Y. and Dezeure, R. (2013)
+  On asymptotically optimal confidence regions and tests for  high-dimensional models.
+  Preprint. %% ArXiv, URL? _FIXME_
 
-  Zhang, C.,  Zhang, S. (2014), Confidence intervals for low dimensional
-  parameters in high dimensional linear models, Journal of the Royal
-  Statistical Society: Series B (Statistical Methodology).
+  Zhang, C.,  Zhang, S. (2014)
+  Confidence intervals for low dimensional parameters in high dimensional linear models.
+  \emph{Journal of the Royal Statistical Society: Series B}, \bold{??}, .--.%% FIXME
 
-  B\"uhlmann, P. and van de Geer, S. (2015). High-dimensional inference in
-  misspecified linear models. Electronic Journal of Statistics 9,
-  1449-1473
+  \enc{Bühlmann}{Buhlmann}, P. and van de Geer, S. (2015)
+  High-dimensional inference in misspecified linear models.
+  \emph{Electronic Journal of Statistics} \bold{9}, 1449--1473.
 }
 \author{Ruben Dezeure}
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \examples{
 x <- matrix(rnorm(100*20), nrow = 100, ncol = 20)
@@ -96,8 +97,5 @@ fit.lasso$groupTest(1:2)
 out.clust <- fit.lasso$clusterGroupTest()
 plot(out.clust)
 }
-
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{models}
 \keyword{regression}
