@@ -61,7 +61,7 @@ rXy <- function(rXb, sigma = 1) {
   list(x = X, y = drop(X %*% b) + rnorm(nrow(X), sd = sigma))
 }
 
-##' from a p-vectort, return corresponding list of 'groups', i.e., group indices
+##' from a p-vector, return corresponding list of 'groups', i.e., group indices
 pvec2grp <- function(pv) {
   stopifnot(is.numeric(pv), is.finite(pv), pv >= 0)
   cv <- cumsum(c(1,pv))
@@ -79,7 +79,7 @@ if(FALSE) { ## not used currently
 }
 
 set.seed(20)
-d1B <- rXbBlock(p = c(7, 8, 7), s0 = c(2,4,1), n = 16)
+d1B <- rXbBlock(p = c(7, 8, 7), s0 = c(2, 4, 1), n = 16)
 p2 <- sample(c(32, 16, 16, 16, 12, 12, 5, 5, 5))
 s2 <- c(rmultinom(1, size = p2, prob = ifelse(p2 > 15, 1/4, 1/8)))
 rbind(p2, s2)

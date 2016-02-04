@@ -79,11 +79,10 @@ hdi <- function(x, y, method = "multi.split", B = NULL,
   ## ...
   
   ## The following overwrites 
-  out$call = match.call()
+  out$call <- match.call()
   
   class(out) <- "hdi"
-  
-  return(out)
+  out
 }
 
 

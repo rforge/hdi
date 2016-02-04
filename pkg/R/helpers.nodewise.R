@@ -23,16 +23,13 @@ score.nodewiselasso <- function(x,
   ## Author: Ruben Dezeure, Date: 27 Nov 2012 (initial version),
 
   ## First, a sequence of lambda values over all nodewise regressions is created
-  
-  if(lambdaseq == "quantile"){ ## this is preferred
-    lambdas <- nodewise.getlambdasequence(x)
-  }else{
-    if(lambdaseq == "linear"){
-      lambdas <- nodewise.getlambdasequence.old(x,verbose)
-    }else{
-      stop("invalid lambdaseq given")
-    }
-  }
+
+  lambdas <-
+    switch(lambdaseq,
+           "quantile" = nodewise.getlambdasequence(x), ## this is preferred
+           "linear"   = nodewise.getlambdasequence.old(x,verbose),
+           ## otherwise
+           stop("invalid 'lambdaseq': ", lambdaseq))
   
   if(verbose){
     cat("Using the following lambda values:", lambdas, "\n")
@@ -251,13 +248,12 @@ cv.nodewise.err.unitfunction <- function(c, K, dataselects, x, lambdas,
     }
   }
   
-  totalerr <- cv.nodewise.totalerr(c = c,
-                                   K = K,
-                                   dataselects = dataselects,
-                                   x = x,
-                                   lambdas = lambdas)
-  ##return(apply(totalerr, 1, mean))
-  return(totalerr)
+  ## return  'totalerr' 
+  cv.nodewise.totalerr(c = c,
+                       K = K,
+                       dataselects = dataselects,
+                       x = x,
+                       lambdas = lambdas)
 }
 
 ## gets the standard error for one particular lambda
@@ -288,13 +284,11 @@ cv.nodewise.stderr <- function(K, x, dataselects, lambda, parallel, ncores)
                        x = list(x = x),
                        lambdas = lambda)
   }
-  ##get the mean over the variables
-  totalerr.varmean <- apply(totalerr, 1, mean)
+  ## get the mean over the variables
+  totalerr.varmean <- rowMeans(totalerr)
   
-  ##get the stderror over the K
-  stderr.forlambda <- sd(totalerr.varmean) / sqrt(K)
-  
-  return(stderr.forlambda)
+  ## get the stderror over the K;  return stderr.forlambda
+  sd(totalerr.varmean) / sqrt(K)
 }
 
 cv.nodewise.totalerr <- function(c, K, dataselects, x, lambdas)
@@ -321,7 +315,7 @@ cv.nodewise.totalerr <- function(c, K, dataselects, x, lambdas)
     totalerr[, i] <- apply((x[whichj, c] - predictions)^2, 2, mean)
   }
 
-  return(totalerr)
+  totalerr
 }
 
 
@@ -411,10 +405,8 @@ cv.nodewise.bestlambda <- function(lambdas, x, K = 10, parallel = FALSE,
 ##-                                           lambda = lambda.min,
 ##-                                           parallel = parallel,
 ##-                                           ncores = ncores)
-  lambda.1se <- max(lambdas[err.mean < (min(err.mean) + stderr.lambda.min)])
-  
-  return(list(lambda.min=lambda.min,
-              lambda.1se=lambda.1se))
+  list(lambda.min = lambda.min,
+       lambda.1se = max(lambdas[err.mean < (min(err.mean) + stderr.lambda.min)]))
 }
 
 ##DEPRECATED, not really the best choice
@@ -453,7 +445,7 @@ nodewise.getlambdasequence.old <- function(x,verbose=FALSE)
     }
   }
   
-  lambdas <- seq(minlambda,maxlambda,by=(maxlambda-minlambda)/nlambda)
-  lambdas <- sort(lambdas,decreasing=TRUE)
-  return(lambdas)
+  lambdas <- seq(minlambda, maxlambda, by = (maxlambda-minlambda)/nlambda)
+  ## return
+  sort(lambdas, decreasing=TRUE)
 }
