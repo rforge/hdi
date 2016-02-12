@@ -3,10 +3,9 @@ Type: Package
 Title: High-Dimensional Inference
 Version: 0.1-5
 Date: 2016-01-28
-Author: Lukas Meier [aut, cre], Ruben Dezeure [aut], Nicolai Meinshausen [aut], Martin Maechler [aut]
+Author: Lukas Meier [aut, cre], Ruben Dezeure [aut], Nicolai Meinshausen [aut], Martin Maechler [aut], Peter Buehlmann [aut]
 Maintainer: Lukas Meier <meier@stat.math.ethz.ch>
-Description: Implementation of multiple approaches to perform inference in
-	     high-dimensional models.
+Description: Implementation of multiple approaches to perform inference in high-dimensional models.
 Depends: scalreg
 DependsNote: scalreg does not correctly import lars etc, so we need to depend on it
 Imports: grDevices, graphics, stats, parallel, MASS, glmnet, linprog
