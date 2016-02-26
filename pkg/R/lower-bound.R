@@ -14,7 +14,7 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
 
   group <- getMembers(me, sel)
   if(!silent)
-    cat("\n ", sel, "  ", length(group), "members")
+    cat("\n ", sel, "  ", length(group), "member(s)")
   
   res <- groupBound(x, y, group = group, alpha = alpha, eps = eps,
                     s = s, nsplit = nsplit, silent = TRUE,
@@ -25,7 +25,7 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
   groupsl[[sel]] <- group
   
   if(!silent)
-    cat("\t lower bound", res)
+    cat("\t with lower bound", res)
 
   if(res > 0 & length(group) > 1) {
     if(all(me[sel,] > 0)) {
@@ -39,6 +39,10 @@ getLowerBoundNode <- function(x, y, me, sel, resmat, groupsl, alpha = 0.05,
       }
     }
   }
+  
+  if(!silent)
+    cat("\n")
+  
   list(resmat = resmat, groupsl = groupsl)
 }
 
@@ -113,9 +117,6 @@ groupBoundWithPrediction <- function(x, y, group, mfact, pred,
   else
     vapply(group, oneGroup, numeric(1))
 }
-
-## FIXME: 90% quantile is  hard-coded (!)
-## --> added option eps (as in original paper; code was correct)
 
 groupBound <- function(x, y, group, alpha = 0.05, eps = 0.1,
                        nsplit = 11, s = min(10, ncol(x) - 1),
@@ -192,15 +193,13 @@ groupBound <- function(x, y, group, alpha = 0.05, eps = 0.1,
     }
   }
 
-  ## FIXME ?? should '0.9' really be  1 - 2*alpha  ????
-  ## Yes, this is correct, added an option (lme)
   TG <- if(!listg)
     quantile(TG, probs = 1 - eps, type = 5)
   else
     apply(TG, 1, quantile, probs = 1 - eps, type = 5)
 
-  ## return
-  structure(TG, class = c("lowerBound", "hdi"))
+  ## return value
+  structure(unname(TG), class = c("lowerBound", "hdi"))
 }
 
 ##' [internal function]  Workhorse of groupBound() :
@@ -265,7 +264,7 @@ do.splits <- function(splitc,
     TGsplit <- groupBoundWithPrediction(x[outsam,], y[outsam], group,
                                         mfact, pred,
                                         intercept = TRUE,
-                                        useseed = if(setseed) useseed, # else NULL
+                                        useseed = if(setseed) useseed,# else NULL
                                         lpSolve = lpSolve)
   }
   if(!silent)
@@ -346,7 +345,7 @@ clusterGroupBound <- function(x, y, method = "average",
 
     tmp <- which(sel == mergeext[sel[k], 2] & sel < sel[k])
     out$rightChild[k] <- if(length(tmp) > 0) tmp else -1
-    out$position[k] <- mean(((1:length(ord)))[ord %in% out$members[[k]]] / p)
+    out$position[k]   <- mean(((1:length(ord)))[ord %in% out$members[[k]]] / p)
   }
 
   leafLeft  <- (out$leftChild < 0  |

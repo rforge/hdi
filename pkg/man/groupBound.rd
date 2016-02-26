@@ -13,27 +13,25 @@
   %% data.
 }
 \usage{
-groupBound(x, y, group,
-           alpha = 0.05, eps = 0.1, nsplit = 11,
-           s = min(10, ncol(x) - 1),
-           setseed = TRUE,
-           silent = FALSE, lpSolve = TRUE,
-           parallel = FALSE, ncores = getOption("mc.cores", 2L))
+groupBound(x, y, group, alpha = 0.05, eps = 0.1, nsplit = 11,
+           s = min(10, ncol(x) - 1), setseed = TRUE,
+           silent = FALSE, lpSolve = TRUE, parallel = FALSE,
+           ncores = getOption("mc.cores", 2L))
 }
 \arguments{
   \item{x}{numeric design matrix of the regression \eqn{n \times p}{n * p}
     with \eqn{p} columns for \eqn{p} predictor variables and \eqn{n}
     rows corresponding to \eqn{n} observations.}
   \item{y}{numeric response variable of length \eqn{n}.}
-  \item{group}{either a numeric vector with entries in \eqn{\{1,..,p\}}
+  \item{group}{either a numeric vector with entries in \eqn{\{1,...,p\}}
     or a \code{\link{list}} with such numeric vectors. If \code{group}
     is a numeric vector, this is the group of variables for which a
-    lower bound is computed.  If \code{group} is a list, the lower bound
+    lower bound is computed. If \code{group} is a list, the lower bound
     is computed for each group in the list.}
   \item{alpha}{numeric level in \eqn{(0,1)} at which the test /
     confidence interval is computed.}
-  \item{eps}{a level of eps*alpha is used and the values of different
-    splits are aggregated using the (1-eps) quantile. See reference
+  \item{eps}{a level of eps * alpha is used and the values of different
+    splits are aggregated using the (1 - eps) quantile. See reference
     below for more details.}
   \item{nsplit}{the number of data splits used.}
   \item{s}{the dimensionality of the projection that is used.  Lower
@@ -58,7 +56,7 @@ groupBound(x, y, group,
 }
 
 \value{If \code{group} is a single numeric vector, a scalar containg the lower
- bound for this group of variables is returned.  If \code{group} is a
+ bound for this group of variables is returned. If \code{group} is a
  list, a numeric vector is retuned where each entry corresponds to the
  group of variables defined in the same order in \code{group}.
 }
@@ -68,8 +66,7 @@ groupBound(x, y, group,
   Group bound: confidence intervals for groups of variables in sparse
   high dimensional regression without assumptions on the design.
   \emph{Journal of the Royal Statistical Society: Series B} \bold{77}(5)
-  923--945; 
-  \url{http://dx.doi.org/10.1111/rssb.12094}.
+  923--945; \url{http://dx.doi.org/10.1111/rssb.12094}.
 }
 
 \author{Nicolai Meinshausen}
@@ -86,7 +83,7 @@ n   <- 300
 B   <- 5
 rho <- 0.99
 
-ind <- rep(1:ceiling(p / B), each = B)[1:p]
+ind   <- rep(1:ceiling(p / B), each = B)[1:p]
 Sigma <- diag(p)
 
 for (ii in unique(ind)){
@@ -112,10 +109,10 @@ print(lowerBoundAll)
 cat("\nlower bound for all variables 1-10: ", lowerBoundAll, "\n")
 
 ## Compute lower bounds:
-## Lower bounds for variable 1 in itself, then group {1,3}, 1-3, 1-4, 1-5, 2-5, 2-10
+## Lower bounds for variable 1 itself, then group {1,3}, 1-3, 1-4, 1-5, 2-5, 2-10
 lowerBound <- groupBound(x, y, list(1, c(1,3), 1:3, 1:4, 1:5, 2:5, 2:10))
 cat("lower bound for the groups\n\t {1}, {1,3}, {1,2,3}, {1..4}, {1..5}, {2..5}, {2..10}:\n\t  ",
-    format(formatC(c(lowerBound))), "\n")
+format(formatC(c(lowerBound))), "\n")
 }
 \keyword{confidence intervals}
 \keyword{regression}

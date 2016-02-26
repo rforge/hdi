@@ -10,7 +10,8 @@
 \usage{
 clusterGroupBound(x, y, method = "average",
                   dist = as.dist(1 - abs(cor(x))), alpha = 0.05,
-                  eps = 0.1, hcloutput, nsplit = 11, s = min(10, ncol(x) - 1),
+                  eps = 0.1, hcloutput, nsplit = 11,
+                  s = min(10, ncol(x) - 1),
                   silent = FALSE, setseed = TRUE, lpSolve = TRUE)}
 \arguments{
   \item{x}{numeric design matrix of the regression \eqn{n \times p}{n * p}

@@ -20,7 +20,8 @@
 *** DONE *ruben* [man pages] update the man pages
 *** DONE *ruben* [man page rX] to be added
 ** lowerbound
-*** TODO *lukas* [] lower bound Fehler n > 50
+*** TODO *lukas* lowerBound error n > 50
+*** TODO *lukas* fix seed issues (see comments Martin)
 ** everywhere
 *** TODO *lukas* add more dput comparisons to test files
 *** TODO *ruben* [calc.ci function] return a calculate ci function everywhere s.t. no need to recalc whole fit to get different ci level

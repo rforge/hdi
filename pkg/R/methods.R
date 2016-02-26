@@ -46,26 +46,26 @@ print.hdi <- function(x, ...)
   ## Cluster Lower-Bound ##
   #########################
 
-  else if(method == "clusterLowerBound"){
-    cat("\n lower l1-norm group bounds in a hierarchical clustering ")
-    cat("\n lower bound on l1-norm of all regression coefficients:",
+  else if(method == "clusterGroupBound"){
+    cat("lower l1-norm group bounds in a hierarchical clustering:")
+    cat("\n- lower bound on l1-norm of *all* regression coefficients:",
         signif(max(x$lowerBound),4))
 
     leaf.p.bnd <- x$isLeaf & x$lowerBound > 0
     if(sum(leaf.p.bnd) == 1){
       tmp <- sum(x$noMembers[which(leaf.p.bnd)])
-      cat("\n only 1 significant non-overlapping cluster with", tmp ,
+      cat("\n- only 1 significant non-overlapping cluster with", tmp ,
           if(tmp == 1) "member" else "members")
     }else{
-      cat("\n number of non-overlapping significant clusters       :",
+      cat("\n- number of non-overlapping significant clusters:",
           sum(leaf.p.bnd))
       tmp <- range(x$noMembers[which(leaf.p.bnd)])
       if(diff(tmp) == 0){
-        cat("\n with", tmp[1],
-          if(tmp[1] == 1) "member in each non-overlapping cluster" else
-            "members in each non-overlapping cluster")
+        cat("\n  (with", tmp[1],
+          if(tmp[1] == 1) "member in each non-overlapping cluster)" else
+            "members in each non-overlapping cluster)")
       }else{
-        cat("\n with", paste(tmp, collapse = " up to "), "members each")
+        cat("\n  (with", paste(tmp, collapse = " "), "members each)")
       }
     }
     cat("\n ")
@@ -78,6 +78,7 @@ print.hdi <- function(x, ...)
   else{
     print.default(x, ...)
   }
+  
   invisible(x) # as *every* print() method
 }
 
