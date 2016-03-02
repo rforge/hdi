@@ -64,7 +64,13 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
         sel.pval <- do.call(classical.fit,
                             args = c(list(x = x.right[,sel.model],
                                           y = y.right), args.classical.fit))
-        
+        ## Sanity checks for the output of classical.fit
+        if(any(is.na(sel.pval)))
+          stop("The classical.fit function returned a p-value NA")
+        if(length(sel.pval)!= p.sel)
+          stop("The classical.fit function didn't return the correct number of p-values for the provided submodel.")
+        if(!all(sel.pval >=0 & sel.pval <= 1))
+          stop("The classical.fit function returned values below 0 or above 1 as p-values")
         
         ## Bonferroni on small model
         pvals.v[sel.model] <- pmin(sel.pval * p.sel, 1) ## new
