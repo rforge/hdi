@@ -250,8 +250,9 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                      ## multi.corr = TRUE,## temporarily trying multiple testing corrected ci
                      multi.corr = FALSE,## single testing confidence intervals
                      verbose = FALSE,
-                     s0=list(s0=s0),
-                     var=1:vars)#for debug information to have the var of this aggregate call
+                     s0 = list(s0=s0),
+                     ci.level = ci.level,
+                     var = 1:vars)#for debug information to have the var of this aggregate call
     lci.current <- t(new.ci)[,1]
     uci.current <- t(new.ci)[,2]
   } else {
@@ -295,11 +296,12 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
 aggregate.ci <- function(lci,rci,centers,
                          ses,
                          df.res,
-                         gamma.min=0.05,
+                         gamma.min,
                          multi.corr=FALSE,
                          verbose=FALSE,
                          var,
-                         s0) {
+                         s0,
+                         ci.level) {
   ## detect the -Inf Inf intervals
   inf.ci <- is.infinite(lci)|is.infinite(rci)
   no.inf.ci <- sum(inf.ci)## this we will use later on
@@ -329,7 +331,8 @@ aggregate.ci <- function(lci,rci,centers,
                   s0=s0,
                   df.res=df.res,
                   gamma.min=gamma.min,
-                  multi.corr=multi.corr)
+                  multi.corr=multi.corr,
+                  ci.level=ci.level)
   ## find an inside point: we need to find a point that is definitely in the confidence intervals
   inner <- find.inside.point.gammamin(low=min(centers),
                                       high=max(centers),
@@ -529,6 +532,7 @@ does.it.cover.gammamin <- function(beta.j,
   gamma.min <- ci.info$gamma.min
   multi.corr <- ci.info$multi.corr
   s0 <- ci.info$s0
+  alpha <- 1-ci.info$ci.level
 
   ## Warning!: this is also affected by noncentral vs central t dist
   pval.rank <- rank(-abs(beta.j-centers)/(ci.lengths/2))## the rank of the pvalue in increasing order, - sign to reverse rank
@@ -538,9 +542,9 @@ does.it.cover.gammamin <- function(beta.j,
   if(multi.corr){
     if(any(is.na(s0)))
       stop("need s0 information to be able to create multiple testing corrected pvalues")
-    level <- (1-0.05*gamma.b/(1-log(gamma.min)*s0))
+    level <- (1-alpha*gamma.b/(1-log(gamma.min)*s0))
   } else {
-    level <- (1-0.05*gamma.b/(1-log(gamma.min)))
+    level <- (1-alpha*gamma.b/(1-log(gamma.min)))
   }
   ## from the getAnywhere(confint.lm) code
   a <- (1 - level)/2

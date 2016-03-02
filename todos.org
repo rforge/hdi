@@ -1,10 +1,17 @@
 * cleaning up
 ** multi split
-*** TODO *ruben* [ci investigate] how the ci calculation works, is it critical 1-ci.level %in% gamma? Can we handle ci.level < 0.05 at all if gamma.min = 0.05?
-*** TODO *ruben* [ci] gamma create better default option multisplit
-*** TODO *ruben* [ci] gamma hardcoded 0.05
-*** TODO *ruben* [hierarchical - speed F test] speed up the lm fits without formula notation, FIXME of martin
-*** TODO *ruben* [sanity check output classical.fit] no NA [ ] is length correct [ ] are all p-values >=0 and <=1 [ ]
+*** OPEN-FOR-DISCUSSION *ruben* [ci investigate] how the ci calculation works, is it critical 1-ci.level %in% gamma? 
+    only for duality
+    the ci ignores the gamma range and just takes the empirical quantiles
+    coming from the splits
+    therefore,  if the p-values are calculated by the aggregation from the
+    gamma range -> duality is lost
+    + p-values are calculated by interpolation (which is not the biggest issue)
+*** DONE *ruben* [ci investigate]Can we handle ci.level < 0.05 at all if gamma.min = 0.05?
+    yes, no issue here
+*** OPEN-FOR-DISCUSSION *ruben* [ci] gamma create better default option multisplit
+*** TODO *ruben* *low priority* [hierarchical - speed F test] speed up the lm fits without formula notation, FIXME of martin
+*** DONE *ruben* [sanity check output classical.fit] no NA [ ] is length correct [ ] are all p-values >=0 and <=1 [ ]
 *** DONE *ruben* [glmnet sample size] fix warning glmnet too small sample size
     example: take any design matrix with < 20 samples and apply cv.glmnet
     
@@ -24,7 +31,7 @@
 *** TODO *lukas* fix seed issues (see comments Martin)
 ** everywhere
 *** TODO *lukas* add more dput comparisons to test files
-*** TODO *ruben* [calc.ci function] return a calculate ci function everywhere s.t. no need to recalc whole fit to get different ci level
+*** OPEN-FOR-DISCUSSION *ruben* *but confint.hdi already exists in methods.R!!!* [calc.ci function] (use the helpers.R function as well) return a calculate ci function everywhere s.t. no need to recalc whole fit to get different ci level
 *** DONE *lukas* [parallel default] ncores default change to default of multisplit, as in mcmapply
 *** DONE *lukas* replace print("abc") etc. with cat("abc")
 *** DONE *lukas* [message] replace everywhere cat and print with message if not within verbose
