@@ -185,7 +185,6 @@ ridge.proj <- function(x, y,
     get.clusterGroupTest.function(group.testing.function=group.testing.function,
                                   x = x)
   
-
   out <- list(pval          = res.pval,
               pval.corr     = pcorr,
               groupTest     = group.testing.function,

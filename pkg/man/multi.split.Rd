@@ -10,7 +10,7 @@ multi.split(x, y, B = 100, fraction = 0.5, ci = TRUE, ci.level = 0.95,
             model.selector = lasso.cv,
             classical.fit = lm.pval, classical.ci = lm.ci,
             parallel = FALSE, ncores = getOption("mc.cores", 2L),
-            gamma = seq(ceiling(0.05*B)/B,1-1/B,by=1/B),
+            gamma = seq(ceiling(0.05 * B) / B, 1 - 1 / B, by = 1 / B),
             args.model.selector = NULL, args.classical.fit = NULL,
             args.classical.ci = NULL,
             return.nonaggr = FALSE, return.selmodels = FALSE,
@@ -123,7 +123,7 @@ head(confint(fit.m2))  ## the first  6  95\% conf.intervals
 clGTst <- fit.m2$clusterGroupTest
 names(envGT <- environment(clGTst))# about 14
 if(!interactive()) # if you are curious (and advanced):
-  print(ls.str(envGT), max=0)
+  print(ls.str(envGT), max = 0)
 stopifnot(identical(clGTst, envGT$clusterGroupTest))
 ccc <- clGTst()
 str(ccc)%% MM: hmm..

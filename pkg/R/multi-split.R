@@ -11,8 +11,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                         return.nonaggr = FALSE,
                         return.selmodels = FALSE,
                         repeat.max = 20,
-                        verbose = FALSE)
-{
+                        verbose = FALSE) {
   ## --> ../man/multi.split.Rd
   ##       ~~~~~~~~~~~~~~~~~~~
   ## Author: Lukas Meier, Date:  2 Apr 2013, 11:52
@@ -76,6 +75,9 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
         pvals.v[sel.model] <- pmin(sel.pval * p.sel, 1) ## new
 
         if(ci) { ## Calculations of confidence intervals
+          if(!all.equal(diff(gamma), rep(1 / B, length(gamma) - 1)))
+            warning("Duality might be violated because of choice of gamma. Use steps of length 1 / B")
+          
           if(identical(classical.fit, lm.pval)) {
             ## Calculate ci's and save all necessary information
             tmp.fit.lm <- lm(y.right ~ x.right[,sel.model],
@@ -96,8 +98,9 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
             ## do the primitive ci interval aggregation
             sel.ci <- do.call(classical.ci,
                               args =  c(list(x = x.right[, sel.model],
-                                y = y.right, level = 1 - (1 - ci.level) / 2),
-                                args.classical.ci))
+                                             y = y.right,
+                                             level = 1 - (1 - ci.level) / 2),
+                                        args.classical.ci))
             lci.v[sel.model] <- sel.ci[, 1] ## new
             uci.v[sel.model] <- sel.ci[, 2] ## new
           }
@@ -124,8 +127,8 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
         warning("Too large model selected in a sample-split")
       }
       if(repeat.count > repeat.max) { ## to prevent never-ending loops
-          stop("More than repeat.max=", repeat.max,
-               " sample splits resulted in too large models...giving up")
+        stop("More than repeat.max=", repeat.max,
+             " sample splits resulted in too large models...giving up")
           ## try.again <- FALSE
       }
     } ## end while(try.again)
@@ -172,12 +175,11 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                dist = as.dist(1 - abs(cor(x))),
                alpha = 0.05,
                method = "average",
-               conservative = TRUE, verbose = TRUE)
-  {
+               conservative = TRUE, verbose = TRUE) {
     ## We use "global" variables
     ## return.selmodels, x, y, gamma, split.out
     if(!return.selmodels)
-      stop("Cluster group testing cannot be done if the original function was not run with return.selmodels=TRUE.")
+      stop("Cluster group testing cannot be done if the original function was not run with return.selmodels = TRUE.")
 
     hh <- if(!missing(hcloutput)) hcloutput else hclust(dist, method = method)
 
@@ -222,8 +224,9 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
 
   ## For loop is not very innovative, but it does it's job...
   pvals.current <- which.gamma <- numeric(p)
+  
   if(!(0.05 %in% gamma)) ## FIXME: depending on  ci.level = 1 - 0.05 = 0.95  ????
-    warning("0.05 is not in the gamma range due to the choice of B, the results might be incorrect. Pick a B such that some integer multiple of 1/B equals 0.05 to avoid this.")
+ ##   warning("0.05 is not in the gamma range due to the choice of B, the results might be incorrect. Pick a B such that some integer multiple of 1/B equals 0.05 to avoid this.")
 
   for(j in 1:p) { ## loop through all predictors
     quant.gamma <- quantile(pvals[,j], gamma) / gamma
@@ -247,7 +250,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
                      ses = split(ses, rep(1:ncol(ses), each = B)),
                      df.res = list(df.res = df.res),
                      gamma.min = min(gamma),
-                     ## multi.corr = TRUE,## temporarily trying multiple testing corrected ci
+                     ## multi.corr = TRUE,## temporarily trying multiple testing corrected ci 
                      multi.corr = FALSE,## single testing confidence intervals
                      verbose = FALSE,
                      s0 = list(s0=s0),
@@ -289,7 +292,7 @@ multi.split <- function(x, y, B = 100, fraction = 0.5,
          method        = "multi.split",
          call          = match.call(),
          clusterGroupTest = clusterGroupTest),
-  class = "hdi")
+    class = "hdi")
 }
 
 ## aggregate the ci over multiple splits for one single beta_j
@@ -311,7 +314,7 @@ aggregate.ci <- function(lci,rci,centers,
   if((no.inf.ci == length(lci)) || (no.inf.ci >= (1-gamma.min)*length(lci))) {
     ## we only have infinite ci or more than 1-gamma.min of the splits have an
     ## inf ci
-    return(c(-Inf,Inf))
+    return(c(-Inf, Inf))
   }
   ## remove the infinite ci from the input
   lci <- lci[!inf.ci]
@@ -321,55 +324,57 @@ aggregate.ci <- function(lci,rci,centers,
   ses <- ses[!inf.ci]
   s0 <- s0[!inf.ci]
 
-  ci.lengths <- rci-lci
-  ci.info <- list(lci=lci,
-                  rci=rci,
-                  centers=centers,
-                  ci.lengths=ci.lengths,
-                  no.inf.ci=no.inf.ci,
-                  ses=ses,
-                  s0=s0,
-                  df.res=df.res,
-                  gamma.min=gamma.min,
-                  multi.corr=multi.corr,
-                  ci.level=ci.level)
-  ## find an inside point: we need to find a point that is definitely in the confidence intervals
-  inner <- find.inside.point.gammamin(low=min(centers),
-                                      high=max(centers),
-                                      ci.info=ci.info,
-                                      verbose=verbose)
+  ci.lengths <- rci - lci
+  ci.info <- list(lci        = lci,
+                  rci        = rci,
+                  centers    = centers,
+                  ci.lengths = ci.lengths,
+                  no.inf.ci  = no.inf.ci,
+                  ses        = ses,
+                  s0         = s0,
+                  df.res     = df.res,
+                  gamma.min  = gamma.min,
+                  multi.corr = multi.corr,
+                  ci.level   = ci.level)
+  
+  ## find an inside point: we need to find a point that is definitely in the
+  ## confidence intervals
+  inner <- find.inside.point.gammamin(low     = min(centers),
+                                      high    = max(centers),
+                                      ci.info = ci.info,
+                                      verbose = verbose)
 
   ## inner <- max(lci)
   outer <- min(lci)
   ## finding good bounds for our bisection method
-  new.bounds <- find.bisection.bounds.gammamin(shouldcover=inner,
-                                               shouldnotcover=outer,
-                                               ci.info=ci.info,
-                                               verbose=verbose)
+  new.bounds <- find.bisection.bounds.gammamin(shouldcover    = inner,
+                                               shouldnotcover = outer,
+                                               ci.info        = ci.info,
+                                               verbose        = verbose)
   inner <- new.bounds$shouldcover
   outer <- new.bounds$shouldnotcover
 
-  l.bound <- bisection.gammamin.coverage(outer=outer,
-                                         inner=inner,
-                                         ci.info=ci.info,
-                                         verbose=verbose)
+  l.bound <- bisection.gammamin.coverage(outer   = outer,
+                                         inner   = inner,
+                                         ci.info = ci.info,
+                                         verbose = verbose)
   if(verbose){
     cat("lower bound ci aggregated is", l.bound, "\n")
   }
 
   ## inner <- min(rci)
   outer <- max(rci)
-  new.bounds <- find.bisection.bounds.gammamin(shouldcover=inner,
-                                               shouldnotcover=outer,
-                                               ci.info=ci.info,
-                                               verbose=verbose)
+  new.bounds <- find.bisection.bounds.gammamin(shouldcover    = inner,
+                                               shouldnotcover = outer,
+                                               ci.info        = ci.info,
+                                               verbose        = verbose)
   inner <- new.bounds$shouldcover
   outer <- new.bounds$shouldnotcover
 
-  u.bound <- bisection.gammamin.coverage(inner=inner,
-                                         outer=outer,
-                                         ci.info=ci.info,
-                                         verbose=verbose)
+  u.bound <- bisection.gammamin.coverage(inner   = inner,
+                                         outer   = outer,
+                                         ci.info = ci.info,
+                                         verbose = verbose)
   if(verbose) {
     cat("upper bound ci aggregated is", u.bound, "\n")
   }
@@ -377,25 +382,22 @@ aggregate.ci <- function(lci,rci,centers,
   return(c(l.bound, u.bound))
 }
 
-find.inside.point.gammamin <- function(low,
-                                       high,
-                                       ci.info,
-                                       verbose) {
+find.inside.point.gammamin <- function(low, high, ci.info, verbose) {
   ## searching over the range low and high for a point that is inside
   ## does it cover gammamin
   ## we increase the granularity up until a certain level and then give up
   range.length <- 10
-  test.range <- seq(low,high,length.out=range.length)
-  cover <- mapply(does.it.cover.gammamin,
-                  beta.j=test.range,
-                  ci.info=list(ci.info=ci.info))
+  test.range   <- seq(low, high, length.out = range.length)
+  cover        <- mapply(does.it.cover.gammamin,
+                         beta.j  = test.range,
+                         ci.info = list(ci.info = ci.info))
   while(!any(cover)) {
-    range.length <- 10*range.length
-    test.range <- seq(low,high,length.out=range.length)
-    cover <- mapply(does.it.cover.gammamin,
-                    beta.j=test.range,
-                    ci.info=list(ci.info=ci.info))
-    if(range.length>10^3) {
+    range.length <- 10 * range.length
+    test.range   <- seq(low, high, length.out = range.length)
+    cover        <- mapply(does.it.cover.gammamin,
+                           beta.j = test.range,
+                           ci.info = list(ci.info=ci.info))
+    if(range.length > 10^3) {
       message("FOUND NO INSIDE POINT")
       message("number of splits")
       message(length(ci.info$centers))
@@ -425,16 +427,16 @@ find.bisection.bounds.gammamin <- function(shouldcover,
                                            verbose)
 {
   reset.shouldnotcover <- FALSE
-  if(does.it.cover.gammamin(beta.j=shouldnotcover,ci.info=ci.info)) {
+  if(does.it.cover.gammamin(beta.j = shouldnotcover, ci.info = ci.info)) {
     reset.shouldnotcover <- TRUE
     if(verbose)
       cat("finding a new shouldnotcover bound\n")
     ## need to find a shouldnotcover further away from this point
     ## the direction we move in is shouldnotcover-shouldcover
-    while(does.it.cover.gammamin(beta.j=shouldnotcover,ci.info=ci.info)) {
-      old <- shouldnotcover
+    while(does.it.cover.gammamin(beta.j = shouldnotcover, ci.info = ci.info)) {
+      old            <- shouldnotcover
       shouldnotcover <- shouldnotcover + (shouldnotcover - shouldcover)
-      shouldcover <- old## update the should cover bound too!
+      shouldcover    <- old ## update the should cover bound too!
     }
     if(verbose){
       cat("new\n")
@@ -443,17 +445,17 @@ find.bisection.bounds.gammamin <- function(shouldcover,
     }
   }
   ## Is it possible that these get triggered consecutively?, no :0
-  if(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info)) {
+  if(!does.it.cover.gammamin(beta.j = shouldcover, ci.info = ci.info)) {
     if(reset.shouldnotcover)
-      stop("Problem: we first reset shouldnotcover and are now resetting shouldcover, this is not supposed to happen")
+      stop("Problem: we first reset shouldnotcover and are now resetting shouldcover, this is not supposed to happen") 
     if(verbose)
       cat("finding a new shouldcover bound\n")
-    while(!does.it.cover.gammamin(beta.j=shouldcover,ci.info=ci.info)){
+    while(!does.it.cover.gammamin(beta.j = shouldcover, ci.info = ci.info)){
       ## Problem, it is possible that there is no coverage!?!?!?
       ## This could be if we jump over the CI!!
       ## TODO: fix this, NEED A SMARTER WAY TO FIND AN INSIDE POINT
-      old <- shouldcover
-      shouldcover <- shouldcover + (shouldcover - shouldnotcover)
+      old            <- shouldcover
+      shouldcover    <- shouldcover + (shouldcover - shouldnotcover)
       shouldnotcover <- old
     }
     if(verbose){
@@ -462,24 +464,24 @@ find.bisection.bounds.gammamin <- function(shouldcover,
       cat("shouldcover", shouldcover, "\n")
     }
   }
-  return(list(shouldcover=shouldcover,
-              shouldnotcover=shouldnotcover))
+  return(list(shouldcover    = shouldcover,
+              shouldnotcover = shouldnotcover))
 }
 
 check.bisection.bounds.gammamin <- function(shouldcover,
                                             shouldnotcover,
                                             ci.info,
                                             verbose) {
-  if(does.it.cover.gammamin(beta.j=shouldnotcover,
-                            ci.info=ci.info)){
+  if(does.it.cover.gammamin(beta.j  = shouldnotcover,
+                            ci.info =ci.info)){
     stop("shouldnotcover bound is covered! we need to decrease it even more! (PLZ implement)")
   } else {
     if(verbose)
       cat("shouldnotcover bound is not covered, this is good")
   }
 
-  if(does.it.cover.gammamin(beta.j=shouldcover,
-                            ci.info=ci.info)){
+  if(does.it.cover.gammamin(beta.j  = shouldcover,
+                            ci.info = ci.info)){
     if(verbose)
       cat("shouldcover is covered!, It is a good covered bound")
   } else {
@@ -492,25 +494,25 @@ bisection.gammamin.coverage <- function(outer,
                                         ci.info,
                                         verbose,
                                         eps.bound=10^(-7)){
-  check.bisection.bounds.gammamin(shouldcover=inner,
-                                  shouldnotcover=outer,
-                                  ci.info=ci.info,
-                                  verbose=verbose)
+  check.bisection.bounds.gammamin(shouldcover    = inner,
+                                  shouldnotcover = outer,
+                                  ci.info        = ci.info,
+                                  verbose        = verbose)
   ## do.bisection
   eps <- 1
 
   while(eps > eps.bound){
     ## calc on the outer + inner /2 and see if the thing covers in this
-    middle <- (outer+inner)/2
-    if(does.it.cover.gammamin(beta.j=middle,
-                              ci.info=ci.info)){
+    middle <- (outer + inner) / 2
+    if(does.it.cover.gammamin(beta.j  = middle,
+                              ci.info = ci.info)){
       inner <- middle
     } else {
       outer <- middle
     }
-    eps <- abs(inner-outer)
+    eps <- abs(inner - outer)
   }
-  solution <- (inner+outer)/2
+  solution <- (inner + outer)/2
   if(verbose){
     cat("finished bisection...eps is", eps, "\n")
   }
@@ -524,31 +526,33 @@ does.it.cover.gammamin <- function(beta.j,
   if(missing(ci.info))
     stop("ci.info is missing to the function does.it.cover.gammamin")
   ## extract ci.info
-  centers <- ci.info$centers
+  centers    <- ci.info$centers
   ci.lengths <- ci.info$ci.lengths
-  no.inf.ci <- ci.info$no.inf.ci
-  ses <- ci.info$ses
-  df.res <- ci.info$df.res
-  gamma.min <- ci.info$gamma.min
+  no.inf.ci  <- ci.info$no.inf.ci
+  ses        <- ci.info$ses
+  df.res     <- ci.info$df.res
+  gamma.min  <- ci.info$gamma.min
   multi.corr <- ci.info$multi.corr
-  s0 <- ci.info$s0
-  alpha <- 1-ci.info$ci.level
+  s0         <- ci.info$s0
+  alpha      <- 1 - ci.info$ci.level
 
   ## Warning!: this is also affected by noncentral vs central t dist
-  pval.rank <- rank(-abs(beta.j-centers)/(ci.lengths/2))## the rank of the pvalue in increasing order, - sign to reverse rank
-  nsplit <- length(pval.rank) + no.inf.ci## the number of ci + the inf ci we left out
+  pval.rank <- rank(-abs(beta.j-centers) / (ci.lengths / 2))
+  ## the rank of the pvalue in increasing order, - sign to reverse rank
+  nsplit <- length(pval.rank) + no.inf.ci
+  ## the number of ci + the inf ci we left out
 
   gamma.b <- pval.rank/nsplit
   if(multi.corr){
     if(any(is.na(s0)))
       stop("need s0 information to be able to create multiple testing corrected pvalues")
-    level <- (1-alpha*gamma.b/(1-log(gamma.min)*s0))
+    level <- (1 - alpha * gamma.b / (1 - log(gamma.min) * s0))
   } else {
-    level <- (1-alpha*gamma.b/(1-log(gamma.min)))
+    level <- (1 - alpha * gamma.b/ (1 - log(gamma.min)))
   }
   ## from the getAnywhere(confint.lm) code
   a <- (1 - level)/2
-  a <- 1-a
+  a <- 1 - a
   
   ## return 'beta.is.in' :
   if(all(gamma.b <= gamma.min)) {

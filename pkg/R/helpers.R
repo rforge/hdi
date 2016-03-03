@@ -236,8 +236,8 @@ calculate.pvalue.for.group <- function(brescaled, group, individual,
 
 calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
                                          clusterextractfunction,
-                                         alpha, verbose = FALSE)
-{## Remark: not the cleanest code yet
+                                         alpha, verbose = FALSE) {
+  ## Remark: not the cleanest code yet
   ## Purpose:
   ## calculation of p-values hierarchically for a cluster as input
   ## Author: Ruben Dezeure 10 April 2014
@@ -346,13 +346,14 @@ calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
 
         ## save the children and result if it was significant or not
         for(i in 1:sum(are.children)){
-          clusters[[iter]] <- current.clusts[[which(are.children)[i]]]
-          leftChild[[iter]] <- -1  ## initialise on a leaf
+          clusters[[iter]]   <- current.clusts[[which(are.children)[i]]]
+          leftChild[[iter]]  <- -1  ## initialise on a leaf
           rightChild[[iter]] <- -1 ## initialise on a leaf
-          pvalue[[iter]] <- pvals[i]
+          pvalue[[iter]]     <- pvals[i]
           iter <- iter + 1
         }
-        ## update the list of clusters that are significant to keep branching out,
+        ## update the list of clusters that are significant to
+        ## keep branching out,
         upper.clust <- upper.clust[!has.children]
         upper.clust.ind <- upper.clust.ind[!has.children]
         tmp.iter <- length(upper.clust)+1
@@ -384,8 +385,8 @@ calculate.pvalue.for.cluster <- function(hh, p, pvalfunction,
     pval       = unlist(pvalue),
     leftChild  = unlist(leftChild),
     rightChild = unlist(rightChild),
-    alpha = alpha,
-    hh = hh)
+    alpha      = alpha,
+    hh         = hh)
 }
 
 get.clusterGroupTest.function <- function(group.testing.function, x)
@@ -404,9 +405,9 @@ get.clusterGroupTest.function <- function(group.testing.function, x)
            conservative = TRUE) {
     ## optional argument: hcloutput = the result from a hclust call
     hh <- if(missing(hcloutput))
-              hclust(dist, method = method)
+            hclust(dist, method = method)
           else
-              hcloutput
+            hcloutput
 
     clusterextractfunction <- function(nclust){
       ## function to extract the correct level of the tree where the number
@@ -420,13 +421,13 @@ get.clusterGroupTest.function <- function(group.testing.function, x)
              conservative = conservative,
              group = split(clusters.to.test, col(clusters.to.test)))
     }
-    structure(calculate.pvalue.for.cluster(hh = hh,
+    structure(c(calculate.pvalue.for.cluster(hh = hh,
                                            p = ncol(x),
                                            pvalfunction = pvalfunction,
                                            alpha = alpha,
                                            clusterextractfunction =
                                              clusterextractfunction),
-              method = "clusterGroupTest",
+                method = "clusterGroupTest"),
               class = c("clusterGroupTest", "hdi"))
   }
 }

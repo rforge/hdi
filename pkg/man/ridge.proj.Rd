@@ -42,7 +42,7 @@ ridge.proj(x, y, family = "gaussian", standardize = TRUE,
   \code{\link{clusterGroupBound}}. P-values are adjusted for multiple testing.}
   %\item{betahat}{initial estimate by the scaled lasso of \eqn{\beta^0}}
   %\item{bhat}{de-sparsified \eqn{\beta^0} estimate used for p-value calculation}
-  \item{sigmahat}{\eqn{\widehat{\sigma}}{sigma^} coming from the scaled lasso.}
+  \item{sigmahat}{\eqn{\widehat{\sigma}}{sigma} coming from the scaled lasso.}
 }
 
 \references{
@@ -59,7 +59,7 @@ y <- x[,1] + x[,2] + rnorm(100)
 fit.ridge <- ridge.proj(x, y)
 which(fit.ridge$pval.corr < 0.05)
 
-## Use the scaeld lasso for the initial estimate
+## Use the scaled lasso for the initial estimate
 fit.ridge.scaled  <- ridge.proj(x, y, betainit = "scaled lasso")
 which(fit.ridge.scaled$pval.corr < 0.05)
 
