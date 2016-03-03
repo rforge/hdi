@@ -4,6 +4,7 @@ ridge.proj <- function(x, y,
                        lambda = 1,
                        betainit = "cv lasso",
                        sigma = NULL,
+                       suppress.grouptesting = FALSE,
                        multiplecorr.method = "holm", N = 10000)
 {
   ## Purpose:
@@ -168,22 +169,26 @@ ridge.proj <- function(x, y,
   ##############################################
   ## Function to calculate p-value for groups ##
   ##############################################
-  
-  pre <- preprocess.group.testing(N = N, cov = cov2, conservative = FALSE)
-  
-  group.testing.function <- function(group, conservative = FALSE){
-    calculate.pvalue.for.group(brescaled    = hat.betast,
-                               group        = group,
-                               individual   = res.pval,
-                               Delta        = Delta,
-                               ##correct    = TRUE,
-                               conservative = conservative,
-                               zz2          = pre)
+  if(suppress.grouptesting){
+    group.testing.function <- NULL
+    cluster.group.testing.function <- NULL
+  }else{
+    pre <- preprocess.group.testing(N = N, cov = cov2, conservative = FALSE)
+    
+    group.testing.function <- function(group, conservative = FALSE){
+      calculate.pvalue.for.group(brescaled    = hat.betast,
+                                 group        = group,
+                                 individual   = res.pval,
+                                 Delta        = Delta,
+                                 ##correct    = TRUE,
+                                 conservative = conservative,
+                                 zz2          = pre)
+    }
+    
+    cluster.group.testing.function <-
+      get.clusterGroupTest.function(group.testing.function=group.testing.function,
+                                    x = x)
   }
-  
-  cluster.group.testing.function <-
-    get.clusterGroupTest.function(group.testing.function=group.testing.function,
-                                  x = x)
   
   out <- list(pval          = res.pval,
               pval.corr     = pcorr,

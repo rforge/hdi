@@ -8,6 +8,7 @@ lasso.proj <- function(x, y, family = "gaussian",
                        Z = NULL,     ## Z or Thetahat provided by the user
                        verbose = FALSE,
                        return.Z = FALSE,
+                       suppress.grouptesting = FALSE,
                        robust = FALSE)
 {
   ## Purpose:
@@ -147,22 +148,26 @@ lasso.proj <- function(x, y, family = "gaussian",
   ##############################################
   ## Function to calculate p-value for groups ##
   ##############################################
-
-  pre <- preprocess.group.testing(N = N, cov = cov2, conservative = FALSE)
-
-  group.testing.function <- function(group, conservative = TRUE){
-    calculate.pvalue.for.group(brescaled    = bprojrescaled,
-                               group        = group,
-                               individual   = pval,
-                               ##correct    = TRUE,
-                               conservative = conservative,
-                               zz2          = pre)
+  if(suppress.grouptesting){
+    group.testing.function <- NULL
+    cluster.group.testing.function <- NULL
+  }else{
+    pre <- preprocess.group.testing(N = N, cov = cov2, conservative = FALSE)
+    
+    group.testing.function <- function(group, conservative = TRUE){
+      calculate.pvalue.for.group(brescaled    = bprojrescaled,
+                                 group        = group,
+                                 individual   = pval,
+                                 ##correct    = TRUE,
+                                 conservative = conservative,
+                                 zz2          = pre)
+    }
+    
+    cluster.group.testing.function <-
+      get.clusterGroupTest.function(group.testing.function =
+                                      group.testing.function, x = x)
   }
-
-  cluster.group.testing.function <-
-    get.clusterGroupTest.function(group.testing.function =
-                                  group.testing.function, x = x)
-
+  
   ############################
   ## Return all information ##
   ############################

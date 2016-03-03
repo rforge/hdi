@@ -2,7 +2,8 @@
 \title{P-values based on lasso projection method}
 \alias{lasso.proj}
 \description{
-  Compute p-values based on the lasso projection method.
+  Compute p-values based on the lasso projection method, also known as
+  the de-sparsified Lasso.
   %% write more
 }
 \usage{
@@ -11,6 +12,7 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
            parallel = FALSE, ncores = getOption("mc.cores", 2L),
            betainit = "cv lasso",
            sigma = NULL, Z = NULL, verbose = FALSE, return.Z = FALSE,
+           suppress.grouptesting = FALSE,
            robust = FALSE)
 }
 \arguments{
@@ -39,6 +41,9 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     depends on the design matrix x. This intermediate results
     can be used when calling the function again and the design matrix
     is the same as before.}
+  \item{suppress.grouptesting}{A boolean to optionally suppress the
+    preparations made for testing groups. This will avoid quite a bit of
+    computation and memory usage. The output will also be smaller.}
   \item{robust}{Uses a robust variance estimation procedure to be able
     to deal with model misspecification.}
 }
@@ -96,6 +101,11 @@ fit.lasso$groupTest(1:2)
 ## correlation matrix
 out.clust <- fit.lasso$clusterGroupTest()
 plot(out.clust)
+
+## Fit the lasso projection method without doing the preparations
+## for group testing
+## (saves time and memory)
+fit.lasso.faster <- lasso.proj(x, y, suppress.grouptesting = TRUE)
 }
 \keyword{models}
 \keyword{regression}

@@ -7,6 +7,7 @@
 \usage{
 ridge.proj(x, y, family = "gaussian", standardize = TRUE,
            lambda = 1, betainit = "cv lasso", sigma = NULL,
+           suppress.grouptesting = FALSE,
            multiplecorr.method = "holm", N = 10000)
 }
 \arguments{
@@ -21,7 +22,11 @@ ridge.proj(x, y, family = "gaussian", standardize = TRUE,
     initial estimation, "scaled lasso" or "cv lasso".}
   \item{sigma}{Estimate of the standard deviation of the error term. This
     estimate needs to be compatible with the initial
-    estimate (see betainit) provided or calculated. Otherwise, results won't be correct.}
+    estimate (see betainit) provided or calculated. Otherwise, results
+    won't be correct.}
+  \item{suppress.grouptesting}{A boolean to optionally suppress the
+    preparations made for testing groups. This will avoid quite a bit of
+    computation and memory usage. The output will also be smaller.}  
   \item{multiplecorr.method}{Either "WY" or any of
     \code{\link{p.adjust.methods}}.}
   \item{N}{number of empirical samples (only used if
@@ -71,6 +76,11 @@ fit.ridge$groupTest(1:2)
 ## correlation matrix
 out.clust <- fit.ridge$clusterGroupTest()
 plot(out.clust)
+
+## Fit the method without doing the preparations
+## for group testing
+## (saves time and memory)
+fit.ridge.faster <- ridge.proj(x, y, suppress.grouptesting = TRUE)
 }
 \keyword{models}
 \keyword{regression}
