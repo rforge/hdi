@@ -12,7 +12,7 @@ y <- x[,1] + x[,2] + rnorm(100)
 set.seed(3) ; fit.mult <- multi.split(x, y)
 set.seed(3) ; fit.tmp <- multi.split(x, y, verbose = TRUE)
 
-##dput(fit.mult$pval.corr)
+## dput(fit.mult$pval.corr)
 stopifnot(all.equal(fit.mult$pval.corr,c(2.19211217621905e-10, 2.63511914584751e-08, 1, 1, 1, 1, 1, 
 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
