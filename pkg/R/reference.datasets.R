@@ -14,7 +14,8 @@ rXb <-
   ## ----------------------------------------------------------------------
   ## Arguments:
   ## ----------------------------------------------------------------------
-  ## Author: Ruben Dezeure, Date: 6 Oct 2015; 'do2S', 'x.par' and tweaks: Martin Maechler
+  ## Author: Ruben Dezeure, Date: 6 Oct 2015; 'do2S', 'x.par'
+  ## and tweaks: Martin Maechler
 
   ## Checking arguments
   xtype <- match.arg(xtype)
