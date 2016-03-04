@@ -79,17 +79,21 @@ multi.split(x, y, B = 100, fraction = 0.5, ci = TRUE, ci.level = 0.95,
     hierarchical clustering.  You can either provide a distance matrix
     and clustering method or the output of hierarchical clustering from
     the function \code{\link{hclust}} as for
-    \code{\link{clusterGroupBound}}.  P-values are adjusted for multiple
+    \code{\link{clusterGroupBound}}. P-values are adjusted for multiple
     testing.} %% FIXME: Need  Example / Demo / Vignette
 }
 \references{
-  Meinshausen, N., Meier, L. and \enc{Bühlmann}{Buhlmann}, P. (2009).
+  Meinshausen, N., Meier, L. and \enc{Bühlmann}{Buhlmann}, P. (2009)
   P-values for high-dimensional regression.
-  \emph{Journal of the American Statistical Association} \bold{104}, 1671--1681.
+  \emph{Journal of the American Statistical Association} \bold{104},
+  1671--1681.
 
-  %%TODO Jacopo erwaehnen
+  Mandozzi, J. and \enc{Bühlmann}{Buhlmann}, P. (2015)
+  A sequential rejection testing method for high-dimensional regression
+  with correlated variables. To appear in the International Journal of
+  Biostatistics. Preprint arXiv:1502.03300
 }
-\author{Lukas Meier}% with contributions by Jacopo (?)
+\author{Lukas Meier, Ruben Dezeure, Jacopo Mandozzi}
 
 \seealso{
   \code{\link{lasso.cv}}, \code{\link{lasso.firstq}};

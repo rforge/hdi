@@ -17,9 +17,10 @@
 \details{Data kindly provided by DSM (Switzerland).}
 
 \references{
-  \enc{Bühlmann}{Buhlmann}, P., Kalisch, M. and Meier, L. (2013)
-  High-dimensional statistics with a view towards applications in biology.
-  To appear in \emph{Annual Review of Statistics and its Applications}% FIXME
+  \enc{Bühlmann}{Buhlmann}, P., Kalisch, M. and Meier,
+  L. (2014) \emph{High-dimensional statistics with a view towards
+  applications in biology}. Annual Review of Statistics and
+  its Applications \bold{1}, 255--278
 }
 
 \examples{data(riboflavin)}

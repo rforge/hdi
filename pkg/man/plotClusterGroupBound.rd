@@ -31,12 +31,7 @@
 }
 %\details{}
 \value{Nothing is returned}
-\references{
- Nicolai Meinshausen (2013)
- Assumption-free confidence intervals for groups of variables in sparse
- high-dimensional regression.
- \url{http://arxiv.org/abs/1309.3489}
-}
+%\references{}
 \author{Nicolai Meinshausen \email{meinshausen@stat.math.ethz.ch}}
 %\note{}
 

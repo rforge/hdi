@@ -92,13 +92,15 @@ rX(n, p, xtype, permuted, do2S = TRUE,
   }
 }
 \references{
-  \dQuote{The} hdi paper:\cr
-
-}
+  Dezeure, R., \enc{Bühlmann}{Buhlmann}, P., Meier, L. and
+  Meinshausen, N. (2015) 
+  High-dimensional inference: confidence intervals, p-values and
+  R-software hdi.
+  \emph{Statistical Science} \bold{30}, 533--558.}
 \author{Ruben Dezeure \email{dezeure@stat.math.ethz.ch}}
 \examples{
-## Generate the first realization of the linear model with design matrix type Toeplitz and
-## coefficients type uniform between -2 and 2
+## Generate the first realization of the linear model with design matrix
+## type Toeplitz and coefficients type uniform between -2 and 2
 
 dset <- rXb(n = 80, p = 20, s0 = 3,
             xtype = "toeplitz", btype = "U[-2,2]")

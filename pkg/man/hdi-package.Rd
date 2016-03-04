@@ -34,7 +34,7 @@ The DESCRIPTION file:
   Meinshausen, N. (2015)
   Group-bound: confidence intervals for groups of variables in sparse
   high-dimensional regression without assumptions on the design.
-  \emph{Journal of the Royal Statistical Society, Series B},
+  \emph{Journal of the Royal Statistical Society: Series B},
   \bold{77}(5), 923--945. 
 
   Meinshausen, N. and \enc{Bühlmann}{Buhlmann}, P. (2010)

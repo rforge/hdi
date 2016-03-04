@@ -66,13 +66,14 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     the design matrix x. These are the residuals of the nodewise regressions.}
 }
 \references{
-  van de Geer, S., \enc{Bühlmann}{Buhlmann}, P., Ritov, Y. and Dezeure, R. (2013)
-  On asymptotically optimal confidence regions and tests for  high-dimensional models.
-  Preprint. %% ArXiv, URL? _FIXME_
+  van de Geer, S., \enc{Bühlmann}{Buhlmann}, P., Ritov, Y. and Dezeure, R. (2014)
+  On asymptotically optimal confidence regions and tests for
+  high-dimensional models. \emph{Annals of Statistics} \bold{42}, 1166--1202._
 
-  Zhang, C.,  Zhang, S. (2014)
-  Confidence intervals for low dimensional parameters in high dimensional linear models.
-  \emph{Journal of the Royal Statistical Society: Series B}, \bold{??}, .--.%% FIXME
+  Zhang, C., Zhang, S. (2014)
+  Confidence intervals for low dimensional parameters in high
+  dimensional linear models. \emph{Journal of the Royal Statistical
+  Society: Series B} \bold{76}, 217--242.
 
   \enc{Bühlmann}{Buhlmann}, P. and van de Geer, S. (2015)
   High-dimensional inference in misspecified linear models.
@@ -103,8 +104,7 @@ out.clust <- fit.lasso$clusterGroupTest()
 plot(out.clust)
 
 ## Fit the lasso projection method without doing the preparations
-## for group testing
-## (saves time and memory)
+## for group testing (saves time and memory)
 fit.lasso.faster <- lasso.proj(x, y, suppress.grouptesting = TRUE)
 }
 \keyword{models}

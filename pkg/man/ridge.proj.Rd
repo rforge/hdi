@@ -68,7 +68,6 @@ which(fit.ridge$pval.corr < 0.05)
 fit.ridge.scaled  <- ridge.proj(x, y, betainit = "scaled lasso")
 which(fit.ridge.scaled$pval.corr < 0.05)
 
-
 ## Group-wise testing of the first two coefficients
 fit.ridge$groupTest(1:2)
 
@@ -78,8 +77,7 @@ out.clust <- fit.ridge$clusterGroupTest()
 plot(out.clust)
 
 ## Fit the method without doing the preparations
-## for group testing
-## (saves time and memory)
+## for group testing (saves time and memory)
 fit.ridge.faster <- ridge.proj(x, y, suppress.grouptesting = TRUE)
 }
 \keyword{models}
