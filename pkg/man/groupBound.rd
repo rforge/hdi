@@ -102,13 +102,12 @@ y  <- as.numeric(x \%*\% beta + rnorm(n))
 
 ## Compute lower bounds:
 
-## Lower bound for the L1-norm of all variables 1-10 of the sparsest
+## Lower bound for the L1-norm of *all* variables 1-10 of the sparsest
 ## optimal vector
 lowerBoundAll <- groupBound(x, y, 1:p)
-print(lowerBoundAll)
 cat("\nlower bound for all variables 1-10: ", lowerBoundAll, "\n")
 
-## Compute lower bounds:
+## Compute additional lower bounds:
 ## Lower bounds for variable 1 itself, then group {1,3}, 1-3, 1-4, 1-5, 2-5, 2-10
 lowerBound <- groupBound(x, y, list(1, c(1,3), 1:3, 1:4, 1:5, 2:5, 2:10))
 cat("lower bound for the groups\n\t {1}, {1,3}, {1,2,3}, {1..4}, {1..5}, {2..5}, {2..10}:\n\t  ",

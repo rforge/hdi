@@ -10,10 +10,8 @@
 lasso.proj(x, y, family = "gaussian", standardize = TRUE,
            multiplecorr.method = "holm", N = 10000,
            parallel = FALSE, ncores = getOption("mc.cores", 2L),
-           betainit = "cv lasso",
-           sigma = NULL, Z = NULL, verbose = FALSE, return.Z = FALSE,
-           suppress.grouptesting = FALSE,
-           robust = FALSE)
+           betainit = "cv lasso", sigma = NULL, Z = NULL, verbose = FALSE,
+           return.Z = FALSE, suppress.grouptesting = FALSE, robust = FALSE)
 }
 \arguments{
   \item{x}{Design matrix (without intercept).}
@@ -32,8 +30,9 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     initial estimation, "scaled lasso" or "cv lasso".}
   \item{sigma}{Estimate of the standard deviation of the error term. This
     estimate needs to be compatible with the initial
-    estimate (see betainit) provided or calculated. Otherwise, results won't be correct.}
-  \item{Z}{user input}
+    estimate (see betainit) provided or calculated. Otherwise, results
+    will not be correct.}
+  \item{Z}{user input, also see \code{return.Z} below}
   \item{verbose}{A boolean to enable reporting on the progress of the
     computations. (Only prints out information when Z is not provided by
     the user)}
