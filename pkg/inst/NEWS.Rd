@@ -4,7 +4,7 @@
 \title{hdi News}
 \encoding{UTF-8}
 
-\section{CHANGES IN VERSION 0.1-5)}{
+\section{CHANGES IN VERSION 0.1-5) (2016-03-11, svn r144)}{
   \itemize{
     \item new argument \code{suppress.grouptesting} in \code{ridge.proj}
   and \code{lasso.proj} to speed up computation.
