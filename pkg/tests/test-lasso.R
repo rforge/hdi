@@ -2,23 +2,6 @@
 ## Load stuff for testing purposes ##
 #####################################
 
-##- library(glmnet)
-##- library(scalreg)
-##-
-##- setwd("/u/meierluk/R/Pkgs/hdi/pkg/R")
-##-
-##- source("hdi.R")
-##- source("methods.R")
-##- source("lasso-proj.R")
-##- source("helpers.R")
-##- source("helpers.nodewise.R")
-##-
-##- ##########################
-##- ## Load riboflavin data ##
-##- ##########################
-##-
-##- load("/u/meierluk/research/annualReview/Rcode/dsmN71.rda")
-
 library(hdi)
 
 data(riboflavin)
@@ -48,9 +31,12 @@ set.seed(3) ; fit.lasso  <- lasso.proj(x = x.use, y = y)
 set.seed(3) ; fit.lasso2 <- lasso.proj(x = 2 + 4 * x.use, y = y)
 
 ## verbose
+ncores <- if(.Platform$OS.type == "windows") 1 else getOption("mc.cores", 2L)
+  
 set.seed(3) ; fit.tmp  <- lasso.proj(x = x.use, y = y, verbose = TRUE)
 set.seed(3) ; fit.tmp2 <- lasso.proj(x = x.use, y = y,
-                                     parallel = TRUE, verbose = TRUE)
+                                     parallel = TRUE, ncores = ncores,
+                                     verbose = TRUE)
 
 ## confidence intervals
 ci.lasso  <- confint(fit.lasso,  level = 0.95)
@@ -84,8 +70,4 @@ if(!doExtras) {
     )
 }
 
-
-#########
-## GLM ##
-#########
 

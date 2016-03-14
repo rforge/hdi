@@ -42,11 +42,11 @@
   groups of variables.
 }
 \examples{
-## Create a regression problem with block-design: p = 10, n = 30,
-## block size B = 5 and within-block correlation of rho = 0.99
-p   <- 10
-n   <- 100
-B   <- 5
+## Create a regression problem with block-design: p = 6, n = 30,
+## block size B = 3 and within-block correlation of rho = 0.99
+p   <- 6
+n   <- 30
+B   <- 3
 rho <- 0.99
 
 ind <- rep(1:ceiling(p / B), each = B)[1:p]
@@ -57,11 +57,11 @@ for (ii in unique(ind)) {
   Sigma[id, id] <- rho
 }
 diag(Sigma) <- 1
-print.table(Sigma, zero.print=".") ## depicting the 2 blocks
+print.table(Sigma, zero.print = ".") ## depicting the 2 blocks
 
 x <- matrix(rnorm(n * p), nrow = n) \%*\% chol(Sigma)
 
-## Create response with active variables 1 and 21
+## Create response with active variable 1
 beta    <- rep(0, p)
 beta[1] <- 5
 

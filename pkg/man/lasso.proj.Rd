@@ -81,7 +81,7 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
 \author{Ruben Dezeure}
 
 \examples{
-x <- matrix(rnorm(100*20), nrow = 100, ncol = 20)
+x <- matrix(rnorm(100*20), nrow = 100, ncol = 10)
 y <- x[,1] + x[,2] + rnorm(100)
 fit.lasso <- lasso.proj(x, y)
 which(fit.lasso$pval.corr < 0.05) # typically: '1' and '2' and no other

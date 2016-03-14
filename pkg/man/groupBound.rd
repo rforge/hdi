@@ -76,10 +76,10 @@ groupBound(x, y, group, alpha = 0.05, eps = 0.1, nsplit = 11,
 }
 
 \examples{
-## Create a regression problem with block-design: p = 10, n = 300,
+## Create a regression problem with block-design: p = 10, n = 30,
 ## block size B = 5 and within-block correlation of rho = 0.99
 p   <- 10
-n   <- 300
+n   <- 30
 B   <- 5
 rho <- 0.99
 

@@ -4,14 +4,28 @@
 \title{hdi News}
 \encoding{UTF-8}
 
-\section{CHANGES IN VERSION 0.1-5) (2016-03-11, svn r144)}{
+\section{CHANGES IN VERSION 0.1-6 (2016-03-14, svn r145)}{
+  \itemize{
+    \item changed condition for warning message for confidence intervals
+    with \code{multi.split}.
+    \item reduced computing time for examples in \code{lasso.proj},
+    \code{clusterGroupBound} and \code{plot.clusterGroupBound}.
+    \item fixed tests using parallel option on Windows.
+    \item temporary removed tests for \code{groupBound}.
+  }
+}
+  
+\section{CHANGES IN VERSION 0.1-5 (2016-03-11, svn r144)}{
   \itemize{
     \item new argument \code{suppress.grouptesting} in \code{ridge.proj}
-  and \code{lasso.proj} to speed up computation.
+    and \code{lasso.proj} to speed up computation.
     \item argument \code{verbose} instead of \code{trace} in
     \code{multi.split} and \code{stability}.
     \item new functions to generate reference data sets, see
     \code{rXb}, \code{rX} and \code{rb}.
+    \item replaced print and cat statement with message statements that
+    can be suppressed.
+    \item fixed a bug of some estimators (e.g. lasso.proj) setting seeds
     \item added NEWS and CITATION file.
   }
 }

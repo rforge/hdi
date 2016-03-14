@@ -36,7 +36,7 @@ clusterGroupBound(x, y, method = "average",
     splits are aggregated using the (1-eps) quantile. See reference
     below for more details.}
   \item{hcloutput}{optionally, the value of a \code{\link{hclust}()}
-    call.  If it is provided, the arguments \code{dist} and \code{method}
+    call. If it is provided, the arguments \code{dist} and \code{method}
     are ignored.}
   \item{nsplit}{the number of data splits used.}
   \item{s}{the dimensionality of the projection that is used.  Lower
@@ -81,11 +81,11 @@ clusterGroupBound(x, y, method = "average",
   test all groups in a hierarchical clustering tree.
 }
 \examples{
-## Create a regression problem with block-design: p = 10, n = 30,
-## block size B = 5 and within-block correlation of rho = 0.99
-p   <- 10
-n   <- 100
-B   <- 5
+## Create a regression problem with block-design: p = 6, n = 30,
+## block size B = 3 and within-block correlation of rho = 0.99
+p   <- 6
+n   <- 30
+B   <- 3
 rho <- 0.99
 
 ind <- rep(1:ceiling(p / B), each = B)[1:p]
@@ -99,7 +99,7 @@ diag(Sigma) <- 1
 
 x <- matrix(rnorm(n * p), nrow = n) \%*\% chol(Sigma)
 
-## Create response with active variables 1 and 21
+## Create response with active variable 1
 beta    <- rep(0, p)
 beta[1] <- 5
 
@@ -110,6 +110,8 @@ out <- clusterGroupBound(x, y, nsplit = 5)
 ## Plot and print the hierarchical group-test
 plot(out)
 print(out)
+out$members
+out$lowerBound
 }
 \keyword{confidence intervals}
 \keyword{regression}
