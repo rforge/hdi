@@ -4,14 +4,15 @@
 \title{hdi News}
 \encoding{UTF-8}
 
-\section{CHANGES IN VERSION 0.1-6 (2016-03-14, svn r145)}{
+\section{CHANGES IN VERSION 0.1-6 (2016-03-18, svn r146)}{
   \itemize{
     \item changed condition for warning message for confidence intervals
     with \code{multi.split}.
     \item reduced computing time for examples in \code{lasso.proj},
     \code{clusterGroupBound} and \code{plot.clusterGroupBound}.
     \item fixed tests using parallel option on Windows.
-    \item temporary removed tests for \code{groupBound}.
+    \item temporary removed tests for \code{groupBound} due to problem
+    with \code{mvrnorm} (reproducability on different platforms).
   }
 }
   
