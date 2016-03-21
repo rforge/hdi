@@ -84,7 +84,6 @@ clusterGroupBound(x, y, method = "average",
 %% speed-up computing
 %% >>> copy any changes to "../tests/ex-clusterGroupBound.R" <<< to ensure
 %% code is running
-\donttest{
 ## Create a regression problem with correlated design (n = 10, p = 3):
 ## a block of size 2 and a block of size 1, within-block correlation is 0.99
 
@@ -102,7 +101,7 @@ beta    <- rep(0, p)
 beta[1] <- 5
 
 y  <- as.numeric(x \%*\% beta + rnorm(n))
-
+\donttest{
 out <- clusterGroupBound(x, y, nsplit = 4) ## use larger value for nsplit!
 
 ## Plot and print the hierarchical group-test
