@@ -683,8 +683,10 @@ despars.lasso.est <- function(x, y, Z,
   ## ----------------------------------------------------------------------
   ## Author: Ruben Dezeure, Date: 15 June 2016 (initial version)
   ## Based on older private code
-
+  
   b <- crossprod(Z,y-x%*%betalasso)/nrow(x) + betalasso
+  if(ncol(b) == 1)
+    b <- as.vector(b)
 }
 
 est.stderr.despars.lasso <- function(x, y, Z,

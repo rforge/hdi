@@ -1,17 +1,18 @@
-\name{lasso.proj}
-\title{P-values based on lasso projection method}
-\alias{lasso.proj}
+\name{boot.lasso.proj}
+\title{P-values based on the bootstrapped lasso projection method}
+\alias{boot.lasso.proj}
 \description{
   Compute p-values based on the lasso projection method, also known as
-  the de-sparsified Lasso, using an asymptotic gaussian approximation
-  to the distribution of the estimator.
+  the de-sparsified Lasso, using the bootstrap to approximate the
+  distribution of the estimator.
 }
 \usage{
-lasso.proj(x, y, family = "gaussian", standardize = TRUE,
-           multiplecorr.method = "holm", N = 10000,
-           parallel = FALSE, ncores = getOption("mc.cores", 2L),
-           betainit = "cv lasso", sigma = NULL, Z = NULL, verbose = FALSE,
-           return.Z = FALSE, suppress.grouptesting = FALSE, robust = FALSE)
+boot.lasso.proj(x, y, family = "gaussian", standardize = TRUE,
+                multiplecorr.method = "WY",
+                parallel = FALSE, ncores = getOption("mc.cores", 2L),
+                betainit = "cv lasso", sigma = NULL, Z = NULL, verbose = FALSE,
+                return.Z = FALSE, suppress.grouptesting = FALSE, robust= FALSE,
+                B = 1000, boot.shortcut = FALSE, return.bootdist = FALSE)
 }
 \arguments{
   \item{x}{Design matrix (without intercept).}
@@ -21,8 +22,6 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     standard deviation.}
   \item{multiplecorr.method}{Either "WY" or any of
     \code{\link{p.adjust.methods}}.}
-  \item{N}{Number of empirical samples (only used if multiplecorr.method
-    == "WY")}
   \item{parallel}{Should parallelization be used? (logical)}
   \item{ncores}{Number of cores used for parallelization.}
   \item{betainit}{Either a numeric vector, corresponding to a sparse
@@ -45,6 +44,17 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     computation and memory usage. The output will also be smaller.}
   \item{robust}{Uses a robust variance estimation procedure to be able
     to deal with model misspecification.}
+  \item{B}{The number of bootstrap samples to be used.}
+  \item{boot.shortcut}{A boolean to enable the computational shortcut
+    for the bootstrap. If set to true, the lasso is not re-tuned for
+    each bootstrap iteration, but it uses the tuning parameter computed
+    on the original data instead.}
+  \item{return.bootdist}{A boolean specifying if one is to return the
+    computed bootstrap distributions to the estimator. (Matrix size:
+    ncol(x)*B) If the multiple testing method was chosen to be WY, the
+    bootstrap distribution computer under the complete null hypothesis
+    is returned as well. This option is required if one wants to compute
+    confidence intervals afterwards.}
 }
 \value{
   \item{pval}{Individual p-values for each parameter.}
@@ -62,7 +72,19 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
   \item{sigmahat}{\eqn{\widehat{\sigma}} coming from the scaled lasso.}
   \item{Z}{Only different from NULL if the option return.Z is on. This
     is an intermediate result from the computation which only depends on
-    the design matrix x. These are the residuals of the nodewise regressions.}
+    the design matrix x. These are the residuals of the nodewise
+    regressions.}
+  \item{B}{The number of bootstrap samples used.}
+  \item{cboot.dist}{Only different from NULL if the option
+    return.bootdist is on. This is a ncol(x)*B matrix where each row
+    contains the computed centered bootstrap distribution for that
+    estimate.}
+  \item{cboot.dist.underH0}{Only different from NULL if the option
+    return.bootdist is on and if the multiple testing method is WY. This
+    is a ncol(x)*B matrix where each row 
+    contains the computed centered bootstrap distribution for that
+    estimate. These bootstrap distributions were computed under the
+    complete null hypothesis (b_1 = ... = b_p = 0).}
 }
 \references{
   van de Geer, S., \enc{Bühlmann}{Buhlmann}, P., Ritov, Y. and Dezeure, R. (2014)
@@ -77,6 +99,10 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
   \enc{Bühlmann}{Buhlmann}, P. and van de Geer, S. (2015)
   High-dimensional inference in misspecified linear models.
   \emph{Electronic Journal of Statistics} \bold{9}, 1449--1473.
+
+  Dezeure, R., \enc{Bühlmann}{Buhlmann}, P. and Zhang, C. (2016)
+  High-dimensional simultaneous inference with the bootstrap
+  \emph{http://arxiv.org/abs/1606.03940}
 }
 \author{Ruben Dezeure}
 
@@ -87,16 +113,19 @@ lasso.proj(x, y, family = "gaussian", standardize = TRUE,
 %% code is running
 x <- matrix(rnorm(100*20), nrow = 100, ncol = 10)
 y <- x[,1] + x[,2] + rnorm(100)
-fit.lasso <- lasso.proj(x, y)
+fit.lasso <- boot.lasso.proj(x, y)
 which(fit.lasso$pval.corr < 0.05) # typically: '1' and '2' and no other
 
+## Return the bootstrap distribution as well and compute confidence intervals based on it
+fit.lasso.allinfo <- boot.lasso.proj(x, y, return.bootdist = TRUE)
+confint(fit.lasso.allinfo, level = 0.95)
+confint(fit.lasso.allinfo, parm = 1:3)
+
+
+\donttest{
 ## Group-wise testing of the first two coefficients
 fit.lasso$groupTest(1:2)
 
-##Compute confidence intervals
-confint(fit.lasso, level = 0.95)
-
-\donttest{
 ## Hierarchical testing using distance matrix based on
 ## correlation matrix
 out.clust <- fit.lasso$clusterGroupTest()
@@ -104,14 +133,14 @@ plot(out.clust)
 
 ## Fit the lasso projection method without doing the preparations
 ## for group testing (saves time and memory)
-fit.lasso.faster <- lasso.proj(x, y, suppress.grouptesting = TRUE)
+fit.lasso.faster <- boot.lasso.proj(x, y, suppress.grouptesting = TRUE)
 
 ## Use the scaled lasso for the initial estimate
-fit.lasso.scaled <- lasso.proj(x, y, betainit = "scaled lasso")
+fit.lasso.scaled <- boot.lasso.proj(x, y, betainit = "scaled lasso")
 which(fit.lasso.scaled$pval.corr < 0.05)
 
 ## Use a robust estimate for the standard error
-fit.lasso.robust <- lasso.proj(x, y, robust = TRUE)
+fit.lasso.robust <- boot.lasso.proj(x, y, robust = TRUE)
 which(fit.lasso.robust$pval.corr < 0.05)
 }
 }
