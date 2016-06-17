@@ -11,7 +11,8 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
                             robust = FALSE,
                             B = 1000,
                             boot.shortcut = FALSE,
-                            return.bootdist = FALSE)
+                            return.bootdist = FALSE,
+                            gaussian.stub = TRUE)
 {
   ## Purpose:
   ## An implementation of the LDPE method http://arxiv.org/abs/1110.2563
@@ -105,12 +106,22 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
   lambda <- NULL
   if(boot.shortcut)
   {
-    stop("TODO implement the bootstrap shortcut technique!")
+    lambda <- initial.estimate$lambda
+    if(is.null(lambda))
+    {
+      ## The user provided his own betainit and such, we have no lambda value
+      ## to use for the bootstrap shortcut, what do we do here?
+      ## Let the user provide a lambda as option in addition to the betainit?
+      ## We only allow for lasso for bootstrapping no? so it has to be lambda for lasso
+    }
   }
 
-  ##stop("TODO implement bootstrap")
-  cboot.dist <- replicate(B,rnorm(ncol(x),sd=se))## Centered bootstrap distribution
-
+  if(gaussian.stub)
+  {
+    cboot.dist <- replicate(B,rnorm(ncol(x),sd=se))## Centered bootstrap distribution
+  }else{
+    stop("TODO implement bootstrap")
+  }
   
   ## Compute p-values based on that distribution
   dist <- bproj-cboot.dist
@@ -134,11 +145,16 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
              ## Bootstrap under H0 complete another B bootstrap samples to perform WY ##
              ###########################################################################
              
-             ##stop("TODO implement bootstrap under H0 complete")
-             ##Compute the maxT distribution under H0c
-             cboot.dist.underH0c <- replicate(B,rnorm(ncol(x),sd=se))
+             ## Compute the maxT distribution under H0c
+             if(gaussian.stub)
+             {
+               cboot.dist.underH0c <- replicate(B,rnorm(ncol(x),sd=se))
+             }else{
+               stop("TODO implement bootstrap under H0 complete")               
+             }
+             
              max.t.dist <- apply(abs(cboot.dist.underH0c),2,max)
-
+             
              counts.matrix <- sapply(max.t.dist,FUN=">=",abs(bproj))
              counts <- apply(counts.matrix,1,sum)
              

@@ -12,7 +12,8 @@ boot.lasso.proj(x, y, family = "gaussian", standardize = TRUE,
                 parallel = FALSE, ncores = getOption("mc.cores", 2L),
                 betainit = "cv lasso", sigma = NULL, Z = NULL, verbose = FALSE,
                 return.Z = FALSE, suppress.grouptesting = FALSE, robust= FALSE,
-                B = 1000, boot.shortcut = FALSE, return.bootdist = FALSE)
+                B = 1000, boot.shortcut = FALSE,
+                return.bootdist = FALSE, gaussian.stub = TRUE)
 }
 \arguments{
   \item{x}{Design matrix (without intercept).}
@@ -55,6 +56,15 @@ boot.lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     bootstrap distribution computer under the complete null hypothesis
     is returned as well. This option is required if one wants to compute
     confidence intervals afterwards.}
+  \item{gaussian.stub}{DEVELOPER OPTION. Only enable if you know what
+    you are doing.
+    A boolean to run stub code instead of actually bootstrapping the
+    estimator. It generates a finite sample distribution for each
+    estimate by sampling B samples from
+    N(0,\\hat\{s.e.\}_j^2). (Note: we do not sample from the multivariate
+    gaussian with the covariance matrix. Therefore, no dependencies are 
+    modelled at all.) Useful for debugging and for checking if the 
+    bootstrap is way off for some reason.} 
 }
 \value{
   \item{pval}{Individual p-values for each parameter.}

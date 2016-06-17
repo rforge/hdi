@@ -610,6 +610,8 @@ initial.estimator <- function(betainit,x,y,sigma)
     warning("Overriding the error variance estimate with your own value. The initial estimate implies an error variance estimate and if they don't correspond the testing might not be correct anymore.") 
   }
 
+  lambda <- NULL
+  
   if(is.numeric(betainit))
   {
     beta.lasso <- betainit
@@ -630,6 +632,8 @@ initial.estimator <- function(betainit,x,y,sigma)
                                   initial.lasso.method=betainit)
     beta.lasso <- initial.fit$betalasso
 
+    lambda <- initial.fit$lambda
+    
     if(is.null(sigma))
     {
       sigmahat <- initial.fit$sigmahat
@@ -640,7 +644,8 @@ initial.estimator <- function(betainit,x,y,sigma)
   }
   ## return
   list(beta.lasso = beta.lasso,
-       sigmahat = sigmahat)
+       sigmahat = sigmahat,
+       lambda = lambda)
 }
 
 prepare.data <- function(x, y, standardize, family)
