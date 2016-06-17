@@ -6,13 +6,13 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
                             sigma = NULL, ## sigma estimate provided by the user
                             Z = NULL,     ## Z or Thetahat provided by the user
                             verbose = FALSE,
-                            return.Z = FALSE,
-                            suppress.grouptesting = FALSE,
+                            return.Z = FALSE,##suppress.grouptesting = FALSE,
                             robust = FALSE,
                             B = 1000,
                             boot.shortcut = FALSE,
                             return.bootdist = FALSE,
-                            gaussian.stub = TRUE)
+                            wild = FALSE,
+                            gaussian.stub = FALSE)
 {
   ## Purpose:
   ## An implementation of the LDPE method http://arxiv.org/abs/1110.2563
@@ -37,6 +37,9 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
     stop("The function boot.lasso.proj is currently not supporting families other than 'gaussian'")
   ## The current code assumes the family is gaussian
   ## residual based resampling would be incorrect for other family
+
+  if(!parallel)
+    ncores <- 1
   
   ####################
   ## Get data ready ##
@@ -81,7 +84,11 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
                                         x = x, y = y)
   betalasso <- initial.estimate$beta.lasso
   sigmahat <- initial.estimate$sigmahat
-  
+
+  ## Lasso residuals
+  r <- y - x %*% betalasso
+  rc <- as.vector(r) - mean(r)
+
   ## de-sparsified Lasso
   bproj <- despars.lasso.est(x = x,
                              y = y,
@@ -96,44 +103,89 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
   scaleb <- 1/se
   
   bprojrescaled <- bproj * scaleb
+
+
+  ############################
+  ## Bootstrapping approach ##
+  ############################
+  
+  ## Choose the tuning parameter to be used (or leave open) for the bootstrap
+  
+  lambda <- NULL
+  if(boot.shortcut)
+    lambda <- initial.estimate$lambda
+
+  ## ?ISSUE?:
+  ## If the user provided his own betainit, we have no lambda value
+  ## to use for the bootstrap shortcut, what do we do here?
+  ## Let the user provide a lambda as option to the main function in addition to the betainit?
+  ## We only allow for lasso for bootstrapping no? so it has to be lambda for lasso :/
+
+  compute.cbootdist <- function(ystar,
+                                boot.truth)
+  {
+    ## Precalculate the initial estimator    
+    initstar <- boot.initial.fit(x = x,
+                                 ystar = ystar,
+                                 betainit = betainit,
+                                 lambda = lambda,
+                                 parallel = parallel,
+                                 ncores = ncores)
+    betainitstar <- do.call(cbind,
+                            lapply(initstar,
+                                   FUN = function(out) out$betalasso))
+    sigmahatstar <- sapply(initstar,
+                           FUN = function(out) out$sigmahat)
+    
+    ## Compute the de-sparsified Lasso
+    bstar <- despars.lasso.est(x = x,
+                               y = ystar,
+                               Z = Z,
+                               betalasso = betainitstar)
+    
+    ## Compute the standard errors
+    sestar <- boot.se(x = x,
+                      ystar = ystar,
+                      Z = Z,
+                      betainitstar = betainitstar,
+                      sigmahatstar = sigmahatstar,
+                      robust = robust,
+                      parallel = parallel,
+                      ncores = ncores)
+    ## Compute the final bootstrap distribution
+    cboot.dist <- (bstar - boot.truth)/sestar ## Substract the bootstrap truth and studentize
+  }
   
   #########################
   ## p-Value calculation ##
   #########################
-
-  ## Compute the correct centered bootstrap distribution
-
-  lambda <- NULL
-  if(boot.shortcut)
-  {
-    lambda <- initial.estimate$lambda
-    if(is.null(lambda))
-    {
-      ## The user provided his own betainit and such, we have no lambda value
-      ## to use for the bootstrap shortcut, what do we do here?
-      ## Let the user provide a lambda as option in addition to the betainit?
-      ## We only allow for lasso for bootstrapping no? so it has to be lambda for lasso
-    }
-  }
-
+  
+  ## Compute the distribution of the estimator for testing
+  
   if(gaussian.stub)
   {
-    cboot.dist <- replicate(B,rnorm(ncol(x),sd=se))## Centered bootstrap distribution
+    ## stub Centered bootstrap distribution
+    cboot.dist <- replicate(B, rnorm(ncol(x)))
   }else{
-    stop("TODO implement bootstrap")
+    ## Resample the residuals
+    rstar <- resample(r = rc,
+                      B = B,
+                      wild = wild)
+    ystar <- as.vector(x %*% betalasso) + rstar
+    
+    ## Compute the centered bootstrap distribution
+    cboot.dist <- compute.cbootdist(ystar = ystar,
+                                    boot.truth = betalasso)
   }
   
   ## Compute p-values based on that distribution
-  dist <- bproj-cboot.dist
+  dist <- bproj/se - cboot.dist
   counts <- apply(dist >=0,1,sum)
   if(any(counts >= B/2))
     counts[counts >= B/2] <- B-counts[counts >= B/2]
   counts <- 2*counts
   
   pval <- (counts+1)/(B+1)
-
-  ## Compute confidence intervals
-  ## How to deal with this? just have in 
 
   #################################
   ## Multiple testing correction ##
@@ -148,14 +200,22 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
              ## Compute the maxT distribution under H0c
              if(gaussian.stub)
              {
-               cboot.dist.underH0c <- replicate(B,rnorm(ncol(x),sd=se))
+               ## stub Centered bootstrap distributionc
+               cboot.dist.underH0c <- replicate(B,rnorm(ncol(x)))
              }else{
-               stop("TODO implement bootstrap under H0 complete")               
+               ## Use the re-sampled residuals to bootstrap under the complete
+               ## null hypothesis.
+               
+               ystar <- 0 + rstar
+               
+               ## Compute the centered bootstrap distribution
+               cboot.dist.underH0c <- compute.cbootdist(ystar = ystar,
+                                                        boot.truth = 0)
              }
              
              max.t.dist <- apply(abs(cboot.dist.underH0c),2,max)
              
-             counts.matrix <- sapply(max.t.dist,FUN=">=",abs(bproj))
+             counts.matrix <- sapply(max.t.dist,FUN=">=",abs(bproj/se))
              counts <- apply(counts.matrix,1,sum)
              
              (counts+1)/(B+1)  
@@ -195,7 +255,7 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
   ## Function to calculate p-value for groups ##
   ##############################################
 
-  ##TODO implement group testing for boot lasso proj
+  ## For the moment we don't yet support group testing
   group.testing.function <- NULL
   cluster.group.testing.function <- NULL
 
@@ -205,8 +265,8 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
   
   out <- list(pval        = as.vector(pval),
               pval.corr   = pcorr,
-              groupTest   = group.testing.function,
-              clusterGroupTest = cluster.group.testing.function,
+              ##              groupTest   = group.testing.function,
+              ##              clusterGroupTest = cluster.group.testing.function,
               sigmahat    = sigmahat,
               standardize = standardize,
               sds         = sds,
@@ -216,6 +276,8 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
               family      = family,
               method      = "boot.lasso.proj",
               B           = B,
+              boot.shortcut = boot.shortcut,
+              lambda      = lambda,
               call        = match.call())
   if(return.Z)
     out <- c(out,
@@ -226,12 +288,12 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
   if(return.bootdist)
   {
     out <- c(out,
-             list(cboot.dist = cboot.dist))
+             list(cboot.dist = se/sds*cboot.dist))
     rownames(out$cboot.dist) <- names(out$bhat)
     if(!is.null(cboot.dist.underH0c))
     {
       out <- c(out,
-               list(cboot.dist.underH0c = cboot.dist.underH0c))      
+               list(cboot.dist.underH0c = se/sds*cboot.dist.underH0c))      
       rownames(out$cboot.dist.underH0c) <- names(out$bhat)
     }
   }

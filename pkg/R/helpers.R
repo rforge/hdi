@@ -692,6 +692,7 @@ despars.lasso.est <- function(x, y, Z,
   b <- crossprod(Z,y-x%*%betalasso)/nrow(x) + betalasso
   if(ncol(b) == 1)
     b <- as.vector(b)
+  b
 }
 
 est.stderr.despars.lasso <- function(x, y, Z,
@@ -729,4 +730,71 @@ est.stderr.despars.lasso <- function(x, y, Z,
   }
   
   stderr  
+}
+
+boot.initial.fit <- function(x,
+                             ystar,
+                             betainit,
+                             lambda,
+                             parallel,
+                             ncores)
+{
+  if(is.numeric(betainit))
+    stop("We need to somehow specify the initial lasso method for the bootstrap!")
+  args <- list(FUN = do.initial.fit,
+               x = list(x = x),
+               y = split(ystar, col(ystar)),
+               initial.lasso.method = betainit,
+               SIMPLIFY = FALSE,
+               mc.cores = ncores)
+  
+  if(!is.null(lambda))## Implement the bootstrap shortcut
+    args <- c(args, list(lambda = lambda))
+  
+  out.init.star <- do.call(mcmapply,
+                           args = args)  
+}
+
+boot.se <- function(x,
+                    ystar,
+                    Z,
+                    betainitstar,
+                    sigmahatstar,
+                    robust,
+                    robust.div.fixed = FALSE,
+                    parallel,
+                    ncores)
+{
+  if(robust)
+  {
+    sestar <- mcmapply(est.stderr.despars.lasso,
+                       x = list(x = x),
+                       y = split(ystar, col(ystar)),
+                       Z = list(Z = Z),
+                       betalasso = split(betainitstar, col(betainitstar)),
+                       sigmahat = sigmahatstar,
+                       robust = robust,
+                       robust.div.fixed = robust.div.fixed,
+                       mc.cores = ncores)
+  }else{
+    sestar <- outer(sqrt(colSums(Z^2))/nrow(x),
+                    sigmahatstar)
+  }
+  
+  sestar
+}
+
+resample <- function(r,
+                     B,
+                     wild)
+{
+  if(wild)
+  {
+    Ui <- replicate(B,rnorm(length(r)))
+    rs <- r * Ui
+  }else{
+    rs <- replicate(B,
+                    sample(r, replace=TRUE))
+  }
+  rs
 }

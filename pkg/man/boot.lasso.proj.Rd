@@ -11,9 +11,10 @@ boot.lasso.proj(x, y, family = "gaussian", standardize = TRUE,
                 multiplecorr.method = "WY",
                 parallel = FALSE, ncores = getOption("mc.cores", 2L),
                 betainit = "cv lasso", sigma = NULL, Z = NULL, verbose = FALSE,
-                return.Z = FALSE, suppress.grouptesting = FALSE, robust= FALSE,
+                return.Z = FALSE, robust= FALSE,
                 B = 1000, boot.shortcut = FALSE,
-                return.bootdist = FALSE, gaussian.stub = TRUE)
+                return.bootdist = FALSE, wild = FALSE,
+                gaussian.stub = FALSE)
 }
 \arguments{
   \item{x}{Design matrix (without intercept).}
@@ -40,9 +41,9 @@ boot.lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     depends on the design matrix x. This intermediate results
     can be used when calling the function again and the design matrix
     is the same as before.}
-  \item{suppress.grouptesting}{A boolean to optionally suppress the
-    preparations made for testing groups. This will avoid quite a bit of
-    computation and memory usage. The output will also be smaller.}
+  %% \item{suppress.grouptesting}{A boolean to optionally suppress the
+  %%   preparations made for testing groups. This will avoid quite a bit of
+  %%   computation and memory usage. The output will also be smaller.}
   \item{robust}{Uses a robust variance estimation procedure to be able
     to deal with model misspecification.}
   \item{B}{The number of bootstrap samples to be used.}
@@ -56,6 +57,8 @@ boot.lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     bootstrap distribution computer under the complete null hypothesis
     is returned as well. This option is required if one wants to compute
     confidence intervals afterwards.}
+  \item{wild}{Perform the wild bootstrap based on N(0,1) distributed
+    random variables}
   \item{gaussian.stub}{DEVELOPER OPTION. Only enable if you know what
     you are doing.
     A boolean to run stub code instead of actually bootstrapping the
@@ -70,13 +73,13 @@ boot.lasso.proj(x, y, family = "gaussian", standardize = TRUE,
   \item{pval}{Individual p-values for each parameter.}
   \item{pval.corr}{Multiple testing corrected p-values for each
     parameter.}
-  \item{groupTest}{Function to perform groupwise tests. Groups are
-    indicated using an index vector with entries in {1,...,p} or a list thereof.}
-  \item{clusterGroupTest}{Function to perform groupwise tests based on
-    hierarchical clustering. You can either provide a distance matrix
-    and clustering method or the output of hierarchical clustering from
-    the function \code{\link{hclust}} as for
-    \code{\link{clusterGroupBound}}. P-values are adjusted for multiple testing.}
+  %% \item{groupTest}{Function to perform groupwise tests. Groups are
+  %%   indicated using an index vector with entries in {1,...,p} or a list thereof.}
+  %% \item{clusterGroupTest}{Function to perform groupwise tests based on
+  %%   hierarchical clustering. You can either provide a distance matrix
+  %%   and clustering method or the output of hierarchical clustering from
+  %%   the function \code{\link{hclust}} as for
+  %%   \code{\link{clusterGroupBound}}. P-values are adjusted for multiple testing.}
   %\item{betahat}{initial estimate by the scaled lasso of \eqn{\beta^0}}
   %\item{bhat}{de-sparsified \eqn{\beta^0} estimate used for p-value calculation}
   \item{sigmahat}{\eqn{\widehat{\sigma}} coming from the scaled lasso.}
@@ -85,6 +88,10 @@ boot.lasso.proj(x, y, family = "gaussian", standardize = TRUE,
     the design matrix x. These are the residuals of the nodewise
     regressions.}
   \item{B}{The number of bootstrap samples used.}
+  \item{boot.shortcut}{If the bootstrap shortcut has been used or not.}
+  \item{lambda}{What tuning parameter was used for the bootstrap
+    shortcut. NULL if no shortcut was used or if no valid lambda was
+    available to use for the shortcut.}
   \item{cboot.dist}{Only different from NULL if the option
     return.bootdist is on. This is a ncol(x)*B matrix where each row
     contains the computed centered bootstrap distribution for that
@@ -117,33 +124,24 @@ boot.lasso.proj(x, y, family = "gaussian", standardize = TRUE,
 \author{Ruben Dezeure}
 
 \examples{
-%% parts of the following code are in donttest environment to
-%% speed-up computing
-%% >>> copy any changes to "../tests/ex-lasso.proj.R" <<< to ensure
-%% code is running
 x <- matrix(rnorm(100*20), nrow = 100, ncol = 10)
 y <- x[,1] + x[,2] + rnorm(100)
+
+\donttest{
 fit.lasso <- boot.lasso.proj(x, y)
 which(fit.lasso$pval.corr < 0.05) # typically: '1' and '2' and no other
+}
 
+## Use the computational shortcut for the bootstrap to speed up
+## computations
+fit.lasso.shortcut <- boot.lasso.proj(x, y, boot.shortcut = TRUE)
+which(fit.lasso.shortcut$pval.corr < 0.05) # typically: '1' and '2' and no other
+
+\donttest{
 ## Return the bootstrap distribution as well and compute confidence intervals based on it
 fit.lasso.allinfo <- boot.lasso.proj(x, y, return.bootdist = TRUE)
 confint(fit.lasso.allinfo, level = 0.95)
 confint(fit.lasso.allinfo, parm = 1:3)
-
-
-\donttest{
-## Group-wise testing of the first two coefficients
-fit.lasso$groupTest(1:2)
-
-## Hierarchical testing using distance matrix based on
-## correlation matrix
-out.clust <- fit.lasso$clusterGroupTest()
-plot(out.clust)
-
-## Fit the lasso projection method without doing the preparations
-## for group testing (saves time and memory)
-fit.lasso.faster <- boot.lasso.proj(x, y, suppress.grouptesting = TRUE)
 
 ## Use the scaled lasso for the initial estimate
 fit.lasso.scaled <- boot.lasso.proj(x, y, betainit = "scaled lasso")
