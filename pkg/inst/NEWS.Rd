@@ -4,6 +4,10 @@
 \title{hdi News}
 \encoding{UTF-8}
 
+\section{CHANGES IN VERSION 0.1-* (latest update 2016-06-24, svn 152)}
+\itemize{
+  \item added bootstrapping functionality for the de-sparsified Lasso
+  }
 \section{CHANGES IN VERSION 0.1-6 (2016-03-21, svn r147)}{
   \itemize{
     \item changed condition for warning message for confidence intervals

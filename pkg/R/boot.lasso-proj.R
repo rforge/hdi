@@ -6,7 +6,7 @@ boot.lasso.proj <- function(x, y, family = "gaussian",
                             sigma = NULL, ## sigma estimate provided by the user
                             Z = NULL,     ## Z or Thetahat provided by the user
                             verbose = FALSE,
-                            return.Z = FALSE,##suppress.grouptesting = FALSE,
+                            return.Z = FALSE,## suppress.grouptesting = FALSE,
                             robust = FALSE,
                             B = 1000,
                             boot.shortcut = FALSE,
