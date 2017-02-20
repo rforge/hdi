@@ -9,7 +9,8 @@ lasso.proj <- function(x, y, family = "gaussian",
                        verbose = FALSE,
                        return.Z = FALSE,
                        suppress.grouptesting = FALSE,
-                       robust = FALSE)
+                       robust = FALSE,
+                       do.ZnZ = FALSE)
 {
   ## Purpose:
   ## An implementation of the LDPE method http://arxiv.org/abs/1110.2563
@@ -59,7 +60,8 @@ lasso.proj <- function(x, y, family = "gaussian",
                       parallel = parallel,
                       ncores = ncores,
                       verbose = verbose,
-                      Z = Z)
+                      Z = Z,
+                      do.ZnZ = do.ZnZ)
   Z <- Zout$Z
   scaleZ <- Zout$scaleZ
   
