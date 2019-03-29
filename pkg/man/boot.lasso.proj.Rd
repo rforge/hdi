@@ -132,10 +132,12 @@ fit.lasso <- boot.lasso.proj(x, y)
 which(fit.lasso$pval.corr < 0.05) # typically: '1' and '2' and no other
 }
 
+\donttest{
 ## Use the computational shortcut for the bootstrap to speed up
 ## computations
 fit.lasso.shortcut <- boot.lasso.proj(x, y, boot.shortcut = TRUE)
 which(fit.lasso.shortcut$pval.corr < 0.05) # typically: '1' and '2' and no other
+}
 
 \donttest{
 ## Return the bootstrap distribution as well and compute confidence intervals based on it
